@@ -1,0 +1,556 @@
+"""
+dc_ai.py  —  grounded "AI Summary" tab via OpenRouter (free Nemotron). Never kills
+the pipeline.
+
+Flow per run:
+  1. compile a SHEET-ONLY context (computed heatmaps + digests of every tab).
+  2. hash it — if unchanged since last success, SKIP the call (protects the daily
+     query budget; OpenRouter counts internal reasoning tokens too).
+  3. cheap connection + budget test (GET /auth/key, no completion tokens). If it
+     fails / no key / budget low -> write "Didn't Work", keep last good summary.
+  4. call the model with a strict grounding prompt; on any failure -> "Didn't Work".
+  5. write the tab with "Last AI check: <ts>"; cache hash+summary on success.
+
+Reads OPENROUTER_API_KEY. Output is locked to the spreadsheet data only.
+"""
+import os
+import json
+import hashlib
+import urllib.request
+import urllib.error
+from collections import Counter
+from datetime import datetime, timezone
+
+import dc_config as dc
+
+CACHE_PATH = os.path.join(os.path.dirname(__file__), "ai_cache.json")
+
+SYSTEM = (
+    "detailed thinking off\n\n"  # Nemotron switch: no chain-of-thought, answer directly
+    "Output ONLY the sections below — no preamble, no meta-commentary, no 'we need to' "
+    "reasoning, no restating the task. Start directly with 'EXECUTIVE READ'.\n\n"
+    "GROUNDING RULE: every company, number, deal, filing, and signal you mention MUST come from "
+    "the spreadsheet DATA below — never invent or add ones that are not present. You MAY apply "
+    "brief, widely-known background knowledge, but ONLY about entities that already appear in the "
+    "DATA, and ONLY to explain why a data signal matters (e.g. what kind of company it is). Mark "
+    "any such background with a leading '[context]' tag so it is distinguishable from sheet facts. "
+    "If the DATA doesn't support a specific claim, write 'not in data'. When in doubt, stay on the DATA.\n\n"
+    "You are a business-development analyst for The Asia Group (TAG). TAG's core business is "
+    "helping companies ENTER AND GROW IN INDIA — market entry, government affairs, partnerships, "
+    "site selection. Convert this Datacentre intelligence into TAG's best INDIA opportunities. "
+    "Use ONLY the DATA provided below. Do NOT use outside knowledge or assumptions. Name the "
+    "company every time and cite evidence ids or CIN.\n\n"
+    "TOP PRIORITY: Non-Indian companies moving on hyperscale DC in India in the last ~6 months "
+    "are TAG's HIGHEST-value targets — lead with them and name the deal size (deal_value).\n"
+    "CRITICAL — use the presence fields, NOT MCA match, to decide the play:\n"
+    "- india_presence=established (e.g. AWS, Google, Microsoft, Meta, AirTrunk) => the company "
+    "is ALREADY in India; the play is India EXPANSION / partnership / govt-affairs — NEVER call "
+    "it market-entry, even if it has no MCA entity.\n"
+    "- india_presence=announced or no_known_presence + a deal/foreign flag => genuine market-ENTRY.\n"
+    "Follow expansion_stage (entry/scaling/partnership/policy_issue/monitor) for the TAG play. "
+    "Foreign-flagged companies + the FOREIGN HYPERSCALER MOVES digest outrank domestic operators.\n\n"
+    "Lens — always reason toward an INDIA angle:\n"
+    "- Decide entry vs expansion by india_presence (NOT by a missing MCA entity): "
+    "announced/no_known_presence + a deal => market-ENTRY; established => EXPANSION.\n"
+    "- ownership=FTC/foreign-subsidiary means a foreign parent is ALREADY in India via a sub — "
+    "the parent is the market-GROWTH / partnership target; say so.\n"
+    "- An India operator with rising momentum or a fresh filing/partnership is an India "
+    "PARTNERSHIP or GOVERNMENT-AFFAIRS target.\n"
+    "- Indian policy items are India government-affairs hooks; GCC policy matters only if it "
+    "pushes a player toward India.\n"
+    "- Hiring spikes / facility presence / nearby government tenders in Indian states signal "
+    "India expansion before the news — connect them.\n\n"
+    "Produce EXACTLY these three sections:\n\n"
+    "EXECUTIVE READ — 3–5 short lines: where India activity concentrates (states/layers), the "
+    "top India policy hook, the value-chain layers/operators moving on India, and this run's top movers.\n\n"
+    "EVERY factual claim must be evidenced — cite the evidence ids or CIN from the DATA in the "
+    "Evidence column of each table; if a claim is unsupported, write 'not in data'. Within any "
+    "table cell NEVER use the '|' character or a line break.\n\n"
+    "RANKING — a pipe-delimited table, a header row then ONE row per company, highest-conviction "
+    "first, EXACTLY these columns:\n"
+    "Rank | Company | Signal band | Score Δ | India status | TAG play | Evidence\n"
+    "(TAG play ∈ India market-entry / India government-affairs / India partnership / India "
+    "site-selection, and may carry a short rationale; Evidence = the ids/CIN backing that row.) "
+    "No prose around the table.\n\n"
+    "Then leave ONE blank line.\n\n"
+    "COMPANY DOSSIERS — a SECOND pipe-delimited table (rows = companies, one per company in the "
+    "DOSSIER DATA, using ONLY that company's supplied facts), a header row then one row each, "
+    "EXACTLY these columns:\n"
+    "Company | Entity | Momentum | Signals | Why-now | TAG play | Analysis | Evidence\n"
+    "where Entity = ownership/listed/inc_year/state/industry (or 'no India entity'); "
+    "Momentum = score, Δ, new≤7d, tier; Signals = signal mix + layers + geo/states; "
+    "Why-now = the sharpest cross-signal; TAG play = play + one-line rationale; "
+    "Analysis = 2–4 grounded cross-signal sentences (foreign parent + rising momentum => scale "
+    "the sub; announced/no-known-presence + a deal => entry; hiring in a new state => site coming; mark "
+    "general background with [context]); Evidence = the ids/CIN backing this company's row. "
+    "No prose around the table.\n"
+)
+
+
+def _now():
+    return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+
+
+def load_cache():
+    if os.path.exists(CACHE_PATH):
+        try:
+            with open(CACHE_PATH, encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+
+def save_cache(c):
+    with open(CACHE_PATH, "w", encoding="utf-8") as f:
+        json.dump(c, f, ensure_ascii=False, separators=(",", ":"))
+
+
+def _ev_index(tabs):
+    """id/accession -> evidence string, across every evidence tab (real text).
+    M4 truncation fix: news carries its summary (was title-only), filings carry the
+    verified [label|region] quote bullets (was a 150-char clip that starved the
+    dossiers of the SS3 overhaul's output). Nemotron context is not the constraint."""
+    idx = {}
+    for r in tabs.get("ss1", []) + tabs.get("ss2", []):
+        if r.get("id"):
+            title = (r.get("title") or "")[:160]
+            summary = (r.get("summary") or "")[:280]
+            idx[r["id"]] = f"news/policy: {title}" + (f" — {summary}" if summary else "")
+    for r in tabs.get("ss3", []):
+        if r.get("accession"):
+            idx[r["accession"]] = (f"filing {r.get('form', '')} "
+                                   f"[{r.get('deal_type', '')}/{r.get('counterparty_region', '')}]: "
+                                   f"{(r.get('evidence') or r.get('matched_terms') or '')[:600]}")
+    for r in tabs.get("ss4", []):
+        if r.get("id"):
+            idx[r["id"]] = f"{r.get('signal_type', '')}: {(r.get('excerpt') or r.get('actor') or '')[:200]}"
+    return idx
+
+
+def compile_context(tabs, c, register=None):
+    import dc_evidence
+
+    def _evlabels(csv):
+        ids = [i.strip() for i in (csv or "").split(",") if i.strip()]
+        if not register:
+            return csv
+        return "; ".join(dc_evidence.label(i, register) for i in ids[:4])
+    # Brief global block for the EXECUTIVE READ + RANKING, then a deep per-company block.
+    L = ["=== HEATMAPS ===",
+         "Geo(market×layer): " + json.dumps(c["geo_hm"]),
+         "Policy(market×type): " + json.dumps(c["policy_hm"]),
+         "Commercial(layer×market): " + json.dumps(c["comm_hm"])]
+    L += ["", "KEY SIGNALS:"] + c["emphasis"]
+
+    movers = [p for p in c.get("movers", []) if p.get("score_delta") == "new"
+              or (isinstance(p.get("score_delta"), (int, float)) and p["score_delta"] > 0)][:5]
+    if movers:
+        L += ["", "TOP MOVERS:"]
+        for p in movers:
+            d = p.get("score_delta")
+            dtxt = "new" if d == "new" else f"+{d}"
+            L.append(f"  {p.get('company')} | Δ{dtxt} | {p.get('new_ev', 0)} new signals | {p.get('why_now', '')}")
+
+    L += ["", "POLICY SS2:"]
+    for r in tabs.get("ss2", [])[:12]:
+        L.append(f"  {r.get('geo')} | {r.get('type')} | {r.get('title', '')[:100]}")
+
+    sig = Counter(r.get("signal_type") for r in tabs.get("ss4", []))
+    L += ["", f"OSINT SS4 mix: {json.dumps(dict(sig))}"]
+
+    foreign = [p for p in c.get("movers", []) if p.get("is_foreign")]
+    if foreign:
+        L += ["", "=== FOREIGN HYPERSCALER MOVES (≤6mo — HIGHEST PRIORITY) ==="]
+        for p in foreign:
+            sz = f" | {p['deal_value']}" if p.get("deal_value") else ""
+            L.append(f"  {p.get('company')} | {p.get('india_presence', '?')}/{p.get('expansion_stage', '?')}{sz} "
+                     f"| {p.get('why_now', '')} | ev={_evlabels(p.get('top_evidence_ids'))}")
+
+    # ---- M6b: state targeting context (two-pass: matrix summary + per-company
+    # matched pitch lines only — the full bank is NEVER dumped into a prompt) ----
+    try:
+        import dc_states
+        mx = {r["state"]: r for r in dc_states.targeting_matrix()}
+        flags = dc_states.validity_flags()
+        ups = dc_states.upside_states()
+        L += ["", "=== INDIA STATE TARGETING (from the clause-verified state bank; cite state names) ==="]
+        for s, r in sorted(mx.items(), key=lambda kv: kv[1]["priority"]):
+            fl = f"  {flags[s]}" if s in flags else ""
+            L.append(f"  {s} [P{r['priority']}] {r['pitch']} (policy {r['policy_confidence']}; "
+                     f"execution {r['execution_confidence']}; gap: {r['gap']}){fl}")
+        if ups:
+            L.append(f"  UPSIDE STATES (high policy confidence, thin execution): {', '.join(ups)}")
+    except Exception:
+        mx, flags = {}, {}
+
+    # ---- deep per-company dossier data: 1 block per SS5 company (all 11) ----
+    ents = {r.get("cin"): r for r in tabs.get("entities", []) if r.get("cin")}
+    evidx = _ev_index(tabs)
+    companies = c.get("movers", [])                # full enriched SS5 set
+    L += ["", f"=== PER-COMPANY DOSSIER DATA ({len(companies)}) ==="]
+    for p in companies:
+        e = ents.get(p.get("cin"), {})
+        name = e.get("legal_name") or p.get("company")
+        d = p.get("score_delta")
+        dtxt = "new" if d == "new" else (f"+{d}" if isinstance(d, (int, float)) and d > 0 else str(d))
+        L.append(f"\n━ {name} ({p.get('cin') or 'no MCA CIN'}) ━")
+        if e:
+            L.append(f"  entity: ownership={e.get('ownership', '?')} listed={e.get('listed', '?')} "
+                     f"inc_year={e.get('inc_year', '?')} state={e.get('state', '?')} "
+                     f"nic={e.get('nic_class', '?')} class={e.get('company_class', '?')} "
+                     f"paidup={e.get('paidup_capital', '?')} roc={e.get('roc', '?')}")
+        else:
+            L.append("  entity: no MCA entity record (often a foreign parent) — presence is "
+                     "decided by india_presence below, NOT by the missing MCA match")
+        L.append(f"  momentum: score={p.get('score')} Δ{dtxt} new≤7d={p.get('fresh_7d', 0)} "
+                 f"signal_band={p.get('signal_band')} momentum={p.get('momentum')} last={p.get('last_signal')}")
+        L.append(f"  profile: layers={p.get('layer')} geo={p.get('geo')} signals=[{p.get('signals', '')}] "
+                 f"filings={p.get('partnership_strength', 0)} policy={p.get('policy_tailwind', 0)} "
+                 f"play={p.get('tag_play')} foreign={p.get('is_foreign', False)} "
+                 f"deal_value={p.get('deal_value') or '—'}")
+        L.append(f"  role: {p.get('role', '?')} ({p.get('company_type', '?')}) — "
+                 f"{p.get('role_reason', '')} | whitespace={p.get('whitespace_label', '?')}")
+        for s in (p.get("states") or "").split(";"):
+            s = s.strip()
+            if s and s in mx:
+                fl = f" {flags[s]}" if s in flags else ""
+                L.append(f"  state[{s}]: {mx[s]['pitch']}{fl}")
+        L.append(f"  presence: entity_match={p.get('entity_match', '?')} "
+                 f"india_presence={p.get('india_presence', '?')} "
+                 f"expansion_stage={p.get('expansion_stage', '?')} "
+                 f"(established => NOT market-entry)")
+        ids = [i.strip() for i in (p.get("top_evidence_ids") or "").split(",") if i.strip()]
+        ev = [f"    - [{dc_evidence.label(i, register) if register else i}] {evidx[i]}"
+              for i in ids if i in evidx][:8]
+        if ev:
+            L += ["  evidence:"] + ev
+
+    return "\n".join(L)
+
+
+def test_connection(key):
+    """Cheap key/budget check — no completion tokens. Returns (ok, note, remaining)."""
+    try:
+        req = urllib.request.Request(dc.OPENROUTER_BASE + "/auth/key",
+                                     headers={"Authorization": f"Bearer {key}"})
+        with urllib.request.urlopen(req, timeout=15) as r:
+            d = json.loads(r.read().decode("utf-8", "ignore")).get("data", {})
+        rem = d.get("limit_remaining")
+        if isinstance(rem, (int, float)) and rem <= 0:
+            return False, "budget exhausted", rem
+        return True, "ok", rem
+    except Exception as e:
+        return False, str(e), None
+
+
+def _clean(text):
+    """Nemotron can still leak chain-of-thought; keep from the first real section header."""
+    import re
+    m = re.search(r"(?im)^\s*#*\s*EXECUTIVE READ", text or "")
+    return (text[m.start():] if m else (text or "")).strip()
+
+
+def _chat(key, system, user, max_tokens, temperature=0.2):
+    """Low-level OpenRouter chat call — reasoning OFF, returns raw content string."""
+    body = json.dumps({
+        "model": dc.DC_AI_MODEL, "temperature": temperature, "max_tokens": max_tokens,
+        "reasoning": {"enabled": False},    # disable reasoning (not just hide it)
+        "messages": [{"role": "system", "content": system},
+                     {"role": "user", "content": user}],
+    }).encode("utf-8")
+    req = urllib.request.Request(
+        dc.OPENROUTER_BASE + "/chat/completions", data=body,
+        headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json",
+                 "HTTP-Referer": "https://github.com/dp20245/Data-Center-Trial",
+                 "X-Title": "Datacentre BI"})
+    last = None
+    for attempt in range(3):        # transient truncated/non-JSON responses -> retry
+        try:
+            with urllib.request.urlopen(req, timeout=120) as r:
+                d = json.loads(r.read().decode("utf-8", "ignore"))
+            return d["choices"][0]["message"]["content"]
+        except (json.JSONDecodeError, KeyError, urllib.error.HTTPError) as e:
+            last = e
+            import time
+            time.sleep(2 * (attempt + 1))
+    raise last
+
+
+def call_model(key, user):
+    return _clean(_chat(key, SYSTEM, user, dc.AI_MAX_TOKENS))
+
+
+# --- tender triage: grounded classifier, keyword-pre-gated, non-fatal (dc_osint owns cache) ---
+CLASSIFY_SYSTEM = (
+    "detailed thinking off\n\n"
+    "You are a strict classifier for INDIAN GOVERNMENT DATA-CENTRE PROCUREMENT. For each "
+    "tender you get only a title and an organisation name. Use ONLY that text plus basic, "
+    "widely-known contextual inference (e.g. 'colocation'/'UPS'/'cooling'/'server farm'/"
+    "'hyperscale' relate to data centres). Do NOT use outside data; do NOT invent operators, "
+    "numbers, locations, or values. If a field is not stated or clearly inferable FROM THE "
+    "TEXT, return null for it.\n\n"
+    "is_dc = true ONLY if the tender is genuinely for a data-centre facility, colocation, or "
+    "its core infrastructure (power/cooling/UPS/server halls). Generic IT, plain networking "
+    "gear, or an unrelated 'server'/'relay' mention => false.\n\n"
+    "Output ONLY a JSON array, one object per input, no prose:\n"
+    '[{"id":"<id>","is_dc":true,"state":"<Indian state or null>","capacity_mw":<number or null>,'
+    '"value_inr":<number or null>,"layer":"<Compute|Cooling|Power|Network|Colo|Build or null>"}]'
+)
+
+
+def _json_array(text):
+    """Extract a JSON array from possibly-wrapped/malformed model output. Tolerant:
+    falls back to parsing individual {...} objects so one bad field doesn't lose the rest."""
+    i, j = (text or "").find("["), (text or "").rfind("]")
+    if 0 <= i < j:
+        try:
+            return json.loads(text[i:j + 1])
+        except json.JSONDecodeError:
+            pass
+    import re
+    out = []
+    for m in re.findall(r"\{[^{}]*\}", text or ""):
+        try:
+            out.append(json.loads(m))
+        except json.JSONDecodeError:
+            continue
+    return out
+
+
+def classify_tenders(candidates):
+    """candidates: [{'id','title','org'}] -> {id: {is_dc,state,capacity_mw,value_inr,layer}}.
+    Returns {} on no-key / connection-fail / parse-fail (caller falls back to keyword-only)."""
+    if not candidates:
+        return {}
+    key = os.environ.get("OPENROUTER_API_KEY")
+    if not key:
+        return {}
+    ok, note, _ = test_connection(key)
+    if not ok:
+        print(f"  [tender-ai] skipped ({note})")
+        return {}
+    user = "Classify these tenders:\n" + "\n".join(
+        json.dumps({"id": c["id"], "title": c["title"], "org": c.get("org", "")}, ensure_ascii=False)
+        for c in candidates)
+    try:
+        arr = _json_array(_chat(key, CLASSIFY_SYSTEM, user, max_tokens=1500, temperature=0.0))
+        return {str(o["id"]): o for o in arr if isinstance(o, dict) and o.get("id") is not None}
+    except Exception as e:
+        print(f"  [tender-ai] {e}")
+        return {}
+
+
+# --- SS3 filing signal extractor: grounded, multi-signal, per-filing, non-fatal -----------
+JUDGE_SYSTEM = (
+    "detailed thinking off\n\n"
+    "You are a business-development analyst for The Asia Group (TAG). You are given a NUMBERED "
+    "LIST of verbatim passages pulled from ONE SEC filing around data-centre keywords. Identify "
+    "which passages are MATERIAL signals about a DATA-CENTRE facility, deal, investment, "
+    "expansion, capacity, or policy exposure located in INDIA or the GULF (UAE, Saudi Arabia, "
+    "Qatar, Bahrain, Kuwait, Oman). Use ONLY the passage text — never invent facts.\n"
+    "DISCARD passages with no India/Gulf data-centre substance: generic risk boilerplate, "
+    "telecom/international-calling, bare country lists, a shell merely named '... Acquisition "
+    "Corp', or a data-centre mention outside India/the Gulf.\n"
+    "For EACH material passage, emit one object: its passage number `n`, a signal `label`, the "
+    "`region`, and a `quote` copied VERBATIM from that passage (exact characters, no paraphrase "
+    "or ellipsis). Merge duplicates — do not repeat the same signal.\n"
+    "Signal labels (USE ONLY THESE, exactly as written):\n"
+    + "".join(f"  {k} — {v[2]}\n" for k, v in dc.SIGNAL_LABELS.items()) +
+    "Output ONLY a JSON object, no prose:\n"
+    '{"relevant":true|false,"region":"India|UAE|Saudi Arabia|Qatar|Bahrain|Kuwait|Oman|null",'
+    '"signals":[{"n":<passage number>,"label":"<label>","region":"<region>","quote":"<verbatim>"}]}'
+    "\nInclude only material signals (0 to ~12). relevant=true iff at least one such signal exists."
+)
+
+
+def judge_filings(candidates):
+    """candidates: [{'accession','filer','form','section','passages':[...],'window_text'}]
+    -> {accession: {relevant, region, signals:[{n,label,region,quote}]}}. One call per filing
+    (immutable → caller caches permanently). Returns {} on no-key / connection-fail; skips any
+    single filing that errors. Non-fatal by contract."""
+    if not candidates:
+        return {}
+    key = os.environ.get("OPENROUTER_API_KEY")
+    if not key:
+        return {}
+    ok, note, _ = test_connection(key)
+    if not ok:
+        print(f"  [edgar-ai] skipped ({note})")
+        return {}
+    out = {}
+    for c in candidates:
+        passages = c.get("passages") or ([c["window_text"]] if c.get("window_text") else [])
+        if not passages:
+            continue
+        listing = "\n".join(f"[{i + 1}] {p[:1200]}" for i, p in enumerate(passages[:80]))
+        user = (f"SECTION: {c.get('section') or 'Other'}\n"
+                f"FILER: {c.get('filer', '')} ({c.get('form', '')})\n\n"
+                f"PASSAGES:\n{listing}")[:400000]
+        try:
+            o = _json_obj(_chat(key, JUDGE_SYSTEM, user, max_tokens=1500, temperature=0.0))
+            if o:
+                out[c["accession"]] = o
+        except Exception as e:
+            print(f"  [edgar-ai] {c.get('accession')}: {e}")
+    return out
+
+
+def _render(header, body):
+    """Any line with '|' → split into columns (the RANKING table); every other line →
+    one text cell (reads + dossier label lines). Pad rectangular. No special-casing."""
+    rows = [[header], [""]]
+    for ln in (body or "").split("\n"):
+        rows.append([c.strip() for c in ln.split("|")] if "|" in ln else [ln])
+    w = max(len(r) for r in rows)
+    return [r + [""] * (w - len(r)) for r in rows]   # pad rectangular
+
+
+def _wrap_reqs(ss, ws, ncols):
+    sid = ws._properties["sheetId"]
+    return [{"repeatCell": {
+        "range": {"sheetId": sid, "startColumnIndex": 0, "endColumnIndex": ncols},
+        "cell": {"userEnteredFormat": {"wrapStrategy": "WRAP"}},
+        "fields": "userEnteredFormat.wrapStrategy"}}]
+
+
+def _write(ss, header, body):
+    import dc_sheets
+    ws = dc_sheets.get_tab(ss, dc.AI_SUMMARY_TAB, ["AI Summary"])
+    grid = _render(header, body)
+    dc_sheets._retry(ws.clear)
+    dc_sheets._retry(ws.update, "A1", grid, value_input_option="RAW")
+    try:
+        dc_sheets._retry(ss.batch_update, {"requests": _wrap_reqs(ss, ws, len(grid[0]))})
+    except Exception as e:
+        print(f"  [ai] wrap formatting skipped: {e}")
+
+
+# --- AI determinism: code builds RANKING + dossier structure; the model only writes prose ---
+_ANALYSIS_SYS = (
+    "detailed thinking off\n\n"
+    "You are a TAG (The Asia Group) India business-development analyst. Using ONLY the DATA below "
+    "(no outside facts, no invented numbers), write concise India-focused prose. You MAY add brief "
+    "general background about a company that already appears in the DATA with a leading [context] "
+    "tag. Decide entry vs expansion from india_presence (established => expansion, NOT market-entry). "
+    "Respect each company's deterministic role: role=Market-signal, Noise, or Case-study must NEVER "
+    "be written as a pitch, prospect, or TAG opportunity — describe them as market context only. "
+    "If INDIA STATE TARGETING data is present, also write `state_plays`: 3-5 sentences on which "
+    "states the current prospect slate should be steered toward and any upside states, grounded "
+    "ONLY on the state lines given (cite state names; respect validity warnings).\n"
+    "Output ONLY JSON:\n"
+    '{"executive_read":"3-5 short sentences: where India activity concentrates (states/layers), the '
+    'top India policy hook, the value-chain movers, and this run\'s foreign-hyperscaler India moves",'
+    '"analyses":{"<Company>":"2-4 sentences: why-now, entry vs expansion, the TAG play, and the deal '
+    'size if present"}}. Include every company in the PER-COMPANY DOSSIER DATA.'
+)
+
+
+def _json_obj(text):
+    i, j = (text or "").find("{"), (text or "").rfind("}")
+    try:
+        return json.loads(text[i:j + 1]) if 0 <= i < j else {}
+    except Exception:
+        return {}
+
+
+def _fmt_delta(p):
+    d = p.get("score_delta")
+    if d in ("new", "reset"):
+        return d
+    return f"+{d}" if isinstance(d, (int, float)) and d > 0 else str(d)
+
+
+def _ev_labels(p, register):
+    ids = [i.strip() for i in (p.get("top_evidence_ids") or "").split(",") if i.strip()][:3]
+    if register:
+        import dc_evidence
+        return "; ".join(dc_evidence.label(i, register) for i in ids)
+    return ", ".join(ids)
+
+
+def _build_ranking(movers, register):
+    lines = ["RANKING", "Rank | Company | Signal band | BD Priority | Score Δ | India status | TAG play | Evidence"]
+    for n, p in enumerate(sorted(movers, key=lambda x: float(x.get("score") or 0), reverse=True), 1):
+        lines.append(" | ".join([str(n), p.get("company", ""), p.get("signal_band", ""),
+                                  p.get("bd_priority", "") or "—", _fmt_delta(p),
+                                  f"{p.get('india_presence', '?')}/{p.get('expansion_stage', '?')}",
+                                  p.get("tag_play", ""), _ev_labels(p, register)]))
+    return lines
+
+
+def _build_dossiers(movers, ents_by_cin, register, analyses):
+    lines = ["COMPANY DOSSIERS",
+             "Company | Entity | Momentum | Signals | Why-now | TAG play | Analysis | Evidence"]
+    for p in sorted(movers, key=lambda x: float(x.get("score") or 0), reverse=True):
+        co = p.get("company", "")
+        e = ents_by_cin.get(p.get("cin"), {})
+        entity = (f"{e.get('ownership', '?')}/{e.get('company_class', '?')} · inc {e.get('inc_year', '?')} · {e.get('state', '?')}"
+                  if e else "no MCA entity (foreign)")
+        mom = (f"score {p.get('score')} ({_fmt_delta(p)}) · mom {p.get('momentum')} · "
+               f"{p.get('fresh_7d', 0)} new≤7d · {p.get('signal_band')}")
+        analysis = (analyses.get(co) or "").replace("|", "/").replace("\n", " ")
+        lines.append(" | ".join([co, entity, mom, p.get("signals", ""), p.get("why_now", ""),
+                                  p.get("tag_play", ""), analysis, _ev_labels(p, register)]))
+    return lines
+
+
+def summarize(ss, tabs, computed, register=None):
+    """Never raises — degrades to 'Didn't Work' on any failure. Code builds the RANKING +
+    dossier structure (deterministic); the model writes only the executive read + analyses."""
+    try:
+        cache = load_cache()
+        ctx = compile_context(tabs, computed, register)
+        h = hashlib.sha1(ctx.encode("utf-8")).hexdigest()
+        last_good = cache.get("summary", "(no prior AI summary yet)")
+        last_ts = cache.get("timestamp", "never")
+
+        if cache.get("hash") == h and cache.get("status") == "ok":
+            _write(ss, f"AI Summary — cached (data unchanged since {last_ts}) · model {cache.get('model')}",
+                   last_good)
+            print("  AI Summary -> cached (no change); no call made")
+            return last_good
+
+        key = os.environ.get("OPENROUTER_API_KEY")
+        if not key:
+            _write(ss, f"⚠️ AI Summary — Didn't Work (no OPENROUTER_API_KEY). Last successful: {last_ts}", last_good)
+            print("  AI Summary -> no key; Didn't Work")
+            return last_good
+
+        ok, note, rem = test_connection(key)
+        if not ok:
+            _write(ss, f"⚠️ AI Summary — Didn't Work ({note}). Last successful: {last_ts}. Attempted {_now()}", last_good)
+            print(f"  AI Summary -> connection test failed: {note}")
+            return last_good
+
+        # AI writes ONLY prose; if it fails the tables are still built deterministically.
+        obj = {}
+        try:
+            obj = _json_obj(_chat(key, _ANALYSIS_SYS, ctx, dc.AI_MAX_TOKENS, 0.2))
+        except Exception as e:
+            print(f"  [ai] analysis call failed (tables stay deterministic): {e}")
+
+        movers = computed.get("movers", [])
+        ents_by_cin = {r.get("cin"): r for r in tabs.get("entities", []) if r.get("cin")}
+        exec_read = (obj.get("executive_read") or "(AI narrative unavailable this run)").strip()
+        analyses = obj.get("analyses") or {}
+        state_plays = (obj.get("state_plays") or "").strip()
+        summary = "\n".join(
+            ["EXECUTIVE READ", exec_read, ""]
+            + ([f"STATE PLAYS  🤖AI-draft:", state_plays, ""] if state_plays else [])
+            + _build_ranking(movers, register) + [""]
+            + _build_dossiers(movers, ents_by_cin, register, analyses))
+
+        ts = _now()
+        _write(ss, f"AI Summary — Last AI check: {ts} · model {dc.DC_AI_MODEL} · budget left: {rem}", summary)
+        if obj:                       # cache only when the AI prose succeeded (else retry next run)
+            cache.update({"hash": h, "summary": summary, "timestamp": ts,
+                          "model": dc.DC_AI_MODEL, "status": "ok"})
+            save_cache(cache)
+            print("  AI Summary -> generated + cached (deterministic tables + AI prose)")
+        else:
+            print("  AI Summary -> deterministic tables written; AI prose retry next run")
+        return summary
+    except Exception as e:
+        print(f"  [ai] non-fatal error: {e}")
+        return None

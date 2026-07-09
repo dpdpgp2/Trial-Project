@@ -1,0 +1,103 @@
+name: DC Pipeline (SS2-SS5)
+
+on:
+  schedule:
+    - cron: "41 5 * * *"      # daily
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dc-pipeline
+  cancel-in-progress: false
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Cache Hugging Face models
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-models-${{ hashFiles('requirements.txt') }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch==2.4.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt
+
+      - name: Run SS2-SS5 pipeline
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          DC_SPREADSHEET_ID: ${{ secrets.DC_SPREADSHEET_ID }}
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
+          DATA_GOV_IN_API_KEY: ${{ secrets.DATA_GOV_IN_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          ALPHAVANTAGE_API_KEY: ${{ secrets.ALPHAVANTAGE_API_KEY }}
+          HF_HUB_DISABLE_TELEMETRY: "1"
+        run: |
+          set -o pipefail
+          python dc_pipeline.py 2>&1 | tee run.log
+
+      - name: Commit caches
+        run: |
+          git config user.name  "dc-engine-bot"
+          git config user.email "dc-engine-bot@users.noreply.github.com"
+          for f in mca_cache.json ai_cache.json dc_trend.json tender_cache.json presence_cache.json bd_cache.json edgar_cache.json classify_cache.json transcript_cache.json dashboard/data.json; do
+            [ -f "$f" ] && git add "$f"    # tolerate a cache that a run didn't produce
+          done
+          if git diff --staged --quiet; then
+            echo "No cache change."
+          else
+            git commit -m "Update caches [skip ci]"
+            # Caches are derived data (latest run wins). If runs overlap, auto-resolve any
+            # conflict to THIS run's caches (-X theirs = the commit being replayed) instead of
+            # failing on an add/add merge, and retry the push if another run raced us.
+            for i in 1 2 3; do
+              git pull --rebase -X theirs origin "${{ github.ref_name }}" && git push && break
+              echo "cache push race, retry $i"; sleep 5
+            done
+          fi
+
+      - name: Stamp code version
+        if: always()
+        run: |
+          {
+            echo "commit: $(git rev-parse HEAD)"
+            echo "ref:    ${{ github.ref_name }}"
+            echo "run:    ${{ github.run_number }} (${{ github.run_id }})"
+            echo "utc:    $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > RUN_VERSION.txt
+          # snapshot the exact code + config that produced this run
+          tar -czf code_snapshot.tar.gz *.py requirements.txt .github/workflows/dc-pipeline.yml
+
+      - name: Upload run artifacts
+        if: always()                       # keep logs/code even when the pipeline fails
+        uses: actions/upload-artifact@v4
+        with:
+          name: dc-run-${{ github.run_number }}
+          path: |
+            RUN_VERSION.txt
+            code_snapshot.tar.gz
+            run.log
+            ai_cache.json
+            dc_trend.json
+            tender_cache.json
+            presence_cache.json
+            bd_cache.json
+            mca_cache.json
+            edgar_cache.json
+          if-no-files-found: ignore
+          retention-days: 30
