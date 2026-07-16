@@ -6,12 +6,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.7.0/tabler-icons.min.css">
 <style>
-:root{--navy:#262B68;--navy-l:#343A82;--char:#2C2E3A;--acid:#B5D334;--acid-dk:#7E951F;
+/* var names are legacy (navy/acid) — values are the deep-red theme */
+:root{--navy:#6E1423;--navy-l:#8C1C2C;--char:#2E1A1E;--acid:#E9B44C;--acid-dk:#92400E;
 --bg:#F5F6F8;--surface:#FFFFFF;--line:#E7E9EE;--line-2:#D8DBE3;
---ink:#1C1E2A;--ink-2:#5A5F70;--ink-3:#8A8F9E;
---pos:#1E9E6A;--pos-bg:#E7F5EE;--neg:#D6453D;--neg-bg:#FCEBEA;--neu:#6B7081;
---sharp:#D6453D;--sharp-bg:#FCEBEA;--tact:#C77A12;--tact-bg:#FBF0DC;--strat:#2F6F8C;--strat-bg:#E4F0F5;
---news:#3F3D9E;--policy:#9A6310;--talent:#1B7A4F;--capital:#15589C;--osint:#7A3FA0;--disc:#B0492E;
+--ink:#1C1E2A;--ink-2:#4A4F5E;--ink-3:#616774;
+--pos:#15805A;--pos-bg:#E7F5EE;--neg:#B3261E;--neg-bg:#FCEBEA;--neu:#6B7081;
+--sharp:#B3261E;--sharp-bg:#FCEBEA;--tact:#8F5A0A;--tact-bg:#FBF0DC;--strat:#2F6F8C;--strat-bg:#E4F0F5;
+--news:#3F3D9E;--policy:#9A6310;--talent:#1B7A4F;--capital:#15589C;--osint:#7A3FA0;--disc:#7C4A2D;
 --rail:62px;--rail-open:240px;}
 *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
@@ -36,10 +37,25 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 
 #main{margin-left:var(--rail);min-height:100vh;display:flex;flex-direction:column}
 #topbar{height:58px;background:var(--char);display:flex;align-items:center;gap:18px;padding:0 26px;position:sticky;top:0;z-index:30;border-bottom:1px solid rgba(0,0,0,.2)}
-.crumb{color:rgba(255,255,255,.5);font-size:13px;display:flex;align-items:center;gap:7px}.crumb b{color:#fff;font-weight:600}.crumb .sep{opacity:.4}
+.crumb{color:rgba(255,255,255,.65);font-size:13px;display:flex;align-items:center;gap:7px}.crumb b{color:#fff;font-weight:600}.crumb .sep{opacity:.4}
 .crumb .clk{cursor:pointer}.crumb .clk:hover{color:#fff}
-.searchbox{margin-left:8px;flex:1;max-width:400px;height:35px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;gap:8px;padding:0 12px}
-.searchbox input{flex:1;background:none;border:none;outline:none;color:#fff;font-family:inherit;font-size:13px}.searchbox input::placeholder{color:rgba(255,255,255,.4)}.searchbox i{font-size:17px;color:rgba(255,255,255,.5)}
+.searchbox{position:relative;margin-left:8px;flex:1;max-width:400px;height:35px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;gap:8px;padding:0 12px}
+.sdrop{position:absolute;top:41px;left:-1px;right:-1px;min-width:380px;background:var(--surface);border:1px solid var(--line-2);border-radius:10px;box-shadow:0 8px 32px rgba(30,10,15,.18);max-height:420px;overflow-y:auto;z-index:60;color:var(--ink)}
+.sgroup{display:flex;align-items:center;gap:6px;padding:9px 12px 4px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-3)}
+.sgroup .gdot{width:8px;height:8px;border-radius:50%}
+.srow{display:flex;gap:8px;align-items:baseline;padding:7px 12px;font-size:13px;cursor:pointer}.srow:hover{background:var(--bg)}
+.srow .sm{font-size:11px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:45%}
+.srow .sl2{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.snone{padding:14px;font-size:13px;color:var(--ink-3)}
+.shelp{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:18px}
+.shelp summary{padding:12px 16px;font-weight:600;font-size:13px;cursor:pointer;display:flex;gap:8px;align-items:center;color:var(--ink-2);list-style:none}
+.shelp summary i{font-size:16px;color:var(--acid-dk)}
+.shelp .sbody{padding:0 16px 6px;font-size:13px;color:var(--ink-2);line-height:1.6}
+.shelp .sbody p{margin:0 0 10px}
+tr.flash>td{animation:flashbg 2.1s ease-out}
+.prospect.flash{animation:flashbg 2.1s ease-out}
+@keyframes flashbg{0%,40%{background:#FBF3E2;box-shadow:inset 3px 0 0 var(--acid)}100%{background:transparent}}
+.searchbox input{flex:1;background:none;border:none;outline:none;color:#fff;font-family:inherit;font-size:13px}.searchbox input::placeholder{color:rgba(255,255,255,.55)}.searchbox i{font-size:17px;color:rgba(255,255,255,.5)}
 .topspacer{flex:1}
 .fresh{font-size:11px;color:rgba(255,255,255,.45);font-family:'IBM Plex Mono',monospace;display:flex;align-items:center;gap:7px;cursor:pointer;white-space:nowrap}
 .fresh:hover{color:rgba(255,255,255,.8)}
@@ -72,14 +88,14 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .bicon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
 .bicon.news{background:#EDEDFA;color:var(--news)}.bicon.policy{background:#FBF1DE;color:var(--policy)}
 .bicon.ranked{background:#E6F4EC;color:var(--talent)}.bicon.pipeline{background:#E2EFFB;color:var(--capital)}
-.bicon.osint{background:#F3EAFA;color:var(--osint)}.bicon.disclosure{background:#FBEAE4;color:var(--disc)}
+.bicon.osint{background:#F3EAFA;color:var(--osint)}.bicon.disclosure{background:#F3EAE3;color:var(--disc)}
 .bmeta{flex:1;min-width:0}
 .bt{font-size:14px;font-weight:600;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-.bt .sheet{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;color:var(--ink-3);background:var(--bg);border-radius:4px;padding:1px 5px}
+.bt .sheet{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;color:var(--ink-3);background:var(--bg);border-radius:4px;padding:1px 5px}
 .bsub{font-size:11px;color:var(--ink-3);margin-top:2px}
 .bstat{text-align:right;flex-shrink:0}
 .bstat .bn{font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600}
-.bstat .bl{font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.4px}
+.bstat .bl{font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.4px}
 .bchev{color:var(--ink-3);font-size:18px;flex-shrink:0}.bhead:hover .bchev{color:var(--navy)}
 .bbody{padding:6px 17px 14px;flex:1}
 .brow{display:flex;align-items:center;gap:10px;padding:9px 0;font-size:13px;border-bottom:1px solid var(--line)}.brow:last-child{border-bottom:none}
@@ -92,7 +108,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .bfoot:hover{background:#F4F5FA}.bfoot i{font-size:15px}
 
 /* status chips */
-.stchip{font-size:10px;font-weight:600;border-radius:5px;padding:1px 7px;letter-spacing:.3px}
+.stchip{font-size:11px;font-weight:600;border-radius:5px;padding:1px 7px;letter-spacing:.3px}
 .stchip.live{background:var(--pos-bg);color:var(--pos)}.stchip.dev{background:var(--tact-bg);color:var(--tact)}.stchip.soon{background:var(--bg);color:var(--ink-3)}
 
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:14px;margin-bottom:24px}
@@ -128,10 +144,10 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .tag{font-size:11px;font-weight:600;border-radius:6px;padding:2px 8px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
 .tag.p1{background:var(--sharp-bg);color:var(--sharp)}.tag.p2{background:var(--tact-bg);color:var(--tact)}.tag.p3{background:var(--strat-bg);color:var(--strat)}
 .tag.strong{background:var(--pos-bg);color:var(--pos)}.tag.moderate{background:var(--tact-bg);color:var(--tact)}.tag.weak{background:var(--bg);color:var(--ink-3)}
-.tag.geo{background:#EFF0FB;color:var(--navy)}.tag.plain{background:var(--bg);color:var(--ink-2)}
+.tag.geo{background:#F7EDEA;color:var(--navy)}.tag.plain{background:var(--bg);color:var(--ink-2)}
 .tag.hi{background:var(--pos-bg);color:var(--pos)}.tag.md{background:var(--tact-bg);color:var(--tact)}.tag.lo{background:var(--bg);color:var(--ink-3)}
 .tag.foreign{background:#F3EAFA;color:var(--osint)}
-.aichip{font-size:10px;font-weight:600;color:var(--acid-dk);background:#F4F7E6;border-radius:4px;padding:1px 6px;margin-right:6px;letter-spacing:.3px;text-transform:uppercase;white-space:nowrap}
+.aichip{font-size:10px;font-weight:600;color:var(--acid-dk);background:#FBF3E2;border-radius:4px;padding:1px 6px;margin-right:6px;letter-spacing:.3px;text-transform:uppercase;white-space:nowrap}
 
 /* tables */
 .twrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:14px}
@@ -139,8 +155,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .matrix th{background:#FAFBFC;text-align:left;padding:12px 14px;font-size:11px;font-weight:600;color:var(--ink-2);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--line);white-space:nowrap}
 .matrix th.sort{cursor:pointer;user-select:none}.matrix th.sort:hover{color:var(--navy)}
 .matrix th .sarr{font-size:10px;color:var(--navy)}
-.matrix td{padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:middle}.matrix tr:last-child td{border-bottom:none}.matrix tbody tr:hover td{background:#FAFBFC}
-.cellh{font-weight:500;color:var(--ink);max-width:380px}
+.matrix td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:middle}.matrix tr:last-child td{border-bottom:none}.matrix tbody tr:hover td{background:#FAFBFC}
+.cellh{font-weight:500;color:var(--ink);max-width:440px;line-height:1.45}
 .matrix a.ext{color:var(--ink-3);font-size:16px}.matrix a.ext:hover{color:var(--navy)}
 .matrix a.tlink{color:var(--ink);font-weight:500}.matrix a.tlink:hover{color:var(--navy);text-decoration:underline}
 .subrow td{background:#FAFBFC;padding:6px 14px 14px}
@@ -155,10 +171,10 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .prospect.pri1{border-left:3px solid var(--sharp)}.prospect.pri2{border-left:3px solid var(--tact)}.prospect.pri3{border-left:3px solid var(--strat)}
 .ptop{display:flex;align-items:flex-start;gap:16px;padding:16px 18px 14px}.prank{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;color:var(--ink-3);min-width:30px;line-height:1.5}.pmain{flex:1;min-width:0}
 .pco{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.pco h3{font-size:17px;font-weight:600;letter-spacing:-.2px}
-.ptrigger{margin-top:10px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);flex-wrap:wrap}.ptrigger .tk{font-weight:600;color:var(--navy);background:#EFF0FB;border-radius:6px;padding:2px 9px;font-size:12px;display:inline-flex;align-items:center;gap:5px}.ptrigger .tk i{font-size:14px}
+.ptrigger{margin-top:10px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);flex-wrap:wrap}.ptrigger .tk{font-weight:600;color:var(--navy);background:#F7EDEA;border-radius:6px;padding:2px 9px;font-size:12px;display:inline-flex;align-items:center;gap:5px}.ptrigger .tk i{font-size:14px}
 .pthesis{margin-top:11px;font-size:13px;color:var(--ink-2);line-height:1.6;max-width:680px}.pthesis b{color:var(--ink)}
 .pscore{width:184px;flex-shrink:0;border-left:1px solid var(--line);padding-left:16px;display:flex;flex-direction:column;gap:11px}
-.sblock .sl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-3);margin-bottom:3px;display:flex;justify-content:space-between}
+.sblock .sl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-3);margin-bottom:3px;display:flex;justify-content:space-between}
 .sval2{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600}
 .pfoot{display:flex;align-items:center;gap:16px;padding:11px 18px;background:#FAFBFC;border-top:1px solid var(--line);flex-wrap:wrap}
 .fmeta{font-size:12px;color:var(--ink-2);display:flex;align-items:center;gap:6px}.fmeta b{font-family:'IBM Plex Mono',monospace;color:var(--ink);font-weight:600}.fmeta i{font-size:15px;color:var(--ink-3)}.fspace{flex:1}
@@ -166,7 +182,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .evid{display:none;padding:0 18px 16px;border-top:1px dashed var(--line-2)}.evid.open{display:block}.evid .et{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-3);margin:14px 0 8px}
 .aigrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px}
 .aicell{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:12.5px;color:var(--ink-2);line-height:1.5}
-.aicell .al{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-3);display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.aicell .al{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-3);display:flex;align-items:center;gap:6px;margin-bottom:3px}
 
 /* ai summary */
 .aipanel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 24px}
@@ -204,7 +220,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 <div id="main">
   <header id="topbar">
     <div class="crumb" id="crumb"><b>TAG</b></div>
-    <div class="searchbox"><i class="ti ti-search"></i><input placeholder="Search companies, signals, streams..."/></div>
+    <div class="searchbox"><i class="ti ti-search"></i><input id="sinput" placeholder="Search companies, signals, streams..."/><div class="sdrop" id="sdrop" hidden></div></div>
     <div class="topspacer"></div>
     <div class="fresh" id="freshness" title="Feed health"></div>
     <button class="ticon"><i class="ti ti-bell"></i><span class="dot"></span></button>
@@ -341,6 +357,16 @@ function viewSectorDC(){
   }).join('')}</div>`;
 }
 
+/* ---------- SCORING EXPLAINER (copy mirrors dc_score.py / dc_bd.py / dc_config.py) ---------- */
+function scoreHelp(){
+  return `<details class="shelp"><summary><i class="ti ti-info-circle"></i>How scoring works — plain English</summary><div class="sbody">
+  <p><b>Signal Score (0–100)</b> — "How much verified activity are we seeing?" A weighted blend of four ingredients: <b>news momentum (35%)</b> — press mentions, where official sources and global wires count full weight, trade press less, low-quality aggregators barely at all, and every mention loses half its weight every 90 days; <b>policy tailwind (20%)</b> — genuine government policy items (incentives, power, land, data rules) tied to the company; <b>India/GCC relevance (25%)</b> — full credit for India signals, partial for GCC-only; <b>partnership signals (20%)</b> — SEC filings showing deals or JVs. Bands: <b>Strong ≥ 60 · Moderate 40–59 · Weak &lt; 40</b>.</p>
+  <p><b>Momentum</b> — the raw "how much recent credible coverage" number inside the Signal Score. Duplicate articles about the same event count once.</p>
+  <p><b>BD Priority (P1 / P2 / P3)</b> — a separate question: "should TAG act now?" A 0–100 score from eight weighted factors: <b>trigger strength 25%</b> (the strongest verified action — committed capex or capacity strongest, land/M&amp;A next, JV next, hiring weakest — discounted by age), <b>TAG fit 15%</b>, <b>buyer access 15%</b>, <b>cross-border motion 10%</b>, <b>policy exposure 10%</b>, <b>deal size 10%</b>, <b>timing 10%</b>, <b>source quality 5%</b>. <b>P1 = 65+ · P2 = 40+ · P3 below.</b> Guardrail: if the evidence is only market commentary or only low-quality sources, the account can never rank above P3 regardless of score. That's why a company can have a high Signal Score but sit at P3, or a modest score but be P1 on one big verified deal. Expand any prospect's Evidence drawer to see the exact factor-by-factor breakdown.</p>
+  <p><b>Confidence</b> — <b>high</b> = a captured deal value or a filed partnership; <b>med</b> = established or announced India presence; <b>low</b> = neither yet. <b>Fee viability</b> — whether the account clears TAG's fee bar: a mega-fund/hyperscaler backer, a deal ≥ $500M (high) or ≥ $50M (medium), or a listed entity.</p>
+  </div></details>`;
+}
+
 /* ---------- STREAM DETAIL VIEWS ---------- */
 function streamHero(s,n){
   return `<div class="shero"><div class="sicon"><i class="ti ${s.icon}"></i></div>
@@ -352,54 +378,54 @@ function viewStreamNews(s){
   const cols=[{label:'Event',key:'headline',style:'width:40%'},{label:'Articles',key:'n_articles'},{label:'Sources',key:'n_sources'},{label:'Layer',key:'layer'},{label:'Geo',key:'geo'},{label:'Last seen',key:'last_seen'},{label:''}];
   const rowFn=e=>{
     const arts=(e.articles||[]).map(a=>`<div class="cart"><div class="cs">${esc(a.source||'—')}</div><div class="ch" title="${esc(a.title)}">${titleLink(a.title,a.url)}</div><div class="cd">${shortDate(a.date)}</div>${extLink(a.url)||'<span style="width:16px"></span>'}</div>`).join('');
-    return `<tr><td class="cellh"><b>${esc(e.headline||'—')}</b><div style="margin-top:5px"><span class="evtx" id="exp-ev${e._i}" onclick="toggleEl('sub-ev${e._i}','exp-ev${e._i}')"><i class="ti ti-chevron-down"></i>${(e.articles||[]).length} source articles</span></div></td>
+    return `<tr id="hit-news-${e._i}"><td class="cellh"><b>${esc(e.headline||'—')}</b><div style="margin-top:5px"><span class="evtx" id="exp-ev${e._i}" onclick="toggleEl('sub-ev${e._i}','exp-ev${e._i}')"><i class="ti ti-chevron-down"></i>${(e.articles||[]).length} source articles</span></div></td>
       <td class="mono">${e.n_articles??'—'}</td><td class="mono">${e.n_sources??'—'}</td><td>${dash(e.layer)}</td><td><span class="tag geo">${esc(e.geo||'—')}</span></td><td class="mono">${shortDate(e.last_seen)}</td><td>${esc(e.event_id||'')}</td></tr>
     <tr id="sub-ev${e._i}" class="subrow" style="display:none"><td colspan="7">${arts||emptyState('No linked articles.')}</td></tr>`;
   };
   return streamHero(s,rows.length)+renderTable('tblNews',cols,rows,rowFn,'last_seen');
 }
 function viewStreamPolicy(s){
-  const rows=DATA.policy||[];
+  const rows=(DATA.policy||[]).map((p,i)=>Object.assign({_i:i},p));
   const cols=[{label:'Date',key:'date'},{label:'Geo',key:'geo'},{label:'Type',key:'type'},{label:'Title',key:'title',style:'width:44%'},{label:'Source',key:'source'},{label:''}];
-  const rowFn=p=>`<tr><td class="mono">${shortDate(p.date)}</td><td><span class="tag geo">${esc(p.geo||'—')}</span></td>
+  const rowFn=p=>`<tr id="hit-policy-${p._i}"><td class="mono">${shortDate(p.date)}</td><td><span class="tag geo">${esc(p.geo||'—')}</span></td>
     <td><span class="tag plain">${esc(p.policy_class||p.type||'—')}</span></td>
     <td class="cellh">${titleLink(p.title,p.url)}</td><td>${dash(p.source)}</td><td>${extLink(p.url)}</td></tr>`;
   return streamHero(s,rows.length)+renderTable('tblPolicy',cols,rows,rowFn,'date');
 }
 function viewStreamDisclosure(s){
-  const rows=DATA.disclosures||[];
-  const cols=[{label:'Filed',key:'filed_date'},{label:'Filer',key:'filer'},{label:'Form',key:'form'},{label:'Region',key:'region'},{label:'Deal type',key:'deal_type'},{label:'Confidence',key:'confidence'},{label:'Relevance & evidence',style:'width:36%'},{label:''}];
-  const rowFn=d=>`<tr><td class="mono">${shortDate(d.filed_date)}</td><td class="cellh"><b>${esc(d.filer||'—')}</b>${d.signals?`<div style="margin-top:4px"><span class="tag plain">${esc(d.signals)}</span></div>`:''}</td>
+  const rows=(DATA.disclosures||[]).map((d,i)=>Object.assign({_i:i},d));
+  const cols=[{label:'Filed',key:'filed_date'},{label:'Filer',key:'filer'},{label:'Form',key:'form'},{label:'Region',key:'region'},{label:'Deal type',key:'deal_type'},{label:'Confidence <i class="ti ti-info-circle" title="How tightly the filing ties data centres + the region + a concrete action together. high = 3+ distinct verified signals in the filing."></i>',key:'confidence'},{label:'Relevance & evidence',style:'width:36%'},{label:''}];
+  const rowFn=d=>`<tr id="hit-disc-${d._i}"><td class="mono">${shortDate(d.filed_date)}</td><td class="cellh"><b>${esc(d.filer||'—')}</b>${d.signals?`<div style="margin-top:4px"><span class="tag plain">${esc(d.signals)}</span></div>`:''}</td>
     <td><span class="tag plain mono">${esc(d.form||'—')}</span></td><td>${dash(d.region)}</td><td>${dash(d.deal_type)}</td><td>${confTag(d.confidence)}</td>
     <td>${dash(d.relevance)}${d.evidence?`<div class="qev">${esc(d.evidence)}</div>`:''}</td><td>${extLink(d.url)}</td></tr>`;
   return streamHero(s,rows.length)+renderTable('tblDisc',cols,rows,rowFn,'filed_date');
 }
 function viewStreamOsint(s){
-  const rows=DATA.osint||[];
+  const rows=(DATA.osint||[]).map((o,i)=>Object.assign({_i:i},o));
   const cols=[{label:'Date',key:'date'},{label:'Signal type',key:'signal_type'},{label:'Actor',key:'actor'},{label:'Geo',key:'geo'},{label:'Excerpt',style:'width:40%'},{label:'Confidence',key:'confidence'},{label:''}];
-  const rowFn=o=>`<tr><td class="mono">${shortDate(o.date)}</td><td><span class="tag plain">${esc(o.signal_type||'—')}</span></td>
+  const rowFn=o=>`<tr id="hit-osint-${o._i}"><td class="mono">${shortDate(o.date)}</td><td><span class="tag plain">${esc(o.signal_type||'—')}</span></td>
     <td class="cellh"><b>${esc(o.actor||'—')}</b></td><td><span class="tag geo">${esc(o.geo||'—')}</span></td>
     <td>${dash(o.excerpt)}</td><td>${confTag(o.confidence)}</td><td>${extLink(o.url)}</td></tr>`;
   return streamHero(s,rows.length)+renderTable('tblOsint',cols,rows,rowFn,'date');
 }
 function viewStreamRanked(s){
   const rows=(DATA.prospects||[]).slice().sort((a,b)=>(b.signal_score||0)-(a.signal_score||0));
-  const cols=[{label:'Company',key:'company'},{label:'Score',key:'signal_score'},{label:'Momentum',key:'momentum'},{label:'Geo',key:'geo'},{label:'Presence / stage',key:'india_presence'},{label:'TAG play',key:'tag_play'},{label:'Why now',style:'width:18%'},{label:'Deal value',key:'deal_value'}];
+  const cols=[{label:'Company',key:'company'},{label:'Score <i class="ti ti-info-circle" title="0–100 blend: news momentum 35% + policy tailwind 20% + India/GCC relevance 25% + partnership signals 20%. Strong ≥60, Moderate 40–59."></i>',key:'signal_score'},{label:'Momentum <i class="ti ti-info-circle" title="Recent credible coverage; each mention loses half its weight every 90 days."></i>',key:'momentum'},{label:'Geo',key:'geo'},{label:'Presence / stage',key:'india_presence'},{label:'TAG play',key:'tag_play'},{label:'Why now',style:'width:18%'},{label:'Deal value',key:'deal_value'}];
   const rowFn=p=>`<tr><td class="cellh"><b>${esc(p.company)}</b>${p.is_foreign?' <span class="tag foreign">foreign</span>':''}</td>
     <td><span class="mono" style="font-weight:600">${num(p.signal_score,0)}</span> ${bandTag(p.signal_band)}</td>
     <td class="mono">${num(p.momentum,1)}</td><td><span class="tag geo">${esc(p.geo||'—')}</span></td>
     <td>${dash(p.india_presence)}${p.expansion_stage?` <span style="color:var(--ink-3)">/ ${esc(p.expansion_stage)}</span>`:''}</td>
     <td>${dash(p.tag_play)}</td><td style="font-size:12px;color:var(--ink-2)">${dash(p.why_now)}</td><td class="mono">${dash(p.deal_value)}</td></tr>`;
-  return streamHero(s,rows.length)+renderTable('tblRank',cols,rows,rowFn,'signal_score');
+  return streamHero(s,rows.length)+scoreHelp()+renderTable('tblRank',cols,rows,rowFn,'signal_score');
 }
 function viewStreamPipeline(s){
   const bd=(DATA.prospects||[]).filter(p=>p.bd_priority);
-  let html=streamHero(s,bd.length);
+  let html=streamHero(s,bd.length)+scoreHelp();
   const groups=[['P1','Act now','ti-flame'],['P2','Monitor','ti-eye'],['P3','Park','ti-clock']];
   let any=false;
   groups.forEach(([g,lbl,icon],gi)=>{
     const rows=bd.filter(p=>String(p.bd_priority).startsWith(g));if(!rows.length)return;any=true;
-    const cols=[{label:'Company',key:'company'},{label:'Priority',key:'bd_priority'},{label:'India stage',key:'india_stage'},{label:'Trigger',style:'width:26%'},{label:'Why now'},{label:'Confidence',key:'confidence'},{label:'Deal value',key:'deal_value'}];
+    const cols=[{label:'Company',key:'company'},{label:'Priority <i class="ti ti-info-circle" title="8-factor BD score: P1 = 65+, P2 = 40+, P3 below. Evidence from only low-quality sources caps at P3 regardless of score."></i>',key:'bd_priority'},{label:'India stage',key:'india_stage'},{label:'Trigger',style:'width:26%'},{label:'Why now'},{label:'Confidence <i class="ti ti-info-circle" title="high = captured deal value or filed partnership · med = established/announced India presence · low = neither yet"></i>',key:'confidence'},{label:'Deal value',key:'deal_value'}];
     const rowFn=p=>`<tr><td class="cellh"><b>${esc(p.company)}</b></td><td><span class="tag ${priCls(p.bd_priority)}">${esc(p.bd_priority)}</span></td>
       <td>${dash(p.india_stage)}</td><td style="font-size:12px">${dash(p.trigger)}</td><td style="font-size:12px;color:var(--ink-2)">${dash(p.why_now)}</td>
       <td>${confTag(p.confidence)}</td><td class="mono">${dash(p.deal_value)}</td></tr>`;
@@ -436,11 +462,11 @@ function prospectCard(p,i){
     p.whitespace_label?`<span class="tag plain">${esc(p.whitespace_label)}</span>`:'',
   ].join('');
   const evList=evd.map(x=>`<div class="cart"><div class="cs">${esc(x.r.publisher||'—')}</div><div class="ch" title="${esc(x.r.headline)}">${titleLink(x.r.headline,x.r.url)}</div><div class="cd">${shortDate(x.r.date)}</div>${extLink(x.r.url)||'<span style="width:16px"></span>'}</div>`).join('');
-  return `<div class="prospect ${priBorder(p.bd_priority)}"><div class="ptop"><div class="prank">${i+1}</div><div class="pmain">
+  return `<div class="prospect ${priBorder(p.bd_priority)}" id="hit-pros-${p._x??i}"><div class="ptop"><div class="prank">${i+1}</div><div class="pmain">
     <div class="pco"><h3>${esc(p.company)}</h3>${chips}</div>
     ${p.trigger?`<div class="ptrigger"><span class="tk"><i class="ti ti-bolt"></i>Trigger</span>${esc(p.trigger)}</div>`:''}
     <div class="pthesis">${p.why_now?`<b>Why now:</b> ${esc(p.why_now)}`:''}${p.why_now&&p.tag_play?' · ':''}${p.tag_play?`<b>TAG play:</b> ${esc(p.tag_play)}`:''}</div>
-    ${aiFields?`<div class="aigrid">${aiFields}</div>`:''}</div>
+    </div>
     <div class="pscore">
       <div class="sblock"><div class="sl"><span>Signal score</span></div><span class="sval2">${num(p.signal_score,0)}</span> ${bandTag(p.signal_band)}</div>
       <div class="sblock"><div class="sl"><span>Momentum</span></div><span class="sval2">${num(p.momentum,1)}</span></div>
@@ -453,14 +479,15 @@ function prospectCard(p,i){
       ${p.confidence?`<span class="fmeta"><i class="ti ti-shield-check"></i>${confTag(p.confidence)}</span>`:''}
       ${p.geo?`<span class="fmeta"><span class="tag geo">${esc(p.geo)}</span></span>`:''}
       <div class="fspace"></div>
-      <button class="fbtn" onclick="toggleEl('evid-${i}');document.getElementById('evid-${i}').classList.toggle('open')" style="border:1px solid var(--line-2)"><i class="ti ti-file-search"></i>Evidence (${evd.length})</button>
+      <button class="fbtn" onclick="toggleEl('evid-${i}');document.getElementById('evid-${i}').classList.toggle('open')" style="border:1px solid var(--line-2)"><i class="ti ti-file-search"></i>Evidence${aiFields?' & AI draft':''} (${evd.length})</button>
     </div>
-    <div class="evid" id="evid-${i}" style="display:none"><div class="et">Evidence register — ${evd.length} item${evd.length===1?'':'s'}</div>${evList||emptyState('No register entries linked.')}</div></div>`;
+    <div class="evid" id="evid-${i}" style="display:none">${p.factor_breakdown?`<div class="et">BD score breakdown — factor × weight → points</div><div class="mono" style="font-size:11.5px;color:var(--ink-2);line-height:1.7">${esc(p.factor_breakdown)}</div>`:''}${aiFields?`<div class="et">AI-drafted outreach angles</div><div class="aigrid">${aiFields}</div>`:''}<div class="et">Evidence register — ${evd.length} item${evd.length===1?'':'s'}</div>${evList||emptyState('No register entries linked.')}</div></div>`;
 }
 function viewProspects(){
-  const P=(DATA.prospects||[]).slice().sort((a,b)=>priRank(a.bd_priority)-priRank(b.bd_priority)||(b.signal_score||0)-(a.signal_score||0));
+  const P=(DATA.prospects||[]).map((p,x)=>Object.assign({_x:x},p)).sort((a,b)=>priRank(a.bd_priority)-priRank(b.bd_priority)||(b.signal_score||0)-(a.signal_score||0));
   return `<div class="eyebrow">BD candidate queue</div><div class="phead"><h1>Prospects</h1></div>
   <p class="psub">Operators surfaced by this run's signals, ordered by BD priority then Signal Score. AI-drafted fields are marked — everything else is pipeline-computed from evidence.</p>
+  ${scoreHelp()}
   <div class="pfeed">${P.length?P.map(prospectCard).join(''):`<div class="panel">${emptyState('No prospects in this run.')}</div>`}</div>`;
 }
 
@@ -507,12 +534,12 @@ function viewHealth(){
 }
 function viewStates(){
   const st=DATA.states;
-  if(!st||!st.matrix||!st.matrix.length) return emptyState('ti-map-pin','State bank not loaded','The India state knowledge bank ships with the next pipeline run.');
+  if(!st||!st.matrix||!st.matrix.length) return emptyState('State bank not loaded — the India state knowledge bank ships with the next pipeline run.');
   const flagChip=f=>f?`<span class="stchip dev" title="${esc(f)}">⚠ validity</span>`:'';
-  const prio=p=>({'1':'sharp','2':'tact','3':'strat'})[p]||'strat';
+  const prio=p=>({'1':'p1','2':'p2','3':'p3'})[p]||'p3';
   const rows=st.matrix.map(r=>`<tr>
     <td><b>${esc(r.state)}</b>${st.upside.includes(r.state)?' <span class="stchip live">upside</span>':''} ${flagChip(r.validity_flag)}</td>
-    <td><span class="chip ${prio(r.priority)}">P${esc(r.priority)}</span></td>
+    <td><span class="tag ${prio(r.priority)}">P${esc(r.priority)}</span></td>
     <td>${esc(r.pitch)}</td>
     <td>${esc(r.policy_confidence)}</td>
     <td>${esc(r.execution_confidence)}</td>
@@ -570,6 +597,56 @@ function openStream(key){
 
 document.getElementById('nav').addEventListener('click',e=>{const a=e.target.closest('.nlink');if(!a||!DATA)return;if(a.dataset.view)go(a.dataset.view);else if(a.dataset.sector)openSector(a.dataset.sector);});
 
+/* ---------- SEARCH ---------- */
+let SIDX=[];
+function buildIndex(){
+  SIDX=[];
+  const add=(type,label,sub,hay,domId,nav)=>SIDX.push({type,label:label||'—',sub:sub||'',hay:hay.filter(Boolean).join(' ').toLowerCase(),domId,nav});
+  (DATA.prospects||[]).forEach((p,i)=>add('Prospects',p.company,[p.bd_priority,p.geo].filter(Boolean).join(' · '),[p.company,p.tag_play,p.why_now,p.trigger,p.geo],'hit-pros-'+i,()=>go('prospects')));
+  (DATA.disclosures||[]).forEach((d,i)=>add('Disclosures',d.filer,[d.form,d.deal_type,d.region].filter(Boolean).join(' · '),[d.filer,d.deal_type,d.region,d.relevance,d.signals],'hit-disc-'+i,()=>openStream('disclosure')));
+  (DATA.events||[]).forEach((e,i)=>add('News',e.headline,[e.geo,e.layer].filter(Boolean).join(' · '),[e.headline,e.geo,e.layer],'hit-news-'+i,()=>openStream('news')));
+  (DATA.policy||[]).forEach((p,i)=>add('Policy',p.title,[p.geo,p.policy_class||p.type].filter(Boolean).join(' · '),[p.title,p.geo,p.source,p.policy_class],'hit-policy-'+i,()=>openStream('policy')));
+  (DATA.osint||[]).forEach((o,i)=>add('Hiring / OSINT',o.actor||o.signal_type,[o.signal_type,o.geo].filter(Boolean).join(' · '),[o.actor,o.excerpt,o.signal_type,o.geo],'hit-osint-'+i,()=>openStream('osint')));
+}
+const SGROUPS=[['Prospects','--talent'],['Disclosures','--disc'],['News','--news'],['Policy','--policy'],['Hiring / OSINT','--osint']];
+function runSearch(q){
+  const drop=document.getElementById('sdrop');
+  q=(q||'').trim().toLowerCase();
+  if(q.length<2){drop.hidden=true;drop.innerHTML='';return;}
+  const toks=q.split(/\s+/);
+  let total=0,html='';
+  SGROUPS.forEach(([g,dot])=>{
+    if(total>=25)return;
+    let n=0,rows='';
+    for(let i=0;i<SIDX.length;i++){
+      const it=SIDX[i];
+      if(it.type!==g||!toks.every(t=>it.hay.includes(t)))continue;
+      rows+=`<div class="srow" onclick="jumpTo(${i})"><span class="sl2">${esc(it.label)}</span><span class="sm">${esc(it.sub)}</span></div>`;
+      if(++n>=5)break;
+    }
+    if(n){html+=`<div class="sgroup"><span class="gdot" style="background:var(${dot})"></span>${g}</div>${rows}`;total+=n;}
+  });
+  drop.innerHTML=html||'<div class="snone">No matches across prospects, disclosures, news, policy or OSINT.</div>';
+  drop.hidden=false;
+}
+function jumpTo(i){
+  const h=SIDX[i];if(!h)return;
+  document.getElementById('sdrop').hidden=true;
+  document.getElementById('sinput').value='';
+  h.nav(); /* show() renders synchronously, so the target row exists right after */
+  const el=document.getElementById(h.domId);
+  if(el){el.scrollIntoView({block:'center'});el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),2200);}
+}
+(function(){
+  const inp=document.getElementById('sinput');let t=null;
+  inp.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(()=>runSearch(inp.value),150);});
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){document.getElementById('sdrop').hidden=true;inp.blur();}
+    else if(e.key==='Enter'){const f=document.querySelector('#sdrop .srow');if(f)f.click();}
+  });
+  document.addEventListener('click',e=>{if(!e.target.closest('.searchbox'))document.getElementById('sdrop').hidden=true;});
+})();
+
 /* ---------- BOOT ---------- */
 function bootError(detail){
   document.getElementById('view').innerHTML=`<div class="errpg"><i class="ti ti-plug-connected-x"></i>
@@ -583,6 +660,7 @@ function boot(){
     return r.json();
   }).then(d=>{
     DATA=d;
+    buildIndex();
     const badge=document.getElementById('pBadge');if(badge)badge.textContent=(d.prospects||[]).length;
     const feeds=(d.health&&d.health.feeds)||{};
     const bad=Object.values(feeds).some(f=>f.status!=='ok');
