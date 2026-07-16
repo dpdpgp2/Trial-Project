@@ -142,6 +142,7 @@ tr.flash>td{animation:flashbg 2.1s ease-out}
 
 /* tags & chips */
 .tag{font-size:11px;font-weight:600;border-radius:6px;padding:2px 8px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.tagwrap{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
 .tag.p1{background:var(--sharp-bg);color:var(--sharp)}.tag.p2{background:var(--tact-bg);color:var(--tact)}.tag.p3{background:var(--strat-bg);color:var(--strat)}
 .tag.strong{background:var(--pos-bg);color:var(--pos)}.tag.moderate{background:var(--tact-bg);color:var(--tact)}.tag.weak{background:var(--bg);color:var(--ink-3)}
 .tag.geo{background:#F7EDEA;color:var(--navy)}.tag.plain{background:var(--bg);color:var(--ink-2)}
@@ -395,7 +396,7 @@ function viewStreamPolicy(s){
 function viewStreamDisclosure(s){
   const rows=(DATA.disclosures||[]).map((d,i)=>Object.assign({_i:i},d));
   const cols=[{label:'Filed',key:'filed_date'},{label:'Filer',key:'filer'},{label:'Form',key:'form'},{label:'Region',key:'region'},{label:'Deal type',key:'deal_type'},{label:'Confidence <i class="ti ti-info-circle" title="How tightly the filing ties data centres + the region + a concrete action together. high = 3+ distinct verified signals in the filing."></i>',key:'confidence'},{label:'Relevance & evidence',style:'width:36%'},{label:''}];
-  const rowFn=d=>`<tr id="hit-disc-${d._i}"><td class="mono">${shortDate(d.filed_date)}</td><td class="cellh"><b>${esc(d.filer||'—')}</b>${d.signals?`<div style="margin-top:4px"><span class="tag plain">${esc(d.signals)}</span></div>`:''}</td>
+  const rowFn=d=>`<tr id="hit-disc-${d._i}"><td class="mono">${shortDate(d.filed_date)}</td><td class="cellh"><b>${esc(d.filer||'—')}</b>${d.signals?`<div class="tagwrap">${[...new Set(String(d.signals).split(';').map(s=>s.trim()).filter(Boolean))].map(s=>`<span class="tag plain">${esc(s.replace('|',' · '))}</span>`).join('')}</div>`:''}</td>
     <td><span class="tag plain mono">${esc(d.form||'—')}</span></td><td>${dash(d.region)}</td><td>${dash(d.deal_type)}</td><td>${confTag(d.confidence)}</td>
     <td>${dash(d.relevance)}${d.evidence?`<div class="qev">${esc(d.evidence)}</div>`:''}</td><td>${extLink(d.url)}</td></tr>`;
   return streamHero(s,rows.length)+renderTable('tblDisc',cols,rows,rowFn,'filed_date');
