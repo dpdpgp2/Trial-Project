@@ -143,6 +143,13 @@ tr.flash>td{animation:flashbg 2.1s ease-out}
 /* tags & chips */
 .tag{font-size:11px;font-weight:600;border-radius:6px;padding:2px 8px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
 .tagwrap{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.fbgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:6px 28px;margin-bottom:4px}
+.fbrow{display:flex;align-items:center;gap:8px;font-size:12px}
+.fbl{width:132px;color:var(--ink-2);flex:none}
+.fbbar{flex:1;height:6px;background:var(--bg);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.fbbar div{height:100%;background:var(--navy);border-radius:2px}
+.fbv{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink);width:46px;text-align:right;flex:none}
+.fbm{color:var(--ink-3)}
 .tag.p1{background:var(--sharp-bg);color:var(--sharp)}.tag.p2{background:var(--tact-bg);color:var(--tact)}.tag.p3{background:var(--strat-bg);color:var(--strat)}
 .tag.strong{background:var(--pos-bg);color:var(--pos)}.tag.moderate{background:var(--tact-bg);color:var(--tact)}.tag.weak{background:var(--bg);color:var(--ink-3)}
 .tag.geo{background:#F7EDEA;color:var(--navy)}.tag.plain{background:var(--bg);color:var(--ink-2)}
@@ -447,12 +454,25 @@ function viewStream(key){
 
 /* ---------- PROSPECTS ---------- */
 function priRank(p){const m=/^P([123])/.exec(p||'');return m?+m[1]:9;}
+const FLBL={'trigger strength':'Trigger strength','tag fit':'TAG fit','buyer access':'Buyer access','cross border':'Cross-border motion','policy exposure':'Policy exposure','deal size':'Deal size','timing':'Timing','source confidence':'Source quality'};
+function fbRows(s){
+  const m=[...String(s).matchAll(/([a-z ]+?)\s+([\d.]+)×([\d.]+)→(\d+)/g)];
+  if(!m.length)return `<div class="mono" style="font-size:11.5px;color:var(--ink-2);line-height:1.7">${esc(s)}</div>`;
+  return '<div class="fbgrid">'+m.map(x=>{
+    const max=Math.round(+x[3]*100),pts=+x[4],lbl=FLBL[x[1].trim()]||x[1].trim();
+    return `<div class="fbrow"><span class="fbl">${esc(lbl)}</span><div class="fbbar"><div style="width:${max?Math.min(100,pts/max*100):0}%"></div></div><span class="fbv">${pts}<span class="fbm">/${max}</span></span></div>`;
+  }).join('')+'</div>';
+}
 function prospectCard(p,i){
   const reg=DATA.evidence_register||{};
   const evd=(p.evidence_ids||[]).map(id=>({id,r:reg[id]})).filter(x=>x.r);
   const ai=p.ai_draft||{};
-  const aiFields=[['pain_point','Pain point'],['tag_wedge','TAG wedge'],['public_buyer','Public buyer + role'],['intro_path','Intro path'],['next_action','Next action']]
-    .filter(([k])=>ai[k]).map(([k,l])=>`<div class="aicell"><div class="al">${l} <span class="aichip">AI draft</span></div>${esc(ai[k])}</div>`).join('');
+  const aiFields=[
+    ['pain_point','Their likely pain point','The India-side problem the trigger implies this company is facing'],
+    ['tag_wedge','Where TAG fits in','Which TAG service line this opens: market entry, government & regulatory, state land + power coordination, or partnerships'],
+    ['public_buyer','Government stakeholder to know','The Indian public-sector body or official who allocates, approves or regulates what this company needs'],
+    ['intro_path','Suggested route to the door','A first step for reaching the company, based on the evidence in this run']]
+    .filter(([k])=>ai[k]).map(([k,l,tip])=>`<div class="aicell"><div class="al" title="${tip}">${l} <span class="aichip">AI draft</span></div>${esc(ai[k])}</div>`).join('');
   const chips=[
     p.bd_priority?`<span class="tag ${priCls(p.bd_priority)}">${esc(p.bd_priority)}</span>`:'',
     p.signal_band?bandTag(p.signal_band):'',
@@ -482,7 +502,7 @@ function prospectCard(p,i){
       <div class="fspace"></div>
       <button class="fbtn" onclick="toggleEl('evid-${i}');document.getElementById('evid-${i}').classList.toggle('open')" style="border:1px solid var(--line-2)"><i class="ti ti-file-search"></i>Evidence${aiFields?' & AI draft':''} (${evd.length})</button>
     </div>
-    <div class="evid" id="evid-${i}" style="display:none">${p.factor_breakdown?`<div class="et">BD score breakdown — factor × weight → points</div><div class="mono" style="font-size:11.5px;color:var(--ink-2);line-height:1.7">${esc(p.factor_breakdown)}</div>`:''}${aiFields?`<div class="et">AI-drafted outreach angles</div><div class="aigrid">${aiFields}</div>`:''}<div class="et">Evidence register — ${evd.length} item${evd.length===1?'':'s'}</div>${evList||emptyState('No register entries linked.')}</div></div>`;
+    <div class="evid" id="evid-${i}" style="display:none">${p.factor_breakdown?`<div class="et">What's driving the BD score — points earned / points possible</div>${fbRows(p.factor_breakdown)}`:''}${aiFields?`<div class="et">AI-drafted outreach angles</div><div class="aigrid">${aiFields}</div>`:''}<div class="et">Evidence register — ${evd.length} item${evd.length===1?'':'s'}</div>${evList||emptyState('No register entries linked.')}</div></div>`;
 }
 function viewProspects(){
   const P=(DATA.prospects||[]).map((p,x)=>Object.assign({_x:x},p)).sort((a,b)=>priRank(a.bd_priority)-priRank(b.bd_priority)||(b.signal_score||0)-(a.signal_score||0));

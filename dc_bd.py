@@ -31,11 +31,12 @@ _BD_SYS = (
     "You are a TAG (The Asia Group) business-development strategist. For each company you get a "
     "validated Trigger, India stage, and evidence snippets FROM THE SHEET ONLY. Draft five short "
     "fields, grounded ONLY in that data — no outside facts, no invented names or numbers:\n"
-    "pain_point (the India challenge the trigger implies), tag_wedge (TAG's specific service: "
+    "pain_point (the India challenge the trigger implies — state the problem, then ' — ' and the "
+    "specific evidence line that supports it; <= 28 words), tag_wedge (TAG's specific service: "
     "market-entry / government & regulatory / state land+power coordination / partnerships), "
     "public_buyer (the Indian public/government stakeholder + role, ONLY if implied by the data, "
     "else empty), intro_path (how TAG reaches them; generic if unknown), next_action (one concrete "
-    "step). Each field <= 14 words.\n"
+    "step). Each field except pain_point <= 14 words.\n"
     "tag_wedge MUST match the India stage: established/scaling => expansion / government-affairs / "
     "partnership (NEVER 'market-entry'); announced or no-known-presence => market-entry.\n"
     "Output ONLY a JSON array: "
@@ -279,7 +280,7 @@ def ai_draft(rows, evidence_by_company):
     for r in rows:
         co = r["Company"]
         ev = evidence_by_company.get(co, [])
-        h = hashlib.sha1(("|".join([r["Trigger"], r["India stage"]] + ev)).encode("utf-8")).hexdigest()[:12]
+        h = hashlib.sha1(("|".join(["v2", r["Trigger"], r["India stage"]] + ev)).encode("utf-8")).hexdigest()[:12]  # v2 busts cache for richer pain_point prompt
         r["_h"] = h
         if (cache.get(co) or {}).get("h") != h:
             todo.append((co, r["Trigger"], r["India stage"], ev, h))
