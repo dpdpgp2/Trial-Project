@@ -1,5 +1,14 @@
 [
  {
+  "id": "q-2",
+  "q": "Khazna - Which state would they enter India with the CPP investment? any particular policy they'd like in any state?",
+  "asked_at": "2026-07-17T10:19:37Z",
+  "a": "Khazna is a GCC operator with no direct India signal; it has no India presence or expansion plans in the data, so no state or policy can be identified for CPP investment.",
+  "answered_at": "2026-07-17T10:27:43Z",
+  "evidence_ids": [],
+  "status": "answered"
+ },
+ {
   "id": "q-1",
   "q": "Crtls - Which state would they enter India with the CPP investment? any particular policy they'd like in any state?",
   "asked_at": "2026-07-17T09:11:29Z",
