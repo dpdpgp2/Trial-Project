@@ -264,13 +264,20 @@ def main():
     except Exception as e:
         print(f"  [bd] non-fatal error: {e}")
 
-    computed, ai_text = {}, None
+    computed, tri, qa = {}, None, []
     try:
         computed = dc_dashboard.compute(tabs)
         print(f"  Dashboard -> {dc_dashboard.write(sheet, computed, register)} rows")
-        ai_text = dc_ai.summarize(sheet, tabs, computed, register)
+        tri = dc_ai.triangulate(sheet, tabs, computed, register)
     except Exception as e:
         print(f"  [dashboard/ai] non-fatal error: {e}")
+
+    # Ask-the-Analyst: answer queued dashboard questions (GitHub Issues queue).
+    try:
+        import dc_qa
+        qa = dc_qa.run(tabs, computed, register)
+    except Exception as e:
+        print(f"  [qa] non-fatal error: {e}")
 
     # M6c: State Targeting tab (clear+rebuild; humans read, bank is the truth).
     try:
@@ -286,7 +293,7 @@ def main():
         health = {**h2, **h3, **hr, **hj}
         data = dc_export.build(tabs, computed or {"movers": ranked}, register,
                                pipe=pipe, gcc=gcc, md_rows=md_rows,
-                               ai_summary=ai_text, health=health)
+                               triangulation=tri, qa=qa, health=health)
         dc_export.write(data)
     except Exception as e:
         print(f"  [export] non-fatal error: {e}")

@@ -21,7 +21,7 @@ from datetime import datetime, timezone
 
 import dc_config as dc
 
-SCHEMA_VERSION = "1.0"
+SCHEMA_VERSION = "1.1"
 EXPORT_PATH = os.path.join(os.path.dirname(__file__), "dashboard", "data.json")
 
 # Caps (keep data.json < ~3 MB)
@@ -31,7 +31,7 @@ CAP_EVENTS, CAP_EVIDENCE, CAP_QUOTE_CHARS = 50, 600, 300
 CONTRACT_KEYS = ["schema_version", "sector", "generated_at", "scoring_version",
                  "kpis", "emphasis", "heatmaps", "prospects", "gcc_watch",
                  "md_view", "events", "policy", "disclosures", "osint",
-                 "evidence_register", "ai_summary", "health"]
+                 "evidence_register", "triangulation", "qa", "states", "health"]
 
 # Frozen writer headers (append-only discipline). A new column is legal ONLY as an
 # append: update the frozen list in the same PR. Insert/rename fails _selfcheck.
@@ -96,7 +96,7 @@ def _tier(source, url):
 
 # --------------------------------------------------------------------------- build
 def build(tabs, computed, register, pipe=None, gcc=None, md_rows=None,
-          ai_summary=None, health=None):
+          triangulation=None, qa=None, health=None):
     """Pure function over pipeline in-memory objects -> contract dict."""
     ss1 = tabs.get("ss1") or []
     ss2 = tabs.get("ss2") or []
@@ -209,13 +209,21 @@ def build(tabs, computed, register, pipe=None, gcc=None, md_rows=None,
                              reverse=True)[:CAP_SS4]]
 
     # Evidence register: only ids actually referenced by exported objects.
+    # Desk/Q&A citations are PINNED first — a capped register must never drop an id
+    # the UI displays as a citation (validate() fails the export if one is missing).
+    tri = triangulation or {}
+    pinned = []
+    for pl in (tri.get("top_plays") or []) + (tri.get("watchlist") or []):
+        pinned += [i for i in (pl.get("evidence_ids") or []) if i not in pinned]
+    for e in (qa or []):
+        pinned += [i for i in (e.get("evidence_ids") or []) if i not in pinned]
     wanted = set()
     for p in prospects:
         wanted.update(p["evidence_ids"])
     for g in events:
         wanted.update(a["id"] for a in g["articles"] if a.get("id"))
     ev_reg = {}
-    for eid in list(wanted)[:CAP_EVIDENCE]:
+    for eid in (pinned + [i for i in wanted if i not in pinned])[:CAP_EVIDENCE]:
         r = (register or {}).get(eid)
         if not r:
             continue
@@ -272,9 +280,9 @@ def build(tabs, computed, register, pipe=None, gcc=None, md_rows=None,
         "disclosures": disclosures,
         "osint": osint,
         "evidence_register": ev_reg,
-        "ai_summary": {"status": "ok" if ai_summary else "absent",
-                       "generated": _now() if ai_summary else None,
-                       "text": ai_summary or None},
+        "triangulation": tri or {"status": "unavailable", "generated_at": None,
+                                 "window_days_used": None, "top_plays": [], "watchlist": []},
+        "qa": (qa or [])[:20],
         "health": {"feeds": feeds},
         "states": _states_payload(tabs),
     }
@@ -310,6 +318,28 @@ def validate(data):
         if not p.get("company"):
             problems.append("prospect without company")
             break
+    tri = data.get("triangulation")
+    if not isinstance(tri, dict):
+        problems.append("triangulation not a dict")
+    else:
+        if len(tri.get("top_plays") or []) > 3:
+            problems.append("triangulation over 3 plays")
+        if len(tri.get("watchlist") or []) > 4:
+            problems.append("triangulation over 4 watchlist")
+        for pl in (tri.get("top_plays") or []) + (tri.get("watchlist") or []):
+            for eid in pl.get("evidence_ids") or []:
+                if eid not in (data.get("evidence_register") or {}):
+                    problems.append(f"triangulation cites unexported evidence {eid}")
+    qa = data.get("qa")
+    if not isinstance(qa, list) or len(qa) > 20:
+        problems.append("qa missing/over cap")
+    else:
+        for e in qa:
+            if len(e.get("q") or "") > 300:
+                problems.append("qa question over 300 chars")
+            for eid in e.get("evidence_ids") or []:
+                if eid not in (data.get("evidence_register") or {}):
+                    problems.append(f"qa cites unexported evidence {eid}")
     blob = json.dumps(data, ensure_ascii=False)
     if len(blob) > 3_500_000:
         problems.append(f"data.json too large ({len(blob)} bytes)")
@@ -404,10 +434,29 @@ def _fixture_bundle():
 
 def _selfcheck():
     tabs, computed, register, pipe, gcc, md, health = _fixture_bundle()
+    fixture_tri = {"status": "ok", "generated_at": "2026-07-17 05:00 UTC", "window_days_used": 2,
+                   "top_plays": [{"company": "AirTrunk", "headline": "fixture play",
+                                  "why_now": "news + filing corroborate", "streams": ["news", "filings"],
+                                  "evidence_ids": ["n1"], "state_hook": "no state match yet — site-selection is the opening",
+                                  "freshest_signal": "2026-07-06", "act_by": "2026-08-05",
+                                  "expired": False, "confidence": "med"}],
+                   "watchlist": [{"company": "Khazna", "note": "GCC-only; watch for an India signal",
+                                  "evidence_ids": []}]}
+    fixture_qa = [{"id": "q-1", "q": "Which operator has the freshest India signal?",
+                   "asked_at": "2026-07-16T10:00:00Z", "status": "answered",
+                   "a": "AirTrunk [n1].", "answered_at": "2026-07-17T05:00:00Z",
+                   "evidence_ids": ["n1"]}]
     data = build(tabs, computed, register, pipe, gcc, md,
-                 ai_summary="EXECUTIVE READ\nfixture", health=health)
+                 triangulation=fixture_tri, qa=fixture_qa, health=health)
     probs = validate(data)
     assert not probs, probs
+    assert data["triangulation"]["top_plays"][0]["evidence_ids"] == ["n1"]
+    assert "n1" in data["evidence_register"]          # pinned citation resolvable
+    assert data["qa"][0]["evidence_ids"] == ["n1"]
+    # a play citing an unexported id must fail validation
+    bad_tri = json.loads(json.dumps(data))
+    bad_tri["triangulation"]["top_plays"][0]["evidence_ids"] = ["ghost-id"]
+    assert any("unexported evidence" in x for x in validate(bad_tri))
     assert not check_headers(), check_headers()
     p = data["prospects"][0]
     assert p["company"] == "AirTrunk" and p["signal_band"] == "Moderate", p

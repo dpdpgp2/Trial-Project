@@ -214,7 +214,7 @@ tr.flash>td{animation:flashbg 2.1s ease-out}
     <a class="nlink" data-view="prospects"><i class="ti ti-target"></i><span>Prospects</span><span class="nbadge" id="pBadge"></span></a>
     <a class="nlink" data-view="md"><i class="ti ti-clipboard-list"></i><span>MD View</span></a>
     <a class="nlink" data-view="gcc"><i class="ti ti-world"></i><span>GCC Watch</span></a>
-    <a class="nlink" data-view="ai"><i class="ti ti-sparkles"></i><span>AI Summary</span></a>
+    <a class="nlink" data-view="ai"><i class="ti ti-telescope"></i><span>Analyst Desk</span></a>
     <a class="nlink" data-view="health"><i class="ti ti-heart-rate-monitor"></i><span>Feed health</span></a>
     <div class="nsec">Sectors</div>
     <a class="nlink" data-sector="dc"><i class="ti ti-server-2"></i><span>Data Centres</span><span class="ndot">live</span></a>
@@ -532,15 +532,67 @@ function viewGCC(){
   <p class="psub">GCC-based operators with no India signal yet — watched for the moment they turn toward the India corridor.</p>
   ${rows.length?renderTable('tblGCC',cols,rows,rowFn,'latest_signal'):`<div class="panel">${emptyState('No GCC watch entries in this run.')}</div>`}`;
 }
-function viewAI(){
-  const a=DATA.ai_summary||{};
-  const head=`<div class="eyebrow">Machine-drafted brief</div><div class="phead"><h1>AI Summary</h1></div>`;
-  if(!a.text)return head+`<div class="panel">${emptyState('No AI summary was generated for this run.')}</div>`;
-  return head+`<div class="aipanel"><div class="aimeta">
-      <span class="aichip">AI draft</span>
-      <span class="fmeta"><i class="ti ti-circle-check"></i>status <b>${esc(a.status||'—')}</b></span>
-      <span class="fmeta"><i class="ti ti-clock"></i>generated <b>${esc(a.generated||'—')}</b></span></div>
-    <pre>${esc(a.text)}</pre></div>`;
+function playCard(p,i){
+  const reg=DATA.evidence_register||{};
+  const evd=(p.evidence_ids||[]).map(id=>({id,r:reg[id]})).filter(x=>x.r);
+  const dl=p.act_by?Math.ceil((new Date(p.act_by+'T00:00:00Z')-Date.now())/86400000):null;
+  const abChip=p.act_by?(dl<0?`<span class="tag plain">expired ${esc(shortDate(p.act_by))}</span>`
+    :`<span class="tag ${dl<7?'p1':dl<15?'p2':'p3'}">act by ${esc(shortDate(p.act_by))} · ${dl}d left</span>`):'';
+  const streams=(p.streams||[]).map(s=>`<span class="tag plain">${esc(s)}</span>`).join('');
+  const evList=evd.map(x=>`<div class="cart"><div class="cs">${esc(x.r.publisher||'—')}</div><div class="ch" title="${esc(x.r.headline)}">${titleLink(x.r.headline,x.r.url)}</div><div class="cd">${shortDate(x.r.date)}</div>${extLink(x.r.url)||'<span style="width:16px"></span>'}</div>`).join('');
+  return `<div class="prospect ${dl!=null&&dl>=0?'pri1':''}"><div class="ptop"><div class="prank">${i+1}</div><div class="pmain">
+    <div class="pco"><h3>${esc(p.company)}</h3>${streams}${confTag(p.confidence)}${abChip}</div>
+    <div class="ptrigger"><span class="tk"><i class="ti ti-target-arrow"></i>Play</span>${esc(p.headline)}</div>
+    <div class="pthesis"><b>Why now:</b> ${esc(p.why_now)}</div>
+    <div class="pthesis"><b>State hook:</b> ${esc(p.state_hook||'—')}</div></div></div>
+    <div class="pfoot">
+      <span class="fmeta"><i class="ti ti-clock"></i>freshest signal ${shortDate(p.freshest_signal)}</span>
+      <div class="fspace"></div>
+      <button class="fbtn" onclick="toggleEl('tri-ev-${i}');document.getElementById('tri-ev-${i}').classList.toggle('open')" style="border:1px solid var(--line-2)"><i class="ti ti-file-search"></i>Cited evidence (${evd.length})</button>
+    </div>
+    <div class="evid" id="tri-ev-${i}" style="display:none"><div class="et">Cited evidence — ${evd.length} item${evd.length===1?'':'s'}</div>${evList||emptyState('Citations not in this export.')}</div></div>`;
+}
+function qaRow(e){
+  const st=e.status==='answered'?`<span style="color:var(--ink-3)">answered ${shortDate(e.answered_at)}</span>`
+    :e.status==='rejected'?'<span class="tag lo">rejected by sanitation</span>'
+    :'<span class="tag md">queued — answers on next run</span>';
+  return `<div class="brow"><div class="bled" style="background:var(--osint)"></div><div class="bmain">
+    <div class="bh">${esc(e.q)}</div><div class="bm">${e.a?esc(e.a)+' ':''}${st}</div></div></div>`;
+}
+function askQ(){
+  const q=document.getElementById('qaQ'),p=document.getElementById('qaP'),m=document.getElementById('qaMsg');
+  m.textContent='Sending…';
+  fetch('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q.value,password:p.value})})
+    .then(async r=>{const d=await r.json().catch(()=>({}));
+      if(r.ok){m.textContent=d.status==='already queued'?'That question is already queued.':'Queued — the answer arrives after the next pipeline run.';
+        document.getElementById('qaList').insertAdjacentHTML('afterbegin',qaRow({q:q.value.trim(),status:'pending'}));q.value='';}
+      else m.textContent=d.error||('Error '+r.status);})
+    .catch(()=>{m.textContent='Network error — try again.'});
+}
+function viewDesk(){
+  const t=DATA.triangulation||{},qa=DATA.qa||[];
+  let html=`<div class="eyebrow">LLM triangulation across all streams + the state bank</div>
+  <div class="phead"><h1>Analyst Desk</h1></div>
+  <p class="psub">Each play is corroborated across independent streams and triggered within the last ${esc(String(t.window_days_used??'—'))} day(s).
+  Golden rule: a strong signal is only worth acting on within one month — every play carries its act-by date.
+  ${t.status==='cached'?'<span class="tag md">showing last good run</span> ':''}<span style="color:var(--ink-3)">generated ${esc(t.generated_at||'—')}</span></p>`;
+  const plays=(t.top_plays||[]).map(playCard).join('');
+  html+=plays||`<div class="panel">${emptyState('No cross-corroborated fresh plays — the Analyst Desk populates on the next pipeline run.')}</div>`;
+  if((t.watchlist||[]).length){
+    html+=`<div class="shead"><h2><i class="ti ti-eye"></i>Watchlist<span class="sx">not yet actionable — what would trigger a move</span></h2></div><div class="panel">`
+      +t.watchlist.map(w=>`<div class="brow"><div class="bled" style="background:var(--tact)"></div><div class="bmain"><div class="bh">${esc(w.company)}</div><div class="bm">${esc(w.note)}</div></div></div>`).join('')+`</div>`;
+  }
+  html+=`<div class="shead"><h2><i class="ti ti-message-question"></i>Ask the analyst<span class="sx">answered from sheet data on the next pipeline run</span></h2></div>
+  <div class="panel">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+      <input id="qaQ" maxlength="300" placeholder="Ask about this run's data… (10–300 chars)" style="flex:2;min-width:220px;padding:9px 12px;border:1px solid var(--line-2);border-radius:8px;font:inherit;font-size:13px">
+      <input id="qaP" type="password" placeholder="Password" style="width:120px;padding:9px 12px;border:1px solid var(--line-2);border-radius:8px;font:inherit;font-size:13px">
+      <button class="fbtn" style="border:1px solid var(--line-2)" onclick="askQ()"><i class="ti ti-send"></i>Ask</button>
+    </div>
+    <div id="qaMsg" style="font-size:12px;color:var(--ink-3);margin-bottom:10px">Questions and answers are published on this public dashboard — do not submit confidential information.</div>
+    <div id="qaList">${qa.map(qaRow).join('')||emptyState('No questions yet — be the first.')}</div>
+  </div>`;
+  return html;
 }
 function viewHealth(){
   const feeds=(DATA.health&&DATA.health.feeds)||{};
@@ -596,7 +648,7 @@ function go(view){
   else if(view==='prospects'){crumb([{t:'Prospects'}]);show(viewProspects());}
   else if(view==='md'){crumb([{t:'MD View'}]);show(viewMD());}
   else if(view==='gcc'){crumb([{t:'GCC Watch'}]);show(viewGCC());}
-  else if(view==='ai'){crumb([{t:'AI Summary'}]);show(viewAI());}
+  else if(view==='ai'){crumb([{t:'Analyst Desk'}]);show(viewDesk());}
   else if(view==='health'){crumb([{t:'Feed health'}]);show(viewHealth());}
   else if(view==='states'){crumb([{t:'State Targeting'}]);show(viewStates());}
 }

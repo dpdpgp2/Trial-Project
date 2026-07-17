@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  issues: write      # Ask-the-Analyst queue (dc_qa.py)
 
 concurrency:
   group: dc-pipeline
@@ -45,6 +46,7 @@ jobs:
           ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
           DATA_GOV_IN_API_KEY: ${{ secrets.DATA_GOV_IN_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
           ALPHAVANTAGE_API_KEY: ${{ secrets.ALPHAVANTAGE_API_KEY }}
           HF_HUB_DISABLE_TELEMETRY: "1"
         run: |
@@ -53,9 +55,11 @@ jobs:
 
       - name: Commit caches
         run: |
-          git config user.name  "dc-engine-bot"
-          git config user.email "dc-engine-bot@users.noreply.github.com"
-          for f in mca_cache.json ai_cache.json dc_trend.json tender_cache.json presence_cache.json bd_cache.json edgar_cache.json classify_cache.json transcript_cache.json dashboard/data.json; do
+          # Author as the repo owner: Vercel (Hobby) only auto-deploys commits from
+          # team members on private repos — bot-authored commits are rejected.
+          git config user.name  "dpdpgp2"
+          git config user.email "301230172+dpdpgp2@users.noreply.github.com"
+          for f in mca_cache.json ai_cache.json dc_trend.json tender_cache.json presence_cache.json bd_cache.json edgar_cache.json classify_cache.json transcript_cache.json qa_log.json dashboard/data.json; do
             [ -f "$f" ] && git add "$f"    # tolerate a cache that a run didn't produce
           done
           if git diff --staged --quiet; then
