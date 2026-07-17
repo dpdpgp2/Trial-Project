@@ -552,12 +552,21 @@ function playCard(p,i){
     </div>
     <div class="evid" id="tri-ev-${i}" style="display:none"><div class="et">Cited evidence — ${evd.length} item${evd.length===1?'':'s'}</div>${evList||emptyState('Citations not in this export.')}</div></div>`;
 }
-function qaRow(e){
+function qaRow(e,i){
+  const reg=DATA.evidence_register||{};
+  const evd=(e.evidence_ids||[]).map(id=>({id,r:reg[id]})).filter(x=>x.r);
   const st=e.status==='answered'?`<span style="color:var(--ink-3)">answered ${shortDate(e.answered_at)}</span>`
     :e.status==='rejected'?'<span class="tag lo">rejected by sanitation</span>'
     :'<span class="tag md">queued — answers on next run</span>';
-  return `<div class="brow"><div class="bled" style="background:var(--osint)"></div><div class="bmain">
-    <div class="bh">${esc(e.q)}</div><div class="bm">${e.a?esc(e.a)+' ':''}${st}</div></div></div>`;
+  const evList=evd.map(x=>`<div class="cart"><div class="cs">${esc(x.r.publisher||'—')}</div><div class="ch" title="${esc(x.r.headline)}">${titleLink(x.r.headline,x.r.url)}</div><div class="cd">${shortDate(x.r.date)}</div>${extLink(x.r.url)||'<span style="width:16px"></span>'}</div>`).join('');
+  const foot=e.status==='answered'?`<div class="pfoot"><span class="fmeta">${st}</span><div class="fspace"></div>
+    <button class="fbtn" onclick="toggleEl('qa-ev-${i}');document.getElementById('qa-ev-${i}').classList.toggle('open')" style="border:1px solid var(--line-2)"><i class="ti ti-file-search"></i>Cited evidence (${evd.length})</button></div>
+    <div class="evid" id="qa-ev-${i}"><div class="et">Cited evidence — ${evd.length} item${evd.length===1?'':'s'}</div>${evList||emptyState('No evidence cited for this answer.')}</div>`
+    :`<div class="pfoot"><span class="fmeta">${st}</span></div>`;
+  return `<div class="prospect" id="qa-row-${i}"><div class="ptop"><div class="pmain">
+    <div class="pco"><h3 style="font-size:14px">${esc(e.q)}</h3></div>
+    ${e.a?`<div class="pthesis">${esc(e.a)}</div>`:''}
+    </div></div>${foot}</div>`;
 }
 function askQ(){
   const q=document.getElementById('qaQ'),p=document.getElementById('qaP'),m=document.getElementById('qaMsg');
@@ -565,7 +574,7 @@ function askQ(){
   fetch('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q.value,password:p.value})})
     .then(async r=>{const d=await r.json().catch(()=>({}));
       if(r.ok){m.textContent=d.status==='already queued'?'That question is already queued.':'Queued — the answer arrives after the next pipeline run.';
-        document.getElementById('qaList').insertAdjacentHTML('afterbegin',qaRow({q:q.value.trim(),status:'pending'}));q.value='';}
+        document.getElementById('qaList').insertAdjacentHTML('afterbegin',qaRow({q:q.value.trim(),status:'pending'},'new'));q.value='';}
       else m.textContent=d.error||('Error '+r.status);})
     .catch(()=>{m.textContent='Network error — try again.'});
 }
@@ -590,7 +599,7 @@ function viewDesk(){
       <button class="fbtn" style="border:1px solid var(--line-2)" onclick="askQ()"><i class="ti ti-send"></i>Ask</button>
     </div>
     <div id="qaMsg" style="font-size:12px;color:var(--ink-3);margin-bottom:10px">Questions and answers are published on this public dashboard — do not submit confidential information.</div>
-    <div id="qaList">${qa.map(qaRow).join('')||emptyState('No questions yet — be the first.')}</div>
+    <div id="qaList">${qa.map((e,i)=>qaRow(e,i)).join('')||emptyState('No questions yet — be the first.')}</div>
   </div>`;
   return html;
 }
@@ -680,8 +689,9 @@ function buildIndex(){
   (DATA.events||[]).forEach((e,i)=>add('News',e.headline,[e.geo,e.layer].filter(Boolean).join(' · '),[e.headline,e.geo,e.layer],'hit-news-'+i,()=>openStream('news')));
   (DATA.policy||[]).forEach((p,i)=>add('Policy',p.title,[p.geo,p.policy_class||p.type].filter(Boolean).join(' · '),[p.title,p.geo,p.source,p.policy_class],'hit-policy-'+i,()=>openStream('policy')));
   (DATA.osint||[]).forEach((o,i)=>add('Hiring / OSINT',o.actor||o.signal_type,[o.signal_type,o.geo].filter(Boolean).join(' · '),[o.actor,o.excerpt,o.signal_type,o.geo],'hit-osint-'+i,()=>openStream('osint')));
+  (DATA.qa||[]).forEach((e,i)=>add('Q&A',e.q,e.status,[e.q,e.a],'qa-row-'+i,()=>go('ai')));
 }
-const SGROUPS=[['Prospects','--talent'],['Disclosures','--disc'],['News','--news'],['Policy','--policy'],['Hiring / OSINT','--osint']];
+const SGROUPS=[['Prospects','--talent'],['Disclosures','--disc'],['News','--news'],['Policy','--policy'],['Hiring / OSINT','--osint'],['Q&A','--capital']];
 function runSearch(q){
   const drop=document.getElementById('sdrop');
   q=(q||'').trim().toLowerCase();

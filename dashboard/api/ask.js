@@ -3,7 +3,7 @@
 // Issues read/write ONLY), GITHUB_REPO ("owner/repo").
 // The pipeline (dc_qa.py) answers the oldest 5 open questions each run and closes them.
 const LABEL = 'analyst-question';
-const MAX_OPEN = 10;
+const MAX_OPEN = 20;
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
   if (!list.ok) return res.status(503).json({ error: 'queue unavailable' });
   const open = await list.json();
   if (open.length >= MAX_OPEN)
-    return res.status(429).json({ error: 'queue full — try again after the next pipeline run' });
+    return res.status(429).json({ error: 'Cannot accept any more questions at this time — queue is full.' });
   const dupe = open.some(i => {
     try { return JSON.parse(i.body.match(/\{[\s\S]*\}/)[0]).q === q; } catch { return false; }
   });

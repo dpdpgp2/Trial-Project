@@ -16,7 +16,7 @@ import dc_ai
 
 LOG_PATH = os.path.join(os.path.dirname(__file__), "qa_log.json")
 LABEL = "analyst-question"
-MAX_PER_RUN, MAX_Q_CHARS, MIN_Q_CHARS, MAX_LOG = 5, 300, 10, 20
+MAX_PER_RUN, MAX_Q_CHARS, MIN_Q_CHARS, MAX_LOG = 5, 300, 10, 200
 
 
 def _gh(method, path, token, body=None):

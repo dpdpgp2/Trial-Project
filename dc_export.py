@@ -27,6 +27,7 @@ EXPORT_PATH = os.path.join(os.path.dirname(__file__), "dashboard", "data.json")
 # Caps (keep data.json < ~3 MB)
 CAP_SS1, CAP_SS2, CAP_SS3, CAP_SS4 = 200, 150, 100, 150
 CAP_EVENTS, CAP_EVIDENCE, CAP_QUOTE_CHARS = 50, 600, 300
+CAP_QA = 200
 
 CONTRACT_KEYS = ["schema_version", "sector", "generated_at", "scoring_version",
                  "kpis", "emphasis", "heatmaps", "prospects", "gcc_watch",
@@ -282,7 +283,7 @@ def build(tabs, computed, register, pipe=None, gcc=None, md_rows=None,
         "evidence_register": ev_reg,
         "triangulation": tri or {"status": "unavailable", "generated_at": None,
                                  "window_days_used": None, "top_plays": [], "watchlist": []},
-        "qa": (qa or [])[:20],
+        "qa": (qa or [])[:CAP_QA],
         "health": {"feeds": feeds},
         "states": _states_payload(tabs),
     }
@@ -331,7 +332,7 @@ def validate(data):
                 if eid not in (data.get("evidence_register") or {}):
                     problems.append(f"triangulation cites unexported evidence {eid}")
     qa = data.get("qa")
-    if not isinstance(qa, list) or len(qa) > 20:
+    if not isinstance(qa, list) or len(qa) > CAP_QA:
         problems.append("qa missing/over cap")
     else:
         for e in qa:

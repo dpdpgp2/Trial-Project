@@ -80,11 +80,12 @@ QA_SYSTEM = (
     "old\" is secondary supporting context only; \"older filing\" should only be mentioned in "
     "passing, phrased as past-tense background (e.g. \"in [month] they said...\"), never as the "
     "main point.\n"
-    "Answers: maximum 4 sentences, and must include at least one concrete fact (amount, date, "
-    "partner name, or state) pulled from the DATA, not a paraphrase of general policy. Cite "
-    "support inline — evidence ids in [brackets] when available, otherwise stream + date (e.g. "
-    "\"policy, 2026-07-15\"). Never invent ids, companies, numbers, or dates. evidence_ids in "
-    "the JSON output must list every id you cited inline.\n"
+    "Answers: 4-8 sentences — give a real, evidence-loaded analysis, not a one-line summary. "
+    "Walk through every concrete fact available (amounts, dates, partner names, states, deal "
+    "structure) rather than compressing to the single most obvious one. Cite support inline — "
+    "evidence ids in [brackets] when available, otherwise stream + date (e.g. \"policy, "
+    "2026-07-15\"). Never invent ids, companies, numbers, or dates. evidence_ids in the JSON "
+    "output must list every id you cited inline.\n"
     "Output ONLY JSON, no prose: "
     '{"answers":{"<question id>":{"a":"<answer>","evidence_ids":["<ids from DATA, or empty>"]}}}'
 )
@@ -669,7 +670,7 @@ def answer_questions(key, ctx, pending):
             + "\n".join(json.dumps({"id": p["id"], "q": p["q"]}, ensure_ascii=False)
                          for p in pending))
     try:
-        obj = _json_obj(_chat(key, QA_SYSTEM, user, max_tokens=1000, temperature=0.2))
+        obj = _json_obj(_chat(key, QA_SYSTEM, user, max_tokens=2200, temperature=0.2))
         out = {}
         for qid, v in (obj.get("answers") or {}).items():
             if isinstance(v, str):
