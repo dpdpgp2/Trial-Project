@@ -61,7 +61,7 @@ TRIANGULATE_SYSTEM = (
     '"confidence":"high"|"med"|"low"}}],'
     '"watchlist":[{{"company":"...","note":"<one line: what to watch + what would trigger action>",'
     '"evidence_ids":["..."]}}]}}\n'
-    "top_plays: at most 3. watchlist: 2-4."
+    "top_plays: at most 3. watchlist: 2-4, and NEVER a company already in top_plays."
 )
 
 QA_SYSTEM = (
@@ -550,8 +550,9 @@ def _validate_tri(obj, cands, register, window, tabs, today=None):
             "act_by": act_by.isoformat() if act_by else None,
             "expired": bool(act_by and act_by < today),
             "confidence": conf if conf in ("high", "med", "low") else "med"})
+    played = {p["company"] for p in plays}
     for w in (obj.get("watchlist") or [])[:4]:
-        if not isinstance(w, dict) or w.get("company") not in by_co:
+        if not isinstance(w, dict) or w.get("company") not in by_co or w.get("company") in played:
             continue
         watch.append({"company": w["company"], "note": str(w.get("note") or "")[:300],
                       "evidence_ids": [str(i) for i in (w.get("evidence_ids") or [])
