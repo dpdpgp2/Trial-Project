@@ -678,6 +678,13 @@ def answer_questions(key, ctx, pending):
             if isinstance(v, dict) and v.get("a"):
                 out[qid] = {"a": str(v["a"])[:800],
                             "evidence_ids": [str(i) for i in (v.get("evidence_ids") or [])][:4]}
+        # Model sometimes drops a hard/broad question from its JSON entirely instead of
+        # using the "Out of scope" fallback it was told to — never leave one unanswered
+        # (it would otherwise re-queue forever with no error and no way to tell why).
+        for p in pending:
+            if p["id"] not in out:
+                out[p["id"]] = {"a": "Out of scope — I can only answer from this run's sheet data.",
+                                 "evidence_ids": []}
         return out
     except Exception as e:
         print(f"  [qa-ai] {e}")
