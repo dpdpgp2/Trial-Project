@@ -781,7 +781,7 @@ def _answer_one(key, p, tabs, register, index, known):
         except Exception as e:
             print(f"  [qa-answer] {e}")
             a = {}
-        ans = {"a": str(a.get("a") or OUT_OF_SCOPE)[:800],
+        ans = {"a": str(a.get("a") or OUT_OF_SCOPE)[:3000],   # ~max_tokens=2200; was 800 = mid-sentence cut
                "evidence_ids": _clean_ids(a.get("evidence_ids"), known)[:4]}
         verdict = _judge(key, q, ans["a"])
         passes.append({"attempt": attempt + 1, "ids": list(sel), "answer": ans["a"],
