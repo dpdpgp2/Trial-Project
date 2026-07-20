@@ -92,9 +92,8 @@ def run(tabs, computed, register):
         if pending and key:
             ok, note, _rem = dc_ai.test_connection(key)
             if ok:
-                ctx = dc_ai.compile_context(tabs, computed, register)
                 answers = dc_ai.answer_questions(
-                    key, ctx, [{"id": e["id"], "q": e["q"]} for _, e in pending])
+                    key, tabs, computed, register, [{"id": e["id"], "q": e["q"]} for _, e in pending])
             else:
                 print(f"  [qa] answering skipped ({note})")
 

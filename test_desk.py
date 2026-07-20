@@ -74,4 +74,45 @@ try:
 finally:
     dc_export.CAP_EVIDENCE = orig_cap
 
+# --- Q&A: state resolution, selector validation, multi-pass widen cap, backfill -----
+import dc_state_context
+
+# state detection maps a city/region alias to the state; unrelated text -> nothing
+assert dc_state_context.resolve_states("best DC company for Dholera?") == ["Gujarat"]
+assert dc_state_context.resolve_states("who is the CEO") == []
+assert dc_state_context.wants_gaps("has this been verified?")
+# bible load returns the whole doc incl. §19 when present; else falls back cleanly
+gj = dc_state_context.load_state_context("Gujarat")
+assert gj == "" or "Investment and Business-Development Judgment" in gj, "bible load"
+
+# selector output validation drops hallucinated ids
+assert dc_ai._clean_ids(["n-fresh", "GHOST", "n-fresh"], {"n-fresh", "p-mid"}) == ["n-fresh"]
+
+# multi-pass loop: stub the model so the judge never accepts -> must stop at MAX_PASSES
+QTABS = {"ss1": [{"id": "n-fresh", "title": "T", "summary": "S"}], "ss2": [], "ss3": [], "ss4": []}
+QREG = {"n-fresh": {"company": "A", "date": D(1), "headline": "h"}}
+calls = {"answer": 0}
+def _fake_chat(key, system, user, max_tokens, temperature=0.2, reason=False):
+    if system is dc_ai.RETRIEVE_SYSTEM:
+        return '{"ids":["n-fresh","GHOST"]}'
+    if system is dc_ai.ANSWER_SYSTEM:
+        calls["answer"] += 1
+        return '{"a":"weak draft","evidence_ids":["n-fresh"]}'
+    if system is dc_ai.JUDGE_SYSTEM:
+        return '{"usable":false,"missing":["more evidence"]}'
+    return "{}"
+_real_chat = dc_ai._chat
+try:
+    dc_ai._chat = _fake_chat
+    ans = dc_ai.answer_questions("k", QTABS, {"movers": []}, QREG,
+                                 [{"id": "q-1", "q": "tell me about A in Gujarat"}])
+    assert calls["answer"] == dc_ai.MAX_PASSES, calls           # widened to the cap, not forever
+    assert ans["q-1"]["evidence_ids"] == ["n-fresh"], ans       # ghost dropped, real id kept
+    # a question the model omits entirely still gets a backfilled answer (never re-queues silent)
+    dc_ai._chat = lambda *a, **k: "{}"
+    ans2 = dc_ai.answer_questions("k", QTABS, {"movers": []}, QREG, [{"id": "q-9", "q": "x in Gujarat"}])
+    assert ans2["q-9"]["a"] == dc_ai.OUT_OF_SCOPE, ans2
+finally:
+    dc_ai._chat = _real_chat
+
 print("test_desk: OK")
