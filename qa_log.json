@@ -1,5 +1,14 @@
 [
  {
+  "id": "q-4",
+  "q": "Which company is best suited for Gujarat and why?",
+  "asked_at": "2026-07-20T23:13:41Z",
+  "a": "Reliance Industries (in partnership with Meta) is the company best suited for Gujarat under the current policy because it has announced a 168 MW AI‑enabled built‑to‑suit data centre in Jamnagar, which clears the 150 MW approved IT‑load threshold required for eligibility under the Viksit Gujarat Data Center Policy (2026‑2029). The announcement assigns Reliance end‑to‑end responsibility for design, construction, utility, renewable‑power, network and managed‑service delivery, while Meta will lease the capacity, providing a clear anchor tenant and defined execution roles. Although the site, approvals and physical progress remain unverified at the cut‑off, the project’s scale and sponsor‑claimed integrated renewable power and desalinated‑seawater cooling align with the policy’s green‑energy and",
+  "answered_at": "2026-07-20T23:23:13Z",
+  "evidence_ids": [],
+  "status": "answered"
+ },
+ {
   "id": "q-3",
   "q": "Which is the best data center company TAG should focus on to bring into uttar pradesh? and why?",
   "asked_at": "2026-07-17T15:39:46Z",
