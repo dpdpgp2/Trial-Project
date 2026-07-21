@@ -9,6 +9,7 @@ Flags:
   --no-ml      skip SS2 sentiment (torch-free)
   --no-sheets  fetch + score in memory, print a summary, write nothing
 """
+import os
 import sys
 
 import dc_config as dc
@@ -233,6 +234,8 @@ def main():
 
     # Evidence Register (hash -> readable, clickable record) — feeds descriptive links everywhere.
     register = dc_evidence.build_register(tabs, ranked)
+    if os.environ.get("DC_EVAL_FIXTURE"):   # opt-in: snapshot tabs+register for eval_qa.py (no-op otherwise)
+        import eval_qa; eval_qa.dump_fixture(tabs, register)
     try:
         print(f"  Evidence Register -> {dc_evidence.write_register(sheet, register)} rows")
     except Exception as e:
