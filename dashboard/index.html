@@ -563,7 +563,7 @@ function qaRow(e,i){
     :e.status==='rejected'?'<span class="tag lo">rejected by sanitation</span>'
     :'<span class="tag md">queued — answers on next run</span>';
   const evList=evd.map(x=>`<div class="cart"><div class="cs">${esc(x.r.publisher||'—')}</div><div class="ch" title="${esc(x.r.headline)}">${titleLink(x.r.headline,x.r.url)} <span class="mono" style="color:var(--ink-3)">${esc(x.id)}</span></div><div class="cd">${shortDate(x.r.date)}</div>${extLink(x.r.url)||'<span style="width:16px"></span>'}</div>`).join('')
-    +stCites.map(c=>`<div class="cart"><div class="cs">state context</div><div class="ch">${c.url?titleLink(c.desc,c.url):esc(c.desc||'')} <span class="mono" style="color:var(--ink-3)">${esc(c.id)}</span></div><div class="cd">policy doc</div>${extLink(c.url)||'<span style="width:16px"></span>'}</div>`).join('');
+    +stCites.map(c=>`<div class="cart"><div class="cs">state context</div><div class="ch">${c.url?titleLink(c.desc,c.url):esc(c.desc||'')} <span class="mono" style="color:var(--ink-3)">${esc(c.id)}</span></div><div class="cd">${c.provider?'pre-requisite research confirmed by provider':'policy doc'}</div>${extLink(c.url)||'<span style="width:16px"></span>'}</div>`).join('');
   const foot=e.status==='answered'?`<div class="pfoot"><span class="fmeta">${st}</span><div class="fspace"></div>
     <button class="fbtn" onclick="toggleEl('qa-ev-${i}');document.getElementById('qa-ev-${i}').classList.toggle('open')" style="border:1px solid var(--line-2)"><i class="ti ti-file-search"></i>Cited evidence (${nCit})</button></div>
     <div class="evid" id="qa-ev-${i}" style="display:none"><div class="et">Cited evidence — ${nCit} item${nCit===1?'':'s'}</div>${evList||emptyState('No evidence cited for this answer.')}</div>`

@@ -11,37 +11,44 @@
    {
     "id": "GJ-CORP-2023-001",
     "desc": "STT Ahmedabad DC1 facility factsheet",
-    "url": "https://assets.sttelemediagdc.com/sttgdc/global_en/public/2023-08/STT-Ahmedabad-DC1.pdf"
+    "url": "https://assets.sttelemediagdc.com/sttgdc/global_en/public/2023-08/STT-Ahmedabad-DC1.pdf",
+    "provider": false
    },
    {
     "id": "GJ-PROJ-2015-001",
     "desc": "official GIFT page for STT Ahmedabad DC1",
-    "url": "https://giftgujarat.in/infrastructure/data-centre"
+    "url": "https://giftgujarat.in/infrastructure/data-centre",
+    "provider": false
    },
    {
     "id": "GJ-PROJ-2010-001",
     "desc": "official Gujarat State Data Centre page",
-    "url": "https://dst.gujarat.gov.in/Home/GujaratStateDataCenter"
+    "url": "https://dst.gujarat.gov.in/Home/GujaratStateDataCenter",
+    "provider": false
    },
    {
     "id": "GJ-CORP-2026-003",
     "desc": "Data First Ahmedabad website capture",
-    "url": "https://www.datafirst.in/"
+    "url": "https://www.datafirst.in/",
+    "provider": false
    },
    {
     "id": "GJ-GOV-2026-003",
     "desc": "verified ministerial announcement of the L&T Vyoma MoU",
-    "url": "https://x.com/arjunmodhwadia/status/2024756380423639368"
+    "url": "https://x.com/arjunmodhwadia/status/2024756380423639368",
+    "provider": false
    },
    {
     "id": "GJ-PROJ-2026-003",
     "desc": "Indian Express report quoting the Gujarat feasibility-assessment statement",
-    "url": "https://indianexpress.com/article/cities/ahmedabad/india-ai-impact-summit-2026-lt-vyoma-mou-gujarat-dholera-sir-10543002/"
+    "url": "https://indianexpress.com/article/cities/ahmedabad/india-ai-impact-summit-2026-lt-vyoma-mou-gujarat-dholera-sir-10543002/",
+    "provider": false
    },
    {
     "id": "GJ-POL-2026-001",
     "desc": "official Viksit Gujarat Data Center Policy 2026–2029 booklet; user-authenticated official copy",
-    "url": "https://vainetra.com/wp-content/uploads/2026/07/gujarat-data-centre-policy.pdf"
+    "url": "https://vainetra.com/wp-content/uploads/2026/07/gujarat-data-centre-policy.pdf",
+    "provider": false
    }
   ]
  },

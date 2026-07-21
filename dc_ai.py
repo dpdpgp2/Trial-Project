@@ -765,15 +765,18 @@ _CITE_RE = re.compile(r"\[([A-Z]{2}-[A-Z]+-\d{4}-\d+)")
 
 
 def _state_cites(answer, src_map, url_map=None):
-    """Verified state-context citations in the answer, as [{id,desc,url}] (deduped, <=8).
-    Kept only if the id exists in the bible's §21 source map -> hallucinated cites drop."""
+    """Verified state-context citations in the answer, as [{id,desc,url,provider}] (deduped, <=8).
+    Kept only if the id exists in the bible's §21 source map -> hallucinated cites drop.
+    url_map: id -> {'url','provider'}; provider marks user-supplied sources (no public URL)."""
     url_map = url_map or {}
     seen, out = set(), []
     for m in _CITE_RE.finditer(answer or ""):
         cid = m.group(1)
         if cid in src_map and cid not in seen:
             seen.add(cid)
-            out.append({"id": cid, "desc": src_map[cid], "url": url_map.get(cid, "")})
+            info = url_map.get(cid) or {}
+            out.append({"id": cid, "desc": src_map[cid],
+                        "url": info.get("url", ""), "provider": bool(info.get("provider"))})
     return out[:8]
 
 
