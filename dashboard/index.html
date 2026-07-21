@@ -566,7 +566,7 @@ function qaRow(e,i){
     +stCites.map(c=>`<div class="cart"><div class="cs">state context</div><div class="ch">${esc(c.desc||'')} <span class="mono" style="color:var(--ink-3)">${esc(c.id)}</span></div><div class="cd">policy doc</div><span style="width:16px"></span></div>`).join('');
   const foot=e.status==='answered'?`<div class="pfoot"><span class="fmeta">${st}</span><div class="fspace"></div>
     <button class="fbtn" onclick="toggleEl('qa-ev-${i}');document.getElementById('qa-ev-${i}').classList.toggle('open')" style="border:1px solid var(--line-2)"><i class="ti ti-file-search"></i>Cited evidence (${nCit})</button></div>
-    <div class="evid" id="qa-ev-${i}"><div class="et">Cited evidence — ${nCit} item${nCit===1?'':'s'}</div>${evList||emptyState('No evidence cited for this answer.')}</div>`
+    <div class="evid" id="qa-ev-${i}" style="display:none"><div class="et">Cited evidence — ${nCit} item${nCit===1?'':'s'}</div>${evList||emptyState('No evidence cited for this answer.')}</div>`
     :`<div class="pfoot"><span class="fmeta">${st}</span></div>`;
   return `<div class="prospect" id="qa-row-${i}"><div class="ptop"><div class="pmain">
     <div class="pco"><h3 style="font-size:14px">${esc(e.q)}</h3></div>
