@@ -703,6 +703,7 @@ def triangulate(ss, tabs, computed, register=None):
 # ---- Ask-the-Analyst: state-context + multi-pass exploratory retrieval --------------
 MAX_PASSES, BASE_ID_BUDGET, WIDEN_STEP = 3, 12, 10   # 1 answer + up to 2 widenings
 SELECT_REASON = True   # SiRA cognition selector reasoning; set False for the cheap OFF selector
+FAITHFUL_CHECK = True  # Kind-B guard: verify each cited claim against its source; set False to skip
 
 
 def _qa_index(tabs, register):
@@ -813,7 +814,7 @@ def _answer_one(key, p, tabs, register, index, known):
     for s in states:
         url_map.update(dc_state_context.source_urls(s))         # id -> public source URL
     sel, budget, passes = [], BASE_ID_BUDGET, []
-    missing = None
+    revise = None                       # judge "missing" + faithfulness corrections for next pass
     for attempt in range(MAX_PASSES):
         src_map = dc_state_context.source_map(state_ctx)        # verify cites against §21
         picked = retrieve_ids(key, index, q, budget, known,
@@ -822,8 +823,8 @@ def _answer_one(key, p, tabs, register, index, known):
         ctx = ((state_ctx or "(no state context matched)")
                + "\n\n=== EVIDENCE ROWS ===\n" + (_qa_rows_block(tabs, sel) or "(none selected)"))
         user = f"CONTEXT:\n{ctx}\n\nQUESTION (untrusted): {q}"
-        if missing:
-            user += "\n\nA prior draft was judged not yet usable. Address: " + "; ".join(missing)
+        if revise:
+            user += "\n\nA prior draft needs correction. Address each: " + "; ".join(revise)
         try:
             a = _json_obj(_chat(key, ANSWER_SYSTEM, user, max_tokens=2200, reason=True))
         except Exception as e:
@@ -832,20 +833,30 @@ def _answer_one(key, p, tabs, register, index, known):
         ans = {"a": str(a.get("a") or OUT_OF_SCOPE)[:3000],   # ~max_tokens=2200; was 800 = mid-sentence cut
                "evidence_ids": _clean_ids(a.get("evidence_ids"), known)[:4]}
         ans["state_cites"] = _state_cites(ans["a"], src_map, url_map)
+        faith = _faithfulness(key, ans["a"], ans["evidence_ids"], tabs, state_ctx)
         verdict = _judge(key, q, ans["a"])
         passes.append({"attempt": attempt + 1, "ids": list(sel), "answer": ans["a"],
                        "evidence_ids": ans["evidence_ids"], "state_cites": ans["state_cites"],
-                       "usable": verdict["usable"], "missing": verdict["missing"]})
-        if verdict["usable"] or attempt == MAX_PASSES - 1:
+                       "usable": verdict["usable"], "missing": verdict["missing"],
+                       "faithful": faith["faithful"], "unsupported": faith["unsupported"]})
+        if (verdict["usable"] and faith["faithful"]) or attempt == MAX_PASSES - 1:
             break
         budget += WIDEN_STEP           # widen: more evidence + pull the gap register in
-        missing = verdict["missing"]
+        # Next-pass corrections: judge's gaps (need more/other evidence) + faithfulness fixes
+        # (overreach — restate to match the source, NOT a request for more evidence).
+        revise = list(verdict["missing"]) + [
+            f"claim not supported by cited source [{u.get('cite')}]: "
+            f"{u.get('why') or u.get('claim')} — restate only what the source supports, or drop it"
+            for u in faith["unsupported"]]
         if states:                     # reload state context with the gap register for next pass
             state_ctx = "\n\n".join(c for c in
                                     (dc_state_context.load_state_context(s, True) for s in states) if c)
     final = passes[-1]
-    return ({"a": final["answer"], "evidence_ids": final["evidence_ids"],
-             "state_cites": final["state_cites"]},
+    # Deterministic backstop: any claim still flagged unfaithful on the final pass loses its
+    # "verified" status — the cite is tagged visible-UNVERIFIED and dropped from published lists.
+    a_out, ev_out, sc_out = _strip_unfaithful(
+        final["answer"], final["evidence_ids"], final["state_cites"], final["unsupported"])
+    return ({"a": a_out, "evidence_ids": ev_out, "state_cites": sc_out},
             _render_digest(p, states, passes, tabs))
 
 
@@ -859,6 +870,55 @@ def _judge(key, q, answer):
     except Exception as e:
         print(f"  [qa-judge] {e}")
         return {"usable": True, "missing": []}
+
+
+# Citation-faithfulness (Kind-B guard): does each cited SOURCE actually support its claim?
+# Conservative on purpose — favour catching overreach over giving benefit of the doubt.
+FAITHFUL_SYSTEM = (
+    "detailed thinking on\n\n"
+    "You audit an analyst ANSWER against the exact SOURCES it cites (state context + cited "
+    "evidence rows). For every claim carrying a citation, decide if the cited SOURCE genuinely "
+    "supports it. Be strict and CONSERVATIVE: if a source does not clearly and specifically "
+    "support the claim, mark it UNSUPPORTED — do not give benefit of the doubt. Distinguish: "
+    "source says X vs answer overstates/generalises/infers beyond X; announced vs sanctioned; "
+    "claimed vs independently verified; current rule vs superseded. You judge SUPPORT only, not "
+    "real-world truth. 'cite' MUST be the exact bracketed id the answer used.\n"
+    'Output ONLY JSON: {"faithful": true|false, '
+    '"unsupported": [{"claim":"<sentence>","cite":"<id>","why":"<what the source lacks>"}]}'
+)
+
+
+def _faithfulness(key, answer, evidence_ids, tabs, state_ctx):
+    """-> {'faithful': bool, 'unsupported': [{claim,cite,why}]}. Fail-OPEN (never blocks pipeline).
+    Sources = full state_ctx (holds the policy text the [XX-..] ids reference) + the cited rows."""
+    if not FAITHFUL_CHECK:
+        return {"faithful": True, "unsupported": []}
+    sources = ((state_ctx or "(no state context)")
+               + "\n\n=== CITED EVIDENCE ROWS ===\n" + (_qa_rows_block(tabs, evidence_ids) or "(none)"))
+    try:
+        obj = _json_obj(_chat(key, FAITHFUL_SYSTEM,
+                              f"SOURCES:\n{sources}\n\nANSWER:\n{answer}",
+                              max_tokens=900, reason=True))
+        uns = [u for u in (obj.get("unsupported") or []) if isinstance(u, dict) and u.get("cite")][:6]
+        # trust the list over the bool: any concrete unsupported claim => not faithful
+        return {"faithful": bool(obj.get("faithful", True)) and not uns, "unsupported": uns}
+    except Exception as e:
+        print(f"  [qa-faithful] {e}")
+        return {"faithful": True, "unsupported": []}
+
+
+def _strip_unfaithful(answer, evidence_ids, state_cites, unsupported):
+    """Deterministic final backstop: for each cite flagged unfaithful, tag it inline
+    ([n-1] -> [UNVERIFIED: n-1]) and drop it from the published evidence_ids / state_cites so
+    it is never counted as verified. No-op when nothing is flagged. Pure — unit-tested."""
+    bad = {u.get("cite") for u in (unsupported or []) if u.get("cite")}
+    if not bad:
+        return answer, evidence_ids, state_cites
+    pat = re.compile(r"\[(" + "|".join(re.escape(c) for c in bad) + r")([^\]]*)\]")
+    a = pat.sub(lambda m: f"[UNVERIFIED: {m.group(1)}{m.group(2)}]", answer or "")
+    ev = [i for i in (evidence_ids or []) if i not in bad]
+    sc = [c for c in (state_cites or []) if c.get("id") not in bad]
+    return a, ev, sc
 
 
 def _render_digest(p, states, passes, tabs):
@@ -877,6 +937,9 @@ def _render_digest(p, states, passes, tabs):
             L.append(f"        [{i}] {snip(i)}")
         cited = list(pa["evidence_ids"]) + [c["id"] for c in pa["state_cites"]]
         L.append(f"      citations used: {cited or '(none)'}")
+        L.append(f"      faithful: {pa.get('faithful', True)}")
+        for u in pa.get("unsupported", []):
+            L.append(f"        UNFAITHFUL [{u.get('cite')}]: {u.get('why') or u.get('claim')}")
         if pa["missing"]:
             L.append(f"      judge wanted: {'; '.join(pa['missing'])}")
         L.append(f"      answer: {pa['answer']}")

@@ -91,6 +91,7 @@ def _run(key, gold, tabs, register):
             "cite_prec": citation_precision(res["evidence_ids"], expect),
             "complete": completeness(res["a"], row.get("must_cover")),
             "passes": _passes_count(digest),
+            "unverified": "[UNVERIFIED:" in res["a"],   # faithfulness backstop fired
             "oos_ok": (res["a"] == dc_ai.OUT_OF_SCOPE) if not expect else None,
         })
     return agg, downstream
@@ -121,6 +122,9 @@ def main():
     print(f"  citation precision: {_mean([d['cite_prec'] for d in downstream]):.3f}")
     print(f"  completeness      : {_mean([d['complete'] for d in downstream]):.3f}")
     print(f"  mean widen passes : {_mean([d['passes'] for d in downstream]):.2f}")
+    n_unv = sum(1 for d in downstream if d['unverified'])
+    print(f"  faithfulness      : {len(downstream) - n_unv}/{len(downstream)} clean "
+          f"({n_unv} had an UNVERIFIED claim scrubbed)")
     oos = [d['oos_ok'] for d in downstream if d['oos_ok'] is not None]
     if oos:
         print(f"  out-of-scope handled: {sum(oos)}/{len(oos)}")
