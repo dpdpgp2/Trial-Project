@@ -6,7 +6,37 @@
   "a": "ST Telemedia Global Data Centres already operates a carrier‑neutral facility at GIFT City with verified power licensing and financial‑services demand, giving it a proven foothold despite being below the 150 MW incentive threshold [GJ-CORP-2023-001] [GJ-PROJ-2015-001]. The Gujarat State Data Centre in Gandhinagar provides a steady public‑sector workload and redundant bandwidth, establishing a reliable base load that can anchor colocation or hybrid deployments [GJ-PROJ-2010-001]. Data First claims a Tier‑III colocation campus in Ahmedabad, but without verified capacity or compliance its success remains uncertain [GJ-CORP-2026-003]. Larsen & Toubro’s Vyoma could capture the Dholera‑only 2.5 % capital subsidy and long‑duration power/tariff support if it converts its MoU into sanctioned land, grid and water allocations and clears the 150 MW IT‑load hurdle [GJ-GOV-2026-003] [GJ-PROJ-2026-003] [GJ-POL-2026-001, p.9] [GJ-POL-2026-001, p.13, cl.7.6]. All other firms lack either verified execution or the scale needed to fully exploit the 2026 policy’s incentives.",
   "answered_at": "2026-07-21T08:19:07Z",
   "evidence_ids": [],
-  "status": "answered"
+  "status": "answered",
+  "state_cites": [
+   {
+    "id": "GJ-CORP-2023-001",
+    "desc": "STT Ahmedabad DC1 facility factsheet"
+   },
+   {
+    "id": "GJ-PROJ-2015-001",
+    "desc": "official GIFT page for STT Ahmedabad DC1"
+   },
+   {
+    "id": "GJ-PROJ-2010-001",
+    "desc": "official Gujarat State Data Centre page"
+   },
+   {
+    "id": "GJ-CORP-2026-003",
+    "desc": "Data First Ahmedabad website capture"
+   },
+   {
+    "id": "GJ-GOV-2026-003",
+    "desc": "verified ministerial announcement of the L&T Vyoma MoU"
+   },
+   {
+    "id": "GJ-PROJ-2026-003",
+    "desc": "Indian Express report quoting the Gujarat feasibility-assessment statement"
+   },
+   {
+    "id": "GJ-POL-2026-001",
+    "desc": "official Viksit Gujarat Data Center Policy 2026–2029 booklet; user-authenticated official copy"
+   }
+  ]
  },
  {
   "id": "q-4",
@@ -15,7 +45,8 @@
   "a": "Reliance Industries (in partnership with Meta) is the company best suited for Gujarat under the current policy because it has announced a 168 MW AI‑enabled built‑to‑suit data centre in Jamnagar, which clears the 150 MW approved IT‑load threshold required for eligibility under the Viksit Gujarat Data Center Policy (2026‑2029). The announcement assigns Reliance end‑to‑end responsibility for design, construction, utility, renewable‑power, network and managed‑service delivery, while Meta will lease the capacity, providing a clear anchor tenant and defined execution roles. Although the site, approvals and physical progress remain unverified at the cut‑off, the project’s scale and sponsor‑claimed integrated renewable power and desalinated‑seawater cooling align with the policy’s green‑energy and",
   "answered_at": "2026-07-20T23:23:13Z",
   "evidence_ids": [],
-  "status": "answered"
+  "status": "answered",
+  "state_cites": []
  },
  {
   "id": "q-3",
@@ -24,7 +55,8 @@
   "a": "Out of scope — I can only answer from this run's sheet data.",
   "answered_at": "2026-07-19T10:56:10Z",
   "evidence_ids": [],
-  "status": "answered"
+  "status": "answered",
+  "state_cites": []
  },
  {
   "id": "q-2",
@@ -33,7 +65,8 @@
   "a": "Khazna is a GCC operator with no direct India signal; it has no India presence or expansion plans in the data, so no state or policy can be identified for CPP investment.",
   "answered_at": "2026-07-17T10:27:43Z",
   "evidence_ids": [],
-  "status": "answered"
+  "status": "answered",
+  "state_cites": []
  },
  {
   "id": "q-1",
@@ -42,6 +75,7 @@
   "a": "CtrlS is entering India via Telangana, leveraging the operator-friendly Hyderabad AI/cloud regime with essential-service treatment.",
   "answered_at": "2026-07-17T09:18:46Z",
   "evidence_ids": [],
-  "status": "answered"
+  "status": "answered",
+  "state_cites": []
  }
 ]
