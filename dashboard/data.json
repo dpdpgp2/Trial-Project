@@ -12941,31 +12941,38 @@
    "state_cites": [
     {
      "id": "GJ-CORP-2023-001",
-     "desc": "STT Ahmedabad DC1 facility factsheet"
+     "desc": "STT Ahmedabad DC1 facility factsheet",
+     "url": "https://assets.sttelemediagdc.com/sttgdc/global_en/public/2023-08/STT-Ahmedabad-DC1.pdf"
     },
     {
      "id": "GJ-PROJ-2015-001",
-     "desc": "official GIFT page for STT Ahmedabad DC1"
+     "desc": "official GIFT page for STT Ahmedabad DC1",
+     "url": "https://giftgujarat.in/infrastructure/data-centre"
     },
     {
      "id": "GJ-PROJ-2010-001",
-     "desc": "official Gujarat State Data Centre page"
+     "desc": "official Gujarat State Data Centre page",
+     "url": "https://dst.gujarat.gov.in/Home/GujaratStateDataCenter"
     },
     {
      "id": "GJ-CORP-2026-003",
-     "desc": "Data First Ahmedabad website capture"
+     "desc": "Data First Ahmedabad website capture",
+     "url": "https://www.datafirst.in/"
     },
     {
      "id": "GJ-GOV-2026-003",
-     "desc": "verified ministerial announcement of the L&T Vyoma MoU"
+     "desc": "verified ministerial announcement of the L&T Vyoma MoU",
+     "url": "https://x.com/arjunmodhwadia/status/2024756380423639368"
     },
     {
      "id": "GJ-PROJ-2026-003",
-     "desc": "Indian Express report quoting the Gujarat feasibility-assessment statement"
+     "desc": "Indian Express report quoting the Gujarat feasibility-assessment statement",
+     "url": "https://indianexpress.com/article/cities/ahmedabad/india-ai-impact-summit-2026-lt-vyoma-mou-gujarat-dholera-sir-10543002/"
     },
     {
      "id": "GJ-POL-2026-001",
-     "desc": "official Viksit Gujarat Data Center Policy 2026–2029 booklet; user-authenticated official copy"
+     "desc": "official Viksit Gujarat Data Center Policy 2026–2029 booklet; user-authenticated official copy",
+     "url": "https://vainetra.com/wp-content/uploads/2026/07/gujarat-data-centre-policy.pdf"
     }
    ]
   },

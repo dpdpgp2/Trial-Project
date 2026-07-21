@@ -764,15 +764,16 @@ def retrieve_ids(key, index, question, budget, known):
 _CITE_RE = re.compile(r"\[([A-Z]{2}-[A-Z]+-\d{4}-\d+)")
 
 
-def _state_cites(answer, src_map):
-    """Verified state-context citations in the answer, as [{id,desc}] (deduped, <=8).
+def _state_cites(answer, src_map, url_map=None):
+    """Verified state-context citations in the answer, as [{id,desc,url}] (deduped, <=8).
     Kept only if the id exists in the bible's §21 source map -> hallucinated cites drop."""
+    url_map = url_map or {}
     seen, out = set(), []
     for m in _CITE_RE.finditer(answer or ""):
         cid = m.group(1)
         if cid in src_map and cid not in seen:
             seen.add(cid)
-            out.append({"id": cid, "desc": src_map[cid]})
+            out.append({"id": cid, "desc": src_map[cid], "url": url_map.get(cid, "")})
     return out[:8]
 
 
@@ -783,6 +784,9 @@ def _answer_one(key, p, tabs, register, index, known):
     want_gaps = dc_state_context.wants_gaps(q)
     state_ctx = "\n\n".join(c for c in
                             (dc_state_context.load_state_context(s, want_gaps) for s in states) if c)
+    url_map = {}
+    for s in states:
+        url_map.update(dc_state_context.source_urls(s))         # id -> public source URL
     sel, budget, passes = [], BASE_ID_BUDGET, []
     missing = None
     for attempt in range(MAX_PASSES):
@@ -801,7 +805,7 @@ def _answer_one(key, p, tabs, register, index, known):
             a = {}
         ans = {"a": str(a.get("a") or OUT_OF_SCOPE)[:3000],   # ~max_tokens=2200; was 800 = mid-sentence cut
                "evidence_ids": _clean_ids(a.get("evidence_ids"), known)[:4]}
-        ans["state_cites"] = _state_cites(ans["a"], src_map)
+        ans["state_cites"] = _state_cites(ans["a"], src_map, url_map)
         verdict = _judge(key, q, ans["a"])
         passes.append({"attempt": attempt + 1, "ids": list(sel), "answer": ans["a"],
                        "evidence_ids": ans["evidence_ids"], "state_cites": ans["state_cites"],

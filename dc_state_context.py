@@ -8,6 +8,7 @@ india_state_bank.md section via dc_states. No web retrieval ever.
 """
 import os
 import re
+import json
 
 import dc_states
 
@@ -91,6 +92,16 @@ def source_map(text):
     for m in _SRC_RE.finditer(text or ""):
         out.setdefault(m.group(1), m.group(2).strip().rstrip("."))
     return out
+
+
+def source_urls(name):
+    """id -> public source URL, from the committed source_urls.json. {} if absent."""
+    slug = name.strip().lower().replace(" ", "-")
+    try:
+        with open(os.path.join(BIBLE_ROOT, slug, "source_urls.json"), encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
 
 
 def _read(path):

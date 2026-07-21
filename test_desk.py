@@ -95,9 +95,10 @@ _smap = dc_state_context.source_map(
 assert _smap["GJ-POL-2026-001"].startswith("official Viksit"), _smap
 _cites = dc_ai._state_cites(
     "Clears the threshold [GJ-POL-2026-001, p.13] and again [GJ-POL-2026-001] but not [GJ-FAKE-9999-001].",
-    _smap)
+    _smap, {"GJ-POL-2026-001": "https://example.gov/policy.pdf"})
 assert [c["id"] for c in _cites] == ["GJ-POL-2026-001"], _cites   # deduped, fake dropped
 assert _cites[0]["desc"].startswith("official Viksit")
+assert _cites[0]["url"] == "https://example.gov/policy.pdf"       # url attached from map
 
 # multi-pass loop: stub the model so the judge never accepts -> must stop at MAX_PASSES
 QTABS = {"ss1": [{"id": "n-fresh", "title": "T", "summary": "S"}], "ss2": [], "ss3": [], "ss4": []}
