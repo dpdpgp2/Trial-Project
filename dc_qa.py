@@ -77,7 +77,7 @@ def run(tabs, computed, register):
             q = _extract_q(it)
             entry = {"id": f"q-{it['number']}", "q": q[:MAX_Q_CHARS],
                      "asked_at": it.get("created_at"), "a": None,
-                     "answered_at": None, "evidence_ids": []}
+                     "answered_at": None, "evidence_ids": [], "state_cites": []}
             if (len(q) > MAX_Q_CHARS or len(q) < MIN_Q_CHARS
                     or any(re.search(p, q) for p in _SECRET_PATTERNS)):
                 entry.update(status="rejected", answered_at=now)
@@ -102,7 +102,8 @@ def run(tabs, computed, register):
             ans = answers.get(entry["id"])
             if ans:
                 entry.update(status="answered", a=ans["a"], answered_at=now,
-                             evidence_ids=[i for i in ans["evidence_ids"] if i in (register or {})])
+                             evidence_ids=[i for i in ans["evidence_ids"] if i in (register or {})],
+                             state_cites=ans.get("state_cites") or [])
                 _close(it, token, repo, ans["a"])
                 log.insert(0, entry)
             else:

@@ -14,6 +14,7 @@ Flow per run:
 Reads OPENROUTER_API_KEY. Output is locked to the spreadsheet data only.
 """
 import os
+import re
 import json
 import hashlib
 import urllib.request
@@ -759,6 +760,22 @@ def retrieve_ids(key, index, question, budget, known):
         return []
 
 
+# State-context citations the answerer writes inline, e.g. [GJ-POL-2026-001, p.13].
+_CITE_RE = re.compile(r"\[([A-Z]{2}-[A-Z]+-\d{4}-\d+)")
+
+
+def _state_cites(answer, src_map):
+    """Verified state-context citations in the answer, as [{id,desc}] (deduped, <=8).
+    Kept only if the id exists in the bible's §21 source map -> hallucinated cites drop."""
+    seen, out = set(), []
+    for m in _CITE_RE.finditer(answer or ""):
+        cid = m.group(1)
+        if cid in src_map and cid not in seen:
+            seen.add(cid)
+            out.append({"id": cid, "desc": src_map[cid]})
+    return out[:8]
+
+
 def _answer_one(key, p, tabs, register, index, known):
     """Multi-pass: select -> answer -> judge -> widen (<=2x). -> (result, digest)."""
     q = p["q"]
@@ -769,6 +786,7 @@ def _answer_one(key, p, tabs, register, index, known):
     sel, budget, passes = [], BASE_ID_BUDGET, []
     missing = None
     for attempt in range(MAX_PASSES):
+        src_map = dc_state_context.source_map(state_ctx)        # verify cites against §21
         picked = retrieve_ids(key, index, q, budget, known)
         sel = list(dict.fromkeys(sel + picked))                 # accumulate across widenings
         ctx = ((state_ctx or "(no state context matched)")
@@ -783,9 +801,10 @@ def _answer_one(key, p, tabs, register, index, known):
             a = {}
         ans = {"a": str(a.get("a") or OUT_OF_SCOPE)[:3000],   # ~max_tokens=2200; was 800 = mid-sentence cut
                "evidence_ids": _clean_ids(a.get("evidence_ids"), known)[:4]}
+        ans["state_cites"] = _state_cites(ans["a"], src_map)
         verdict = _judge(key, q, ans["a"])
         passes.append({"attempt": attempt + 1, "ids": list(sel), "answer": ans["a"],
-                       "evidence_ids": ans["evidence_ids"],
+                       "evidence_ids": ans["evidence_ids"], "state_cites": ans["state_cites"],
                        "usable": verdict["usable"], "missing": verdict["missing"]})
         if verdict["usable"] or attempt == MAX_PASSES - 1:
             break
@@ -795,7 +814,8 @@ def _answer_one(key, p, tabs, register, index, known):
             state_ctx = "\n\n".join(c for c in
                                     (dc_state_context.load_state_context(s, True) for s in states) if c)
     final = passes[-1]
-    return ({"a": final["answer"], "evidence_ids": final["evidence_ids"]},
+    return ({"a": final["answer"], "evidence_ids": final["evidence_ids"],
+             "state_cites": final["state_cites"]},
             _render_digest(p, states, passes))
 
 

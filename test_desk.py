@@ -88,6 +88,17 @@ assert gj == "" or "Investment and Business-Development Judgment" in gj, "bible 
 # selector output validation drops hallucinated ids
 assert dc_ai._clean_ids(["n-fresh", "GHOST", "n-fresh"], {"n-fresh", "p-mid"}) == ["n-fresh"]
 
+# state-context cite verification: §21 map parses, valid cites kept+described, fakes dropped
+_smap = dc_state_context.source_map(
+    "- `GJ-POL-2026-001` — official Viksit Gujarat Data Center Policy booklet.\n"
+    "- `GJ-POW-2023-001` — Gujarat Renewable Energy Policy 2023.")
+assert _smap["GJ-POL-2026-001"].startswith("official Viksit"), _smap
+_cites = dc_ai._state_cites(
+    "Clears the threshold [GJ-POL-2026-001, p.13] and again [GJ-POL-2026-001] but not [GJ-FAKE-9999-001].",
+    _smap)
+assert [c["id"] for c in _cites] == ["GJ-POL-2026-001"], _cites   # deduped, fake dropped
+assert _cites[0]["desc"].startswith("official Viksit")
+
 # multi-pass loop: stub the model so the judge never accepts -> must stop at MAX_PASSES
 QTABS = {"ss1": [{"id": "n-fresh", "title": "T", "summary": "S"}], "ss2": [], "ss3": [], "ss4": []}
 QREG = {"n-fresh": {"company": "A", "date": D(1), "headline": "h"}}

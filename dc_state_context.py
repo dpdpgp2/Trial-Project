@@ -80,6 +80,19 @@ def wants_docs(question):
     return any(w in q for w in _DOC_WORDS)
 
 
+# §21 Source Reference Map lines look like:  - `GJ-POL-2026-001` — official ... booklet ...
+_SRC_RE = re.compile(r"`([A-Z]{2}-[A-Z]+-\d{4}-\d+)`\s*[—-]\s*(.+)")
+
+
+def source_map(text):
+    """id -> short description, from the state_context.md §21 Source Reference Map.
+    {} for legacy/non-bible states (no such section) -> nothing verifies, chip stays 0."""
+    out = {}
+    for m in _SRC_RE.finditer(text or ""):
+        out.setdefault(m.group(1), m.group(2).strip().rstrip("."))
+    return out
+
+
 def _read(path):
     with open(path, encoding="utf-8") as f:
         return f.read()

@@ -555,17 +555,15 @@ function playCard(p,i){
 function qaRow(e,i){
   const reg=DATA.evidence_register||{};
   const evd=(e.evidence_ids||[]).map(id=>({id,r:reg[id]})).filter(x=>x.r);
-  // State-context source IDs are cited inline in the answer (e.g. [GJ-POL-2026-001, p.13]);
-  // they ground bible answers but have no register row, so parse + count them separately.
-  // ponytail: trusts the model's own cites (same trust as the answer text); no cross-check
-  // against the bible source register — add that only if hallucinated cites show up.
-  const stCites=[...new Set(((e.a||'').match(/\[[A-Z]{2}-[A-Z]+-\d{4}-\d+[^\]]*\]/g)||[]).map(s=>s.replace(/[\[\]]/g,'').split(',')[0].trim()))];
+  // State-context citations, server-verified against the bible §21 source map (dc_ai._state_cites):
+  // each is {id, desc}; hallucinated ids are already dropped upstream. Old entries lack the field.
+  const stCites=e.state_cites||[];
   const nCit=evd.length+stCites.length;
   const st=e.status==='answered'?`<span style="color:var(--ink-3)">answered ${shortDate(e.answered_at)}</span>`
     :e.status==='rejected'?'<span class="tag lo">rejected by sanitation</span>'
     :'<span class="tag md">queued — answers on next run</span>';
-  const evList=evd.map(x=>`<div class="cart"><div class="cs">${esc(x.r.publisher||'—')}</div><div class="ch" title="${esc(x.r.headline)}">${titleLink(x.r.headline,x.r.url)}</div><div class="cd">${shortDate(x.r.date)}</div>${extLink(x.r.url)||'<span style="width:16px"></span>'}</div>`).join('')
-    +stCites.map(id=>`<div class="cart"><div class="cs">state context</div><div class="ch">${esc(id)}</div><div class="cd">policy doc</div><span style="width:16px"></span></div>`).join('');
+  const evList=evd.map(x=>`<div class="cart"><div class="cs">${esc(x.r.publisher||'—')}</div><div class="ch" title="${esc(x.r.headline)}">${titleLink(x.r.headline,x.r.url)} <span class="mono" style="color:var(--ink-3)">${esc(x.id)}</span></div><div class="cd">${shortDate(x.r.date)}</div>${extLink(x.r.url)||'<span style="width:16px"></span>'}</div>`).join('')
+    +stCites.map(c=>`<div class="cart"><div class="cs">state context</div><div class="ch">${esc(c.desc||'')} <span class="mono" style="color:var(--ink-3)">${esc(c.id)}</span></div><div class="cd">policy doc</div><span style="width:16px"></span></div>`).join('');
   const foot=e.status==='answered'?`<div class="pfoot"><span class="fmeta">${st}</span><div class="fspace"></div>
     <button class="fbtn" onclick="toggleEl('qa-ev-${i}');document.getElementById('qa-ev-${i}').classList.toggle('open')" style="border:1px solid var(--line-2)"><i class="ti ti-file-search"></i>Cited evidence (${nCit})</button></div>
     <div class="evid" id="qa-ev-${i}"><div class="et">Cited evidence — ${nCit} item${nCit===1?'':'s'}</div>${evList||emptyState('No evidence cited for this answer.')}</div>`
