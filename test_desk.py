@@ -88,6 +88,14 @@ assert gj == "" or "Investment and Business-Development Judgment" in gj, "bible 
 # selector output validation drops hallucinated ids
 assert dc_ai._clean_ids(["n-fresh", "GHOST", "n-fresh"], {"n-fresh", "p-mid"}) == ["n-fresh"]
 
+# richer selector index line carries the fields the cognition selector matches its sketch on
+_ix = dc_ai._qa_index(
+    {"ss1": [{"id": "n-rich"}], "ss2": [], "ss3": [], "ss4": []},
+    {"n-rich": {"company": "AirTrunk", "date": "2026-07-01", "headline": "Chennai build",
+                "geo": "Tamil Nadu", "source_tier": "T1", "layer": "Compute"}})
+for _tok in ("n-rich", "AirTrunk", "Chennai build", "Tamil Nadu", "news", "T1", "Compute"):
+    assert _tok in _ix, (_tok, _ix)
+
 # state-context cite verification: §21 map parses, valid cites kept+described, fakes dropped
 _smap = dc_state_context.source_map(
     "- `GJ-POL-2026-001` — official Viksit Gujarat Data Center Policy booklet.\n"

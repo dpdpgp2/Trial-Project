@@ -1,0 +1,15 @@
+[
+  {"q": "# TEMPLATE — replace these with ~20 real questions. Rows whose q starts with # are skipped.", "expect_ids": [], "must_cover": []},
+
+  {"q": "What CAPEX subsidy does Gujarat offer data-centre investors and is it current?",
+   "state": "Gujarat", "expect_ids": ["GJ-POL-2026-001"], "must_cover": ["capex", "gujarat"]},
+
+  {"q": "Which operators have funded, operating capacity in Dholera versus only announcements?",
+   "state": "Gujarat", "expect_ids": [], "must_cover": ["dholera"]},
+
+  {"q": "Has any Gujarat data-centre power-tariff concession been independently verified?",
+   "state": "Gujarat", "expect_ids": [], "must_cover": ["power"]},
+
+  {"q": "Who is the mayor of Chicago?",
+   "state": "", "expect_ids": [], "must_cover": []}
+]
