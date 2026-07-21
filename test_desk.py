@@ -144,7 +144,7 @@ assert "[UNVERIFIED: n-2]" in _fa and "[n-1]" in _fa, _fa
 assert _fev == ["n-1"] and _fsc == [{"id": "GJ-1"}], (_fev, _fsc)
 assert dc_ai._strip_unfaithful("x [n-1]", ["n-1"], [], [])[0] == "x [n-1]"   # no flags -> no-op
 
-# faithfulness fires end-to-end: an unsupported cite is scrubbed from the published answer
+# faithfulness fires only when ENFORCE is on; default (measure-only) must NOT touch citations
 def _fake_unfaithful(key, system, user, max_tokens, temperature=0.2, reason=False):
     if system is dc_ai.RETRIEVE_SYSTEM: return '{"ids":["n-fresh"]}'
     if system is dc_ai.ANSWER_SYSTEM:   return '{"a":"A ran a plant [n-fresh].","evidence_ids":["n-fresh"]}'
@@ -152,13 +152,23 @@ def _fake_unfaithful(key, system, user, max_tokens, temperature=0.2, reason=Fals
         return '{"faithful":false,"unsupported":[{"claim":"A ran a plant","cite":"n-fresh","why":"row says announced only"}]}'
     if system is dc_ai.JUDGE_SYSTEM:    return '{"usable":true,"missing":[]}'
     return "{}"
+_enforce0 = dc_ai.FAITHFUL_ENFORCE
 try:
     dc_ai._chat = _fake_unfaithful
-    a3 = dc_ai.answer_questions("k", QTABS, {"movers": []}, QREG,
+    # default: measure-only -> citation is PRESERVED, never dropped (the 2026-07 regression guard)
+    dc_ai.FAITHFUL_ENFORCE = False
+    a2 = dc_ai.answer_questions("k", QTABS, {"movers": []}, QREG,
                                 [{"id": "q-2", "q": "did A run a plant in Gujarat"}])
-    assert "[UNVERIFIED: n-fresh]" in a3["q-2"]["a"], a3
-    assert a3["q-2"]["evidence_ids"] == [], a3          # unfaithful cite dropped from published list
+    assert "[n-fresh]" in a2["q-2"]["a"] and "UNVERIFIED" not in a2["q-2"]["a"], a2
+    assert a2["q-2"]["evidence_ids"] == ["n-fresh"], a2
+    # enforce on: unfaithful cite tagged visible-UNVERIFIED and dropped from the published list
+    dc_ai.FAITHFUL_ENFORCE = True
+    a3 = dc_ai.answer_questions("k", QTABS, {"movers": []}, QREG,
+                                [{"id": "q-3", "q": "did A run a plant in Gujarat"}])
+    assert "[UNVERIFIED: n-fresh]" in a3["q-3"]["a"], a3
+    assert a3["q-3"]["evidence_ids"] == [], a3
 finally:
     dc_ai._chat = _real_chat
+    dc_ai.FAITHFUL_ENFORCE = _enforce0
 
 print("test_desk: OK")
