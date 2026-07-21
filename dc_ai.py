@@ -703,7 +703,10 @@ def triangulate(ss, tabs, computed, register=None):
 # ---- Ask-the-Analyst: state-context + multi-pass exploratory retrieval --------------
 MAX_PASSES, BASE_ID_BUDGET, WIDEN_STEP = 3, 12, 10   # 1 answer + up to 2 widenings
 SELECT_REASON = True   # SiRA cognition selector reasoning; set False for the cheap OFF selector
-FAITHFUL_CHECK = True  # Kind-B guard: verify each cited claim against its source; set False to skip
+FAITHFUL_CHECK = True    # Kind-B guard: MEASURE faithfulness (logged to digest). Safe — never edits the answer.
+FAITHFUL_ENFORCE = False # Act on it: tag unfaithful cites [UNVERIFIED: id] in the published answer.
+                         # Off until the eval gate calibrates the critic — an over-strict critic
+                         # must never be allowed to strip good citations (see qa regression 2026-07).
 
 
 def _qa_index(tabs, register):
@@ -839,23 +842,20 @@ def _answer_one(key, p, tabs, register, index, known):
                        "evidence_ids": ans["evidence_ids"], "state_cites": ans["state_cites"],
                        "usable": verdict["usable"], "missing": verdict["missing"],
                        "faithful": faith["faithful"], "unsupported": faith["unsupported"]})
-        if (verdict["usable"] and faith["faithful"]) or attempt == MAX_PASSES - 1:
+        # Faithfulness is MEASURED (recorded above for the digest) but does NOT gate the loop or
+        # feed corrections: doing so let an over-strict critic pressure the answerer into dropping
+        # its own citations across passes (qa regression 2026-07). Only the judge drives widening.
+        if verdict["usable"] or attempt == MAX_PASSES - 1:
             break
         budget += WIDEN_STEP           # widen: more evidence + pull the gap register in
-        # Next-pass corrections: judge's gaps (need more/other evidence) + faithfulness fixes
-        # (overreach — restate to match the source, NOT a request for more evidence).
-        revise = list(verdict["missing"]) + [
-            f"claim not supported by cited source [{u.get('cite')}]: "
-            f"{u.get('why') or u.get('claim')} — restate only what the source supports, or drop it"
-            for u in faith["unsupported"]]
+        revise = list(verdict["missing"])
         if states:                     # reload state context with the gap register for next pass
             state_ctx = "\n\n".join(c for c in
                                     (dc_state_context.load_state_context(s, True) for s in states) if c)
     final = passes[-1]
-    # Deterministic backstop: any claim still flagged unfaithful on the final pass loses its
-    # "verified" status — the cite is tagged visible-UNVERIFIED and dropped from published lists.
-    a_out, ev_out, sc_out = _strip_unfaithful(
-        final["answer"], final["evidence_ids"], final["state_cites"], final["unsupported"])
+    a_out, ev_out, sc_out = final["answer"], final["evidence_ids"], final["state_cites"]
+    if FAITHFUL_ENFORCE:               # opt-in: tag still-unfaithful cites [UNVERIFIED] (keeps them visible)
+        a_out, ev_out, sc_out = _strip_unfaithful(a_out, ev_out, sc_out, final["unsupported"])
     return ({"a": a_out, "evidence_ids": ev_out, "state_cites": sc_out},
             _render_digest(p, states, passes, tabs))
 
