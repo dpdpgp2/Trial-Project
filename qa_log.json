@@ -1,5 +1,15 @@
 [
  {
+  "id": "q-8",
+  "q": "Tell me companies other than Reliance that would kill it in Gujarat?",
+  "asked_at": "2026-07-21T18:31:49Z",
+  "a": "Besides Reliance, the companies with the strongest evidence of success or high potential in Gujarat’s data‑centre market are ST Telemedia Global Data Centres (operating the 3 MW STT Ahmedabad DC1 at GIFT City), Data First (claiming a Tier‑III regional facility in Ahmedabad), and Larsen & Toubro’s Vyoma arm (which has signed an MoU for a 250 MW green AI‑ready campus at Dholera and is undergoing a feasibility assessment). STT’s operational track record shows it can deliver and sustain enterprise‑grade colocation under a regulated licensee, giving it a proven foothold. Data First’s self‑reported operating facility, though lacking independent verification, indicates an existing regional player that could scale if it secures additional capacity and certifications. L&T Vyoma, while still at MoU/feasibility stage, benefits from the policy’s Dholera‑only capital subsidy and has explicit government backing; if it converts the MoU into land, grid and approvals, it could become a major hyperscale contender. Other entities such as Meta (as an anchor tenant) or GIFT City’s regulated power company enhance the ecosystem but are not operators themselves.",
+  "answered_at": "2026-07-21T18:37:50Z",
+  "evidence_ids": [],
+  "state_cites": [],
+  "status": "answered"
+ },
+ {
   "id": "q-5",
   "q": "Tell me companies other than Reliance that would kill it in Gujarat?",
   "asked_at": "2026-07-21T08:10:51Z",
