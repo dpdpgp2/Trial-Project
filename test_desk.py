@@ -96,6 +96,15 @@ _ix = dc_ai._qa_index(
 for _tok in ("n-rich", "AirTrunk", "Chennai build", "Tamil Nadu", "news", "T1", "Compute"):
     assert _tok in _ix, (_tok, _ix)
 
+# geo normalization: a country-level geo='India' row whose city is only in the headline
+# (the CtrlS Ahmedabad case) must resolve to its state so state-scoped questions can retrieve it
+_ixg = dc_ai._qa_index(
+    {"ss1": [], "ss2": [], "ss3": [], "ss4": [{"id": "o-ctrl"}]},
+    {"o-ctrl": {"company": "CtrlS Datacenters Ltd", "date": "2026-01-24", "geo": "India",
+                "source_tier": "T1", "layer": "Colo", "headline": "CtrlS Ahmedabad DC1 — Ahmedabad, IN"}})
+assert "Gujarat" in _ixg, _ixg           # was invisible as geo='India'; now surfaces as Gujarat
+assert dc_ai._row_state({"geo": "India", "headline": "no city here"}) == "India"   # unresolvable -> raw geo
+
 # state-context cite verification: §21 map parses, valid cites kept+described, fakes dropped
 _smap = dc_state_context.source_map(
     "- `GJ-POL-2026-001` — official Viksit Gujarat Data Center Policy booklet.\n"

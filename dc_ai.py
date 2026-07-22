@@ -709,17 +709,30 @@ FAITHFUL_ENFORCE = False # Act on it: tag unfaithful cites [UNVERIFIED: id] in t
                          # must never be allowed to strip good citations (see qa regression 2026-07).
 
 
+def _row_state(m):
+    """Best state label for a register row. Many facility rows arrive geo='India' (country-
+    level) with the actual city only in the headline (e.g. 'CtrlS Ahmedabad DC1'), which hides
+    them from state-scoped questions. Resolve the state via the same city->state alias table
+    resolve_states() uses: try the geo field, else infer from geo+headline+company. Falls back
+    to the raw geo when nothing resolves."""
+    geo = (m.get("geo") or "").strip()
+    st = dc_state_context.resolve_states(geo)
+    if not st:
+        st = dc_state_context.resolve_states(f"{geo} {m.get('headline', '')} {m.get('company', '')}")
+    return ", ".join(st) if st else (geo or "?")
+
+
 def _qa_index(tabs, register):
     """Richer selector menu: one descriptive line per citable evidence id, so the
     cognition-guided selector (RETRIEVE_SYSTEM) has real fields to match its sketch against.
-    id | company | date | geo | stream | source_tier | layer | excerpt
-    All fields come straight off the register record (dc_evidence.REGISTER_HEADER)."""
+    id | company | date | state | stream | source_tier | layer | excerpt
+    Fields come off the register record; state is geo normalized to an Indian state."""
     stream = _id_stream(tabs)
     lines = []
     for i, m in (register or {}).items():
         lines.append(
             f"{i} | {m.get('company', '?')} | {m.get('date', '?')} | "
-            f"{m.get('geo') or '?'} | {stream.get(i, '?')} | "
+            f"{_row_state(m)} | {stream.get(i, '?')} | "
             f"{m.get('source_tier') or '?'} | {m.get('layer') or '?'} | "
             f"{(m.get('headline') or '')[:200]}")
     return "\n".join(lines)
