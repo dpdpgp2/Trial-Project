@@ -318,26 +318,45 @@ def _proposed_payload(proposed):
 
 
 def _spotlight_payload(spotlight, tabs):
-    """Per-feed 48h highlight -> whitelisted, title-enriched, capped. Missing -> {}.
-    Items render from their own title+url (not via evidence_register), so no pinning."""
+    """Per-feed 48h highlight -> whitelisted, capped. Each item is an LLM-clustered EVENT;
+    its article_ids are resolved here to the cited article links (title/url/source/date) from
+    the raw tabs. Events render from those links directly (no evidence_register pinning)."""
     if not isinstance(spotlight, dict):
         return {}
-    title_by = {}
+    row_by = {}
     for feed, idf in (("ss1", "id"), ("ss2", "id"), ("ss3", "accession")):
         for r in tabs.get(feed) or []:
             rid = str(r.get(idf) or "").strip()
             if rid:
-                title_by[(feed, rid)] = r.get("title") or r.get("filer") or ""
+                row_by[(feed, rid)] = r
+
+    def _articles(feed, ids):
+        arts = []
+        for rid in ids[:12]:
+            r = row_by.get((feed, str(rid)))
+            if not r:
+                continue
+            arts.append({"id": str(rid),
+                         "title": _clip(r.get("title") or r.get("filer") or "", 200),
+                         "url": r.get("url") or None, "source": r.get("source") or None,
+                         "date": r.get("date") or r.get("filed_date") or None})
+        return arts
+
     out = {}
     for feed in ("ss1", "ss2", "ss3"):
         v = spotlight.get(feed)
         if not isinstance(v, dict):
             continue
-        items = [{"id": str(it.get("id") or ""), "rank": _i(it.get("rank")),
-                  "title": _clip(title_by.get((feed, str(it.get("id") or "")), ""), 200),
-                  "url": it.get("url") or None, "reason": _clip(it.get("reason"), 200),
-                  "criteria_hits": [str(h)[:24] for h in (it.get("criteria_hits") or [])][:5]}
-                 for it in (v.get("items") or [])[:dc.SPOTLIGHT_MAX_PER_FEED]]
+        items = []
+        for it in (v.get("items") or [])[:dc.SPOTLIGHT_MAX_PER_FEED]:
+            arts = _articles(feed, it.get("article_ids") or [])
+            if not arts:
+                continue
+            items.append({"rank": _i(it.get("rank")),
+                          "heading": _clip(it.get("heading") or arts[0]["title"], 200),
+                          "reason": _clip(it.get("reason"), 200),
+                          "criteria_hits": [str(h)[:24] for h in (it.get("criteria_hits") or [])][:5],
+                          "articles": arts})
         orgs = [{"name": _clip(o.get("name"), 80), "segment": str(o.get("segment") or "")}
                 for o in (v.get("orgs") or []) if isinstance(o, dict)][:20]
         out[feed] = {"generated_at": v.get("generated_at"),
@@ -518,14 +537,14 @@ def _selfcheck():
                    "asked_at": "2026-07-16T10:00:00Z", "status": "answered",
                    "a": "AirTrunk [n1].", "answered_at": "2026-07-17T05:00:00Z",
                    "evidence_ids": ["n1"]}]
-    fixture_spot = {
+    fixture_spot = {   # ss1 event clusters the two AirTrunk articles (n1 + n2) into one
         "ss1": {"generated_at": "2026-07-17 05:00 UTC", "window_days": 2, "status": "ok",
-                "items": [{"id": "n1", "rank": 1, "reason": "foreign mover into India",
-                           "criteria_hits": ["cross-border", "deal"], "url": "https://reuters.com/x"}],
+                "items": [{"rank": 1, "heading": "AirTrunk Mumbai campus", "reason": "foreign mover into India",
+                           "criteria_hits": ["cross-border", "deal"], "article_ids": ["n1", "n2"]}],
                 "orgs": [{"name": "NewCo Power", "segment": "energy/power"}]},
         "ss2": {"generated_at": "2026-07-17 05:00 UTC", "window_days": 2, "status": "ok",
-                "items": [{"id": "p1", "rank": 1, "reason": "state incentive notified",
-                           "criteria_hits": ["P1-state"], "url": "https://pib.gov.in/x"}], "orgs": []},
+                "items": [{"rank": 1, "heading": "State incentive notified", "reason": "state incentive",
+                           "criteria_hits": ["P1-state"], "article_ids": ["p1"]}], "orgs": []},
         "ss3": {"generated_at": "2026-07-17 05:00 UTC", "window_days": 2, "status": "empty",
                 "items": [], "orgs": []}}
     fixture_ops = {"proposed": [
@@ -538,7 +557,9 @@ def _selfcheck():
                  spotlight=fixture_spot, proposed_operators=fixture_ops)
     probs = validate(data)
     assert not probs, probs
-    assert data["spotlight"]["ss1"]["items"][0]["title"].startswith("AirTrunk"), "spotlight title not enriched"
+    ev = data["spotlight"]["ss1"]["items"][0]
+    assert len(ev["articles"]) == 2 and {a["id"] for a in ev["articles"]} == {"n1", "n2"}, "event links not resolved"
+    assert ev["articles"][0]["title"].startswith("AirTrunk") and ev["articles"][0]["url"], "article not enriched"
     assert data["spotlight"]["ss3"]["status"] == "empty", "empty spotlight feed lost"
     assert data["spotlight"]["ss2"]["orgs"] == [], "policy feed should carry no orgs"
     po = {p["name"]: p for p in data["proposed_operators"]}

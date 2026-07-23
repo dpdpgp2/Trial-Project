@@ -411,14 +411,20 @@ function spotlightPanel(feed){
   if(!sp||!sp.items||!sp.items.length){
     return sp&&sp.status==='empty'?`<div class="panel" style="margin-bottom:16px"><h3><i class="ti ti-flame"></i>Most Important — last 48h</h3><div style="font-size:12px;color:var(--ink-3)">Nothing material in the last ${(sp.window_days||2)} days.</div></div>`:'';
   }
-  const rows=sp.items.map(it=>`<div style="display:flex;gap:10px;align-items:baseline;padding:7px 0;border-top:1px solid var(--line)">
-    <span class="mono" style="color:var(--ink-3);min-width:18px">${it.rank||''}</span>
-    <div style="flex:1">
-      <div>${titleLink(it.title,it.url)} ${extLink(it.url)}</div>
-      ${it.reason?`<div style="font-size:12px;color:var(--ink-2);margin-top:2px">${esc(it.reason)}</div>`:''}
-      ${(it.criteria_hits||[]).length?`<div class="tagwrap" style="margin-top:4px">${it.criteria_hits.map(h=>`<span class="tag plain">${esc(h)}</span>`).join('')}</div>`:''}
-    </div></div>`).join('');
-  return `<div class="panel" style="margin-bottom:16px"><h3><i class="ti ti-flame"></i>Most Important — last 48h <span style="font-weight:400;color:var(--ink-3);font-size:12px">· AI-ranked top ${sp.items.length}</span></h3>${rows}</div>`;
+  const rows=sp.items.map(it=>{
+    const arts=(it.articles||[]);
+    const links=arts.map(a=>`<span class="cart" style="display:inline-flex;gap:5px;align-items:baseline"><span class="cs" style="color:var(--ink-3);font-size:11px">${esc(a.source||'')}</span>${titleLink(a.title,a.url)}${extLink(a.url)}</span>`).join('<span style="color:var(--line-2)"> · </span>');
+    const head=arts.length===1?titleLink(it.heading||arts[0].title,arts[0].url):esc(it.heading||'—');
+    return `<div style="display:flex;gap:10px;align-items:baseline;padding:9px 0;border-top:1px solid var(--line)">
+      <span class="mono" style="color:var(--ink-3);min-width:18px">${it.rank||''}</span>
+      <div style="flex:1">
+        <div style="font-weight:500">${head} ${arts.length>1?`<span class="tag plain" title="${arts.length} articles clustered into this event">${arts.length} sources</span>`:''}</div>
+        ${it.reason?`<div style="font-size:12px;color:var(--ink-2);margin-top:2px">${esc(it.reason)}</div>`:''}
+        ${(it.criteria_hits||[]).length?`<div class="tagwrap" style="margin-top:4px">${it.criteria_hits.map(h=>`<span class="tag plain">${esc(h)}</span>`).join('')}</div>`:''}
+        ${arts.length>1?`<div style="font-size:12px;margin-top:5px;line-height:1.9">${links}</div>`:''}
+      </div></div>`;
+  }).join('');
+  return `<div class="panel" style="margin-bottom:16px"><h3><i class="ti ti-flame"></i>Most Important — last 48h <span style="font-weight:400;color:var(--ink-3);font-size:12px">· AI-ranked top ${sp.items.length} events</span></h3>${rows}</div>`;
 }
 function viewStreamNews(s){
   const rows=(DATA.events||[]).map((e,i)=>Object.assign({_i:i},e));

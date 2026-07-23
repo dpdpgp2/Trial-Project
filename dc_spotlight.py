@@ -116,15 +116,19 @@ RANK_SYSTEM = (
     "=== TAG BD CRITERIA (verbatim grounding) ===\n{criteria}\n\n{states}\n\n"
     "Each row is pre-tagged with a deterministic deal bucket (deal=) and matched state (state=) — "
     "judge deal value and state attractiveness on THOSE, not on headline-guessing.\n"
-    "Return the TOP {maxn} rows by BD relevance, weighing: cross-border motion (foreign/GCC->India) "
-    "heaviest, then deal bucket, then P1-state + valid policy, then trigger freshness/novelty. "
-    "Drop hyperscaler-as-client rows and thin single-source chatter. NEVER return the SAME STORY "
-    "twice — if several rows cover one story/announcement, pick the single best article and drop the "
-    "rest. If FEWER than {maxn} rows are genuinely BD-relevant, RETURN FEWER — a padded list is worse "
-    "than a short one.{loosen}{orgs}\n\n"
+    "FIRST cluster the rows into EVENTS: group every row that covers the SAME story / announcement / "
+    "deal into ONE event, even when different outlets word the headline differently or name the state "
+    "vs its city (e.g. 'Odisha' and its capital 'Bhubaneswar' are the same place). List ALL the row "
+    "ids that belong to each event. Every row id appears in AT MOST ONE event.\n"
+    "THEN return the TOP {maxn} EVENTS by BD relevance, weighing: cross-border motion (foreign/GCC->"
+    "India) heaviest, then deal bucket, then P1-state + valid policy, then trigger freshness/novelty. "
+    "Drop hyperscaler-as-client events and thin single-source chatter. If FEWER than {maxn} events are "
+    "genuinely BD-relevant, RETURN FEWER — a padded list is worse than a short one.{loosen}{orgs}\n\n"
     "OUTPUT — ONLY this JSON object, no prose, no markdown fences:\n"
-    '{{"items":[{{"id":"<id copied exactly>","reason":"<one line, <=160 chars, why it matters to TAG>",'
-    '"criteria_hits":["cross-border"|"deal"|"P1-state"|"trigger"|"novel"]}}]{orgs_schema}}}'
+    '{{"items":[{{"heading":"<one-line event heading, <=120 chars>",'
+    '"reason":"<one line, <=160 chars, why this event matters to TAG>",'
+    '"criteria_hits":["cross-border"|"deal"|"P1-state"|"trigger"|"novel"],'
+    '"article_ids":["<id copied exactly>", ...]}}]{orgs_schema}}}'
 )
 _LOOSEN = ("\nRELEVANCE BAR LOOSENED: the strict pass found too little — include weaker-but-real "
            "rows this time, but STAY inside the 48h window and still drop pure noise.")
@@ -157,48 +161,29 @@ def _rank_feed(key, feed, cands, loosen=False):
     return _validate_items(obj, cands, want_orgs)
 
 
-# tokens ignored when comparing headlines — generic words that don't distinguish a story.
-_DUP_STOP = {"the", "a", "an", "to", "in", "of", "for", "and", "on", "at", "with", "its",
-             "is", "as", "by", "it", "data", "centre", "center", "datacentre", "datacenter",
-             "india", "indian", "new", "plans", "plan", "set", "eyes"}
-
-
-def _title_tokens(title):
-    import re
-    toks = re.findall(r"[a-z0-9]+", (title or "").lower())
-    return {t for t in toks if t not in _DUP_STOP and len(t) > 1}
-
-
-def _is_dup(tokens, kept):
-    """Overlap-coefficient near-dupe check vs already-kept headlines (>=0.7 = same story)."""
-    if not tokens:
-        return False
-    for kt in kept:
-        inter = len(tokens & kt)
-        if inter and inter / min(len(tokens), len(kt)) >= 0.7:
-            return True
-    return False
-
-
 def _validate_items(obj, cands, want_orgs):
-    """Drop fabricated ids; drop near-duplicate stories; clip; cap at SPOTLIGHT_MAX_PER_FEED."""
+    """LLM-clustered EVENTS: keep only real article ids, each id in one event only, drop empty
+    events, clip, cap at SPOTLIGHT_MAX_PER_FEED. The LLM does the same-story clustering; this is
+    the id-existence + no-double-count guard on top."""
     valid = {c["id"]: c for c in cands}
-    items, seen, kept_titles = [], set(), []
+    items, used = [], set()
     for it in (obj.get("items") or []):
         if not isinstance(it, dict):
             continue
-        rid = str(it.get("id") or "").strip()
-        if rid not in valid or rid in seen:
+        ids, seen = [], set()
+        for raw in (it.get("article_ids") or []):
+            rid = str(raw).strip()
+            if rid in valid and rid not in used and rid not in seen:
+                seen.add(rid)
+                ids.append(rid)
+        if not ids:                                   # no real, unused article -> drop the event
             continue
-        toks = _title_tokens(valid[rid].get("title"))
-        if _is_dup(toks, kept_titles):        # same story from another source -> skip
-            continue
-        seen.add(rid)
-        kept_titles.append(toks)
+        used.update(ids)
         hits = [str(h)[:24] for h in (it.get("criteria_hits") or [])][:5]
-        items.append({"id": rid, "rank": len(items) + 1,
+        items.append({"rank": len(items) + 1,
+                      "heading": str(it.get("heading") or "")[:120],
                       "reason": str(it.get("reason") or "")[:160],
-                      "criteria_hits": hits, "url": valid[rid]["url"]})
+                      "criteria_hits": hits, "article_ids": ids})
         if len(items) >= dc.SPOTLIGHT_MAX_PER_FEED:
             break
     orgs = _validate_orgs(obj) if want_orgs else []
@@ -231,8 +216,8 @@ def _judge(key, fresh):
         return {}
     lines = []
     for feed, (items, _) in fresh.items():
-        lines.append(f"[{feed}] {len(items)} picks:")
-        lines += [f"  - {it['id']}: {it['reason']}" for it in items] or ["  (none)"]
+        lines.append(f"[{feed}] {len(items)} events:")
+        lines += [f"  - {it['heading']}: {it['reason']}" for it in items] or ["  (none)"]
     try:
         obj = _json_obj(_chat(key, JUDGE_SYSTEM, "\n".join(lines), max_tokens=400, temperature=0.0))
         verd = obj.get("feeds") or {}
@@ -243,21 +228,13 @@ def _judge(key, fresh):
 
 
 def _fallback_items(cands):
-    """Deterministic ranking when the model is unavailable: deal bucket then recency,
-    with the same near-duplicate-story dedup as the AI path."""
+    """Deterministic ranking when the model is unavailable: deal bucket then recency. No LLM to
+    cluster, so each event is a single article (heading = its title)."""
     order = {"≥$500M": 2, "≥$50M": 1, "": 0}
     ranked = sorted(cands, key=lambda c: (order.get(c["deal"], 0), c["date"]), reverse=True)
-    items, kept = [], []
-    for c in ranked:
-        toks = _title_tokens(c.get("title"))
-        if _is_dup(toks, kept):
-            continue
-        kept.append(toks)
-        items.append({"id": c["id"], "rank": len(items) + 1, "reason": "",
-                      "criteria_hits": [], "url": c["url"]})
-        if len(items) >= dc.SPOTLIGHT_MAX_PER_FEED:
-            break
-    return items
+    return [{"rank": i + 1, "heading": (c.get("title") or "")[:120], "reason": "",
+             "criteria_hits": [], "article_ids": [c["id"]]}
+            for i, c in enumerate(ranked[: dc.SPOTLIGHT_MAX_PER_FEED])]
 
 
 def spotlight(ss, tabs, register=None):
@@ -380,12 +357,21 @@ def demo():
             import json as _j
             return _j.dumps({"feeds": feeds})
         calls["rank"] += 1                                     # ranker call
-        # echo back only real ids present in the user block + one fabricated id (must be dropped)
+        # cluster same-story rows into one event; +a fabricated id (must be dropped)
         ids = [ln.split(" | ")[0] for ln in user.splitlines() if " | " in ln]
         import json as _j
-        items = [{"id": i, "reason": "matters", "criteria_hits": ["cross-border"]} for i in ids]
-        items.append({"id": "GHOST", "reason": "fabricated", "criteria_hits": []})
-        out = {"items": items}
+        events = []
+        if "dupA" in ids and "dupB" in ids:                    # HCLTech story from 2 sources -> 1 event
+            events.append({"heading": "HCLTech first India DC in Odisha", "reason": "cross-border first-mover",
+                           "criteria_hits": ["cross-border", "trigger"],
+                           "article_ids": ["dupA", "dupB", "GHOST"]})   # GHOST invented -> dropped
+            rest = [i for i in ids if i not in ("dupA", "dupB")]
+        else:
+            rest = ids
+        for i in rest:
+            events.append({"heading": f"event {i}", "reason": "matters",
+                           "criteria_hits": ["cross-border"], "article_ids": [i]})
+        out = {"items": events}
         if '"orgs"' in system:
             out["orgs"] = [{"name": "AirTrunk", "segment": "operator"},   # dedup: seed watchlist
                            {"name": "NewCo Power", "segment": "energy/power"}]
@@ -397,11 +383,14 @@ def demo():
     r = M.spotlight(None, tabs)
 
     assert r["ss3"]["status"] == "empty" and not r["ss3"]["items"], "empty feed not skipped"
-    ss1_ids = [it["id"] for it in r["ss1"]["items"]]
-    assert "GHOST" not in ss1_ids, "fabricated id not dropped"
-    assert "nOld" not in ss1_ids, "stale row not excluded"
-    assert {"n1", "n2"} <= set(ss1_ids), "in-window rows missing"
-    assert len([i for i in ss1_ids if i in ("dupA", "dupB")]) == 1, "near-duplicate story not collapsed"
+    ss1 = r["ss1"]["items"]
+    all_ids = [i for it in ss1 for i in it["article_ids"]]
+    assert "GHOST" not in all_ids, "fabricated id not dropped"
+    assert "nOld" not in all_ids, "stale row not excluded"
+    assert {"n1", "n2"} <= set(all_ids), "in-window rows missing"
+    assert len(all_ids) == len(set(all_ids)), "an article was double-counted across events"
+    hcl = [it for it in ss1 if set(it["article_ids"]) & {"dupA", "dupB"}]
+    assert len(hcl) == 1 and set(hcl[0]["article_ids"]) == {"dupA", "dupB"}, "same story not clustered into one event"
     orgs = {o["name"] for o in r["ss1"]["orgs"]}
     assert "AirTrunk" not in orgs and "NewCo Power" in orgs, "org dedup/extract wrong"
     assert not r["ss2"]["orgs"], "policy feed must not extract orgs"
