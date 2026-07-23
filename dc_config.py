@@ -252,11 +252,34 @@ LEVER_TOKENS = [
 ]
 # (b) Adzuna keyword/geo search — free, needs ADZUNA_APP_ID + ADZUNA_APP_KEY env.
 #     country code -> search query. Broad India/GCC coverage.
-ADZUNA_QUERIES = {
-    "in": "data centre engineer",
+# (country, query) — a country may carry several queries. The gov-affairs query surfaces
+# public-policy postings company-agnostically (dc_govaffairs), incl. employers with no
+# Greenhouse/Lever board.
+ADZUNA_QUERIES = [
+    ("in", "data centre engineer"),
     # Adzuna has NO GCC countries (ae/sa/qa all 404) — India only. ✅ verified: 'in'
     # returns ~268 "data centre engineer" hits. GCC hiring signal needs another source.
-}
+    ("in", "government affairs public policy"),
+]
+
+# --- In-house government-affairs detection (dc_govaffairs) ------------------
+# A prospect that runs its OWN India public-policy function is harder for TAG to win
+# (advisory wedge is weaker). Flag is advisory only — companies still rank normally.
+# Curated backstop: Workday-only giants whose ATS we cannot scrape, so no job signal ever
+# reaches us. Humans own this list (add a name only with a real known team).
+HAS_INHOUSE_GOVAFFAIRS = ["Amazon", "AWS", "Google", "Microsoft", "Meta", "Oracle"]
+# Cheap pre-gate: only rows/snippets containing one of these reach the LLM classifier.
+GOVAFFAIRS_ROLE_TERMS = [
+    "government affairs", "govt affairs", "public policy", "public affairs",
+    "government relations", "regulatory affairs", "regulatory & public policy",
+    "policy & government", "corporate affairs", "head of policy", "policy lead",
+    "policy manager", "policy counsel",
+]
+# Web enrichment (opt-in): Firecrawl search API — a search API, NOT a headless browser, so
+# it runs from CI datacenter IPs without captchas. Needs FIRECRAWL_API_KEY; skipped silently
+# if unset. Free tier is fine: cached once-ever per company, capped at WEB_LOOKUP_MAX/run.
+FIRECRAWL_SEARCH_URL = "https://api.firecrawl.dev/v1/search"
+GOVAFFAIRS_WEB_QUERY = "{company} India government affairs public policy team"
 # (c) Reddit subreddit RSS — free, no key.
 REDDIT_FEEDS = {
     "r/datacenter": "https://www.reddit.com/r/datacenter/.rss",

@@ -155,6 +155,11 @@ def build(tabs, computed, register, pipe=None, gcc=None, md_rows=None,
                          "intro_path": soft("Intro path"), "next_action": soft("Next action")},
             "evidence_ids": _ids(p.get("top_evidence_ids"))[:8],
             "cin": p.get("cin") or None,
+            "inhouse_govaffairs": bool(p.get("inhouse_govaffairs")),
+            "govaffairs_evidence": ({"source": p.get("govaffairs_source"),
+                                     "url": p.get("govaffairs_evidence_url") or None,
+                                     "note": _clip(p.get("govaffairs_evidence"), 220)}
+                                    if p.get("inhouse_govaffairs") else None),
         }
 
     prospects = [_prospect(p) for p in enriched if p.get("company")]

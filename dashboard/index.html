@@ -155,6 +155,11 @@ tr.flash>td{animation:flashbg 2.1s ease-out}
 .tag.geo{background:#F7EDEA;color:var(--navy)}.tag.plain{background:var(--bg);color:var(--ink-2)}
 .tag.hi{background:var(--pos-bg);color:var(--pos)}.tag.md{background:var(--tact-bg);color:var(--tact)}.tag.lo{background:var(--bg);color:var(--ink-3)}
 .tag.foreign{background:#F3EAFA;color:var(--osint)}
+.gaflag{position:relative;display:inline-block;margin-left:6px;font-size:10px;font-weight:600;color:var(--disc);background:#FBEAE4;border:1px solid #E7C4B7;border-radius:10px;padding:1px 7px;cursor:pointer;vertical-align:middle;white-space:nowrap}
+.gaflag:hover{background:#F6DDD3}
+.gabub{display:none;position:absolute;z-index:60;top:150%;left:0;width:250px;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 26px rgba(30,33,60,.16);padding:10px 12px;font-size:11px;font-weight:400;color:var(--ink-2);cursor:default;white-space:normal;text-align:left}
+.gabub.on{display:block}
+.gabub b{color:var(--ink);font-size:12px}.gabub .gasrc{color:var(--ink-3);margin:3px 0}.gabub .ganote{margin:4px 0;font-style:italic}
 .aichip{font-size:10px;font-weight:600;color:var(--acid-dk);background:#FBF3E2;border-radius:4px;padding:1px 6px;margin-right:6px;letter-spacing:.3px;text-transform:uppercase;white-space:nowrap}
 
 /* tables */
@@ -251,6 +256,13 @@ function priCls(p){const m=/^P([123])/.exec(p||'');return m?('p'+m[1]):'plain';}
 function priBorder(p){const m=/^P([123])/.exec(p||'');return m?('pri'+m[1]):'';}
 function bandTag(b){return b?`<span class="tag ${esc(String(b).toLowerCase())}">${esc(b)}</span>`:'—';}
 function confTag(c){if(!c)return dash(null);const k=/^hi/i.test(c)?'hi':/^(me|md)/i.test(c)?'md':'lo';return `<span class="tag ${k}">${esc(c)}</span>`;}
+function govBadge(p){
+  if(!p||!p.inhouse_govaffairs)return '';
+  const e=p.govaffairs_evidence||{};const id='ga-'+String(p.company||'').replace(/[^a-z0-9]/gi,'').toLowerCase();
+  const bubble=`<span class="gabub" id="${id}" onclick="event.stopPropagation()"><b>In-house gov-affairs</b><div class="gasrc">source: ${esc(e.source||'\u2014')}</div>${e.note?`<div class="ganote">${esc(e.note)}</div>`:''}${e.url?`<div>${extLink(e.url)}<a class="tlink" href="${esc(e.url)}" target="_blank" rel="noopener"> evidence</a></div>`:''}</span>`;
+  return ` <span class="gaflag" onclick="toggleGa('${id}',event)" title="in-house government-affairs \u2014 harder for TAG to win">\u26a0 gov-affairs${bubble}</span>`;
+}
+function toggleGa(id,ev){ev.stopPropagation();document.querySelectorAll('.gabub.on').forEach(el=>{if(el.id!==id)el.classList.remove('on');});const el=document.getElementById(id);if(el)el.classList.toggle('on');}
 function metric(lbl,icon,val,delta,dir){return `<div class="metric"><div class="lbl"><i class="ti ${icon}"></i>${lbl}</div><div class="val mono">${val}</div><div class="delta ${dir||'flat'}">${delta||''}</div></div>`;}
 function emptyState(msg){return `<div class="empty"><i class="ti ti-inbox" style="font-size:26px;display:block;margin-bottom:8px;color:var(--line-2)"></i>${esc(msg)}</div>`;}
 function toggleEl(id,expId){const el=document.getElementById(id);if(el)el.style.display=el.style.display==='none'?'':'none';const x=document.getElementById(expId);if(x)x.classList.toggle('open');}
@@ -419,7 +431,7 @@ function viewStreamOsint(s){
 function viewStreamRanked(s){
   const rows=(DATA.prospects||[]).slice().sort((a,b)=>(b.signal_score||0)-(a.signal_score||0));
   const cols=[{label:'Company',key:'company'},{label:'Score <i class="ti ti-info-circle" title="0–100 blend: news momentum 35% + policy tailwind 20% + India/GCC relevance 25% + partnership signals 20%. Strong ≥60, Moderate 40–59."></i>',key:'signal_score'},{label:'Momentum <i class="ti ti-info-circle" title="Recent credible coverage; each mention loses half its weight every 90 days."></i>',key:'momentum'},{label:'Geo',key:'geo'},{label:'Presence / stage',key:'india_presence'},{label:'TAG play',key:'tag_play'},{label:'Why now',style:'width:18%'},{label:'Deal value',key:'deal_value'}];
-  const rowFn=p=>`<tr><td class="cellh"><b>${esc(p.company)}</b>${p.is_foreign?' <span class="tag foreign">foreign</span>':''}</td>
+  const rowFn=p=>`<tr><td class="cellh"><b>${esc(p.company)}</b>${p.is_foreign?' <span class="tag foreign">foreign</span>':''}${govBadge(p)}</td>
     <td><span class="mono" style="font-weight:600">${num(p.signal_score,0)}</span> ${bandTag(p.signal_band)}</td>
     <td class="mono">${num(p.momentum,1)}</td><td><span class="tag geo">${esc(p.geo||'—')}</span></td>
     <td>${dash(p.india_presence)}${p.expansion_stage?` <span style="color:var(--ink-3)">/ ${esc(p.expansion_stage)}</span>`:''}</td>
@@ -434,7 +446,7 @@ function viewStreamPipeline(s){
   groups.forEach(([g,lbl,icon],gi)=>{
     const rows=bd.filter(p=>String(p.bd_priority).startsWith(g));if(!rows.length)return;any=true;
     const cols=[{label:'Company',key:'company'},{label:'Priority <i class="ti ti-info-circle" title="8-factor BD score: P1 = 65+, P2 = 40+, P3 below. Evidence from only low-quality sources caps at P3 regardless of score."></i>',key:'bd_priority'},{label:'India stage',key:'india_stage'},{label:'Trigger',style:'width:26%'},{label:'Why now'},{label:'Confidence <i class="ti ti-info-circle" title="high = captured deal value or filed partnership · med = established/announced India presence · low = neither yet"></i>',key:'confidence'},{label:'Deal value',key:'deal_value'}];
-    const rowFn=p=>`<tr><td class="cellh"><b>${esc(p.company)}</b></td><td><span class="tag ${priCls(p.bd_priority)}">${esc(p.bd_priority)}</span></td>
+    const rowFn=p=>`<tr><td class="cellh"><b>${esc(p.company)}</b>${govBadge(p)}</td><td><span class="tag ${priCls(p.bd_priority)}">${esc(p.bd_priority)}</span></td>
       <td>${dash(p.india_stage)}</td><td style="font-size:12px">${dash(p.trigger)}</td><td style="font-size:12px;color:var(--ink-2)">${dash(p.why_now)}</td>
       <td>${confTag(p.confidence)}</td><td class="mono">${dash(p.deal_value)}</td></tr>`;
     html+=`<div class="shead"><h2><i class="ti ${icon}"></i>${g} — ${lbl}<span class="sx">${rows.length} account${rows.length>1?'s':''}</span></h2></div>`+renderTable('tblBD'+gi,cols,rows,rowFn,null);

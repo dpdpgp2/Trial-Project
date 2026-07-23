@@ -110,7 +110,7 @@ def fetch_adzuna(per_country=20):
     if not (app_id and app_key):
         return []
     rows = []
-    for country, query in dc.ADZUNA_QUERIES.items():
+    for country, query in dc.ADZUNA_QUERIES:
         from urllib.parse import quote
         url = (f"https://api.adzuna.com/v1/api/jobs/{country}/search/1"
                f"?app_id={app_id}&app_key={app_key}&results_per_page={per_country}"

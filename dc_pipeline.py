@@ -220,6 +220,15 @@ def main():
     except Exception as e:
         print(f"  [states] non-fatal error: {e}")
 
+    # In-house government-affairs flag per prospect (advisory badge only; grounded in scraped
+    # job/news text + curated backstop + optional Firecrawl web enrichment; cached, non-fatal).
+    try:
+        import dc_govaffairs
+        n_ga = dc_govaffairs.attach(ranked, {"ss1": a1, "ss2": a2, "ss4": a4})
+        print(f"  Gov-affairs flagged -> {n_ga}/{len(ranked)}")
+    except Exception as e:
+        print(f"  [govaffairs] non-fatal error: {e}")
+
     print(f"  SS5 -> {dc_sheets.write_ss5(sheet, ranked)} ranked operators")
     print(f"  Entities spine -> {dc_sheets.write_entities(sheet, list(entities.values()))} resolved")
 
