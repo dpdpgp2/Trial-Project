@@ -1,0 +1,599 @@
+<!doctype html>
+<html class="no-js" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="keywords" content="HTML5">
+    <meta name="description" content="DST - Department of science and Technology">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>DST - Department of science and Technology</title>
+    <title>Home Page</title>
+    <link rel="icon" href="/ui/images/fav.png" type="image/x-icon">
+
+    <style>
+        .newmodaldata .btn-close {
+            background: url('/Admin/images/close.png');
+        }
+    </style>
+
+    <!-- Font Icons css -->
+    <link rel="shortcut icon" href="/ui/images/fav.png">
+
+    <link href="/ui/css/font-awesome-all.css" rel="stylesheet" type="text/css">
+    <link href="/ui/css/owl.css" rel="stylesheet" type="text/css">
+    <link href="/ui/css/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="/ui/css/jquery.fancybox.min.css" rel="stylesheet" type="text/css">
+    <link href="/ui/css/global.css" rel="stylesheet" type="text/css"> 
+     <link href="/ui/css/header.css" rel="stylesheet" type="text/css"> 
+     <link href="/ui/css/style.css" rel="stylesheet" type="text/css"> 
+    <link href="/ui/css/responsive.css" rel="stylesheet" type="text/css">
+    <link href="/ui/css/nivo-slider.css" rel="stylesheet" type="text/css">
+    <link href="/ui/css/custom.css" rel="stylesheet" type="text/css">
+    <link href="/ui/css/accesibility-style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" href="/Admin/vendors/css/sweetalert2.min.css?dt=19072026375PM375">
+    
+    <script>
+        var baseUrl = "/";
+    </script> 
+
+</head>
+
+<body class="boxed_wrapper">
+    <!-- preloader -->
+    <!-- Preloader area start here -->
+    <div id="loading" class="icon-preloader">
+        <div class="loader">
+            <div class="animate3">
+                <img src="/ui/images/load.png" alt="Preloader Image animate3">
+            </div>
+        </div>
+    </div>
+    <!--End preloader here -->
+    <!-- preloader end -->
+    <!-- search-popup -->
+    <div id="search-popup" class="search-popup">
+        <div class="close-search"><span>Close</span></div>
+        <div class="popup-inner">
+            <div class="overlay-layer"></div>
+            <div class="search-form">
+                    <div class="form-group">
+                        <fieldset>                        
+                            <input type="search" class="form-control" name="search-input" value=""
+                                   placeholder="Search Here" id="txtGlobalSearch" required>
+                        <span class="loadermike" style="display:none"></span>
+                            <input type="submit" value="Search Now!" class="theme-btn style-four" onclick="GetSearch();">
+                        </fieldset>
+                    </div>
+            </div>
+        </div>
+    </div>
+    <!-- search-popup end -->
+    <!--page start-->
+
+    <header id="masthead" class="main-header style-one">
+
+        <div class="auto-container">
+            <div class="row clearfix">
+                <div class="col-lg-4 col-md-12 col-sm-12 logo-column" id="Dvmainlogo">
+                </div>
+                <div class="col-lg-8 col-md-12 col-sm-12 ">
+                    <div class="outer-box">
+                        <div class="header-top">
+                            <div class="large-container">
+                                <div class="top-inner clearfix">
+                                    <div class="top-left  clearfix">
+                                        <div class="row" id="dvHeadermenu">
+                                                
+                                        </div>
+                                        <div class="row justify-content-end" id="SideExtraMenu">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row clearfix">
+                <div class="col-lg-12 col-md-12 col-sm-12 outer-column">
+                    <div class="outer-box">
+                        <div class="header-upper clearfix">
+                            <div class="menu-area clearfix">
+                                <!--Mobile Navigation Toggler-->
+                                <div class="mobile-nav-toggler">
+                                    <i class="icon-bar"></i>
+                                    <i class="icon-bar"></i>
+                                    <i class="icon-bar"></i>
+                                </div>
+                                <nav class="main-menu navbar-expand-md navbar-light">
+                                    <div class="collapse navbar-collapse show clearfix" id="navbarSupportedContent">
+                                        <ul class="navigation clearfix">
+<li class="active dropdown"><a href="\Index"><i aria-hidden="true" class="fa fa-home"></i></a></li><li class='dropdown'><a href='#'>About DST<span class="arrow fa fa-angle-down"></span> </a><ul class='sub-menu'><li  ><a  href='/Home/Introduction' class='active'>Introduction</a></li><li  ><a  href='/Home/Mission' class='active'>Mission</a></li><li  ><a  href='/Home/Objectives' class='active'>Objectives</a></li><li  ><a  href='/Home/OrganizationStructure' class='active'>Organization Structure</a></li><li class='dropdown'><a href='#'>Awards<span class="arrow fa fa-angle-down"></span> </a><ul class='sub-menu'><li  ><a  href='/Home/AwardsDuring2017and2018' class='active'>Awards During 2017 & 2018</a></li><li  ><a  href='/Home/AwardsDuring2015and2016' class='active'>Awards During 2015 & 2016</a></li><li  ><a  href='/Home/AwardsDuring2014' class='active'>Awards During 2014</a></li><li  ><a  href='/Home/AwardsDuring2013' class='active'>Awards During 2013</a></li><li  ><a  href='/Home/AwardsDuring2011and2012' class='active'>Awards During 2011 & 2012</a></li><li  ><a  href='/Home/AwardsDuring2009and2010' class='active'>Awards During 2009 &  2010</a></li><li  ><a  href='/Home/AwardsDuring2007and2008' class='active'>Awards During 2007 & 2008</a></li><li  ><a  href='/Home/AwardsDuring2005and2006' class='active'>Awards During 2005 & 2006</a></li><li  ><a  href='/Home/AwardsDuring2003and2004' class='active'>Awards During 2003 & 2004</a></li><li  ><a  href='/Home/AwardsDuring2001and2002' class='active'>Awards During 2001 & 2002</a></li></ul></li></ul></li><li class='dropdown'><a href='#'>Organisations<span class="arrow fa fa-angle-down"></span> </a><ul class='sub-menu'><li  ><a  href='/Home/DirectorateofICTandeGovernance' class='active'>Directorate of ICT & e-Governance</a></li><li  ><a  href='/Home/GujaratInformaticsLimited' class='active'>Gujarat Informatics Limited</a></li><li  ><a  href='/Home/GujaratStateElectronicsMission' class='active'>Gujarat State Electronics Mission</a></li><li  ><a  href='/Home/GujaratFibreGridNetworkLimited' class='active'>Gujarat Fibre Grid Network Limited</a></li><li  ><a  href='/Home/InstituteofSeismologicalResearch' class='active'>Institute of Seismological Research</a></li><li  ><a  href='/Home/GujaratCouncilofScienceCity' class='active'>Gujarat Council of Science City</a></li><li  ><a  href='/Home/GujaratCouncilofScienceandTechnology' class='active'>Gujarat Council on Science and Technology</a></li><li  ><a  href='/Home/GujaratStateBioTechnologyMission' class='active'>Gujarat State Bio Technology Mission</a></li><li  ><a  href='/Home/GujaratBiotechnologyResearchCentre' class='active'>Gujarat Biotechnology Research Centre</a></li><li  ><a  href='/Home/GujaratBioTechnologyUniversity' class='active'>Gujarat BioTechnology University</a></li><li  ><a  href='/Home/SavliTechnologyBusinessIncubator' class='active'>Savli Technology & Business Incubator</a></li><li  class="active dropdown" ><a  href='/Home/GujaratStateDataCenter' class='active'>Gujarat State Data Center</a></li></ul></li><li class='dropdown'><a href='#'>ICT<span class="arrow fa fa-angle-down"></span> </a><ul class='sub-menu'><li  ><a  href='/Home/EGovernance' class='active'>E-Governance</a></li><li  ><a  href='/Home/ProjectsandInitiatives' class='active'>Projects & Initiatives</a></li></ul></li><li class='dropdown'><a href='#'>Policies<span class="arrow fa fa-angle-down"></span> </a><ul class='sub-menu'><li  ><a  href='/Home/GujaratSpaceTechPolicy' class='active'>Gujarat SpaceTech Policy</a></li><li  ><a  href='/Home/GujaratGlobalCapabilityCenter' class='active'>Gujarat GCC Policy </a></li><li  ><a  href='/Home/GujaratElectronicsPolicy' class='active'>Gujarat Electronics Policy</a></li><li  ><a  href='/Home/GujaratSemiconductorPolicy' class='active'>Gujarat Semiconductor Policy</a></li><li  ><a  href='/Home/gjstateititespolicy' class='active'>Gujarat State New IT/ITeS Policy</a></li><li  ><a  href='/Home/BiotechnologyPolicy' class='active'>Biotechnology Policy</a></li><li  ><a  href='/Home/stip' class='active'>Science, Technology and Innovation Policy</a></li></ul></li><li  ><a  href='/Home/Investorscorner' class='active'>Investor's corner</a></li><li class='dropdown'><a href='#'>E-Citizen<span class="arrow fa fa-angle-down"></span> </a><ul class='sub-menu'><li  ><a  href='/Home/RighttoInformationAct' class='active'>Right to Information Act</a></li><li  ><a  href='/Home/ActsandRules' class='active'>Acts & Rules</a></li><li  ><a  href='/GovernmentResolutions' class='active'>Government Resolutions</a></li><li  ><a  href='/Notification' class='active'>Notifications / Circular</a></li><li  ><a  href='/Home/Policies' class='active'>Policies</a></li><li  ><a  href='/Home/Guidelines' class='active'>Guidelines</a></li><li  ><a  href='/Home/FAQs' class='active'>FAQs</a></li><li  ><a  href='/Home/UsefulLinks' class='active'>Useful Links</a></li><li class='dropdown'><a href='/Home/ITAct2000'>Information Technology Act 2000<span class="arrow fa fa-angle-down"></span> </a><ul class='sub-menu'><li  ><a  href='/Home/Procedure' class='active'>Procedure</a></li><li  ><a  href='/Home/Judgements' class='active'>Judgements</a></li></ul></li><li  ><a  href='/Home/PoSHAct' class='active'>PoSH Act</a></li></ul></li><li  ><a  href='/Tenders' class='active'>Tenders</a></li><li class='dropdown'><a href='#'>Contact Us<span class="arrow fa fa-angle-down"></span> </a><ul class='sub-menu'><li  ><a  href='/Home/HeadOffice' class='active'>Head Office</a></li><li  ><a  href='/Home/ListofOfficers' class='active'>List of Officers</a></li><li  ><a  href='/FeedBack' class='active'>Feedback</a></li></ul></li>                                        </ul>
+                                    </div>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--sticky Header-->
+        <div class="sticky-header">
+            <div class="auto-container clearfix">
+                <div class="menu-area">
+                    <nav class="main-menu clearfix">
+                        <!-- Keep This Empty / Menu will come through Javascript -->
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Mobile Menu  -->
+    <div class="mobile-menu">
+        <div class="menu-backdrop"></div>
+        <div class="close-btn"><i class="fas fa-times"></i></div>
+        <nav class="menu-box">
+            <div class="nav-logo"><a href="#"><img src="/ui/images/logo.png" alt="img" title=""></a></div>
+            <div class="menu-outer">
+                <!--Here Menu Will Come Automatically Via Javascript / Same Menu as in Header-->
+            </div>
+        </nav>
+    </div><!-- End Mobile Menu -->
+    
+
+    
+<!-- page-title -->
+
+<div class="page-title style-two">
+    <div class="pattern-layer" style="background-image: url('/ui/images/shape-13.png');"></div>
+    <div class="auto-container">
+        <div class="content-box">
+            <ul class="bread-crumb clearfix">
+<li><a title = "Homepage" href="/Index" ><i class="ti ti-home"></i>&nbsp;&nbsp;Home</a></li><li><span><i class="fa fa-angle-right" aria-hidden="true"></i></span></li> <li><a href="#">Organisations</a></li><li><span><i class="fa fa-angle-right" aria-hidden="true"></i></span></li> <li><a href="#">Gujarat State Data Center</a></li>            </ul>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- page-title end-->
+<section class="service-details">
+    <div class="auto-container">
+            <div class="row clearfix" id="maincontent">
+                <div class="col-lg-12 col-md-9 col-sm-12 content-side">
+                    <div class="service-details-content">
+                        <div class="inner-box">
+                            <div class="technology-box">
+                                <div class="row clearfix">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 content-column">
+                                        <div class="content-box">
+                                                <h3>Gujarat State Data Center</h3>
+
+<hr />
+<h5>Overview</h5>
+
+<p>The Gujarat State Data Center (GSDC) is a secure and centralized Information Technology (IT) infrastructure
+	established to host applications and data related to e-Governance initiatives at the state level. This facilitates
+	the efficient delivery of government services across various sectors.<br />
+	<br />
+	The GSDC holds the distinction of being the first State Data Center implemented in India under the National
+	e-Governance Plan (NeGP). Established in 2010, it serves as a central repository for storing and managing all
+	digital data, applications, and services pertaining to the Government of Gujarat.
+</p>
+
+<hr />
+<h5>The GSDC provides a shared platform encompassing:</h5>
+
+<ul class="list-item clearfix">
+	<li><strong>Compute Resources:</strong> Processing power for running applications.</li>
+	<li><strong>Storage:</strong> Secure storage for government data.</li>
+	<li><strong>Network:</strong> Reliable and secure network connectivity.</li>
+	<li><strong>Security:</strong> Robust security measures to safeguard government data and applications.</li>
+</ul>
+
+<p>This shared platform empowers all departments within the Government of Gujarat to host their electronic data and
+	services efficiently.<br />
+	To effectively manage internet traffic, the GSDC is equipped with a high-speed bandwidth of 30 Gbps with redundancy,
+	ensuring constant availability.<br />
+	he Department of Science and Technology has further enhanced the GSDC's capabilities by incorporating a
+	cloud-enabled environment. This enables them to provide Infrastructure-as-a-Service (IaaS) to various departments,
+	Heads of Departments (HoDs), and government offices within the state. This essentially allows them to access and
+	utilize computing resources on demand.</p>
+
+<div class="main-panel pt-25">
+	<div class="row">
+		<div class="col-md-6 col-sm-12 col-lg-6">
+			<div class="card">
+				<div class="card-body">
+					<p class="card-title font-weight-bold">CONTACT DETAILS</p>
+
+					<hr />
+					<ul class="about">
+						<li class="about-items"><i aria-hidden="true" class="fa fa-address-card"></i> <span
+								class="about-item-name"><strong>Department :</strong></span> <span
+								class="about-item-detail">Gujarat State Data Center</span></li>
+						<li class="about-items"><i aria-hidden="true" class="fa fa-phone"></i> <span
+								class="about-item-name"><strong>Phone :</strong></span> <span
+								class="about-item-detail">079 23257345</span></li>
+						<li class="about-items"><i aria-hidden="true" class="fa fa-fax"></i> <span
+								class="about-item-name"><strong>Fax :</strong></span> <span
+								class="about-item-detail">-</span></li>
+						<li class="about-items"><i aria-hidden="true" class="fas fa-map-marker-alt"></i> <span
+								class="about-item-name"><strong>Address :</strong></span> <span
+								class="about-item-detail">Gujarat State Data Center, near Police Bhavan, 382018 -
+								Gandhinagar</span></li>
+						<li class="about-items"><i aria-hidden="true" class="fa fa-envelope"></i> <span
+								class="about-item-name"><strong>Email :</strong></span> <span class="about-item-detail">
+								<a href="#" title="Email">head-gsdc[at]gujarat[dot]gov[dot]in</a></span></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-6 col-sm-12 col-lg-6">
+			<div class="card">
+				<div class="profile-card">
+					<div class="card-body">
+						<p class="card-title font-weight-bold">HEAD OF THE ORGANISATION</p>
+
+						<hr />
+						<div class="profile-header"><!--<div class="user-image"><img alt="Shri Bhumik Barot" class="img " src="/ViewFile?fileName=G23r3P✿X0p4eI02d2v✤jHKcTx0qlvQakoSUdPJY3hG7UJkW0LkOM031SEJeFYfT6AfMG9dkS5qNhD36VMxWRvx1✿CbjVVd3Mgj0xvRL✤yQr8jLglNPQLV✿noYiCgfI6E82BVs✤qhqYM8✤WkOGmZ4ug♬♬" /></div>
+</div>-->
+							<div class="user-image"><img alt="Shri Bhumik Barot" class="img "
+									src="/ViewFile?fileName=o0LWmHiO9eJ09hArk✿DNyjsR9b81✤MwrOsSQGygOWsz3csxY9SO✿✤F90Twq9vcQF0TNptKBnPqSmeZIbFD9j8y9dqtugdGypc1awjBt✤9AzLB✿gMIsBDN692KVyvkqVFbdi0v0S4iZq4V5✿SBqhFHg♬♬" title="Shri Bhumik Barot"/>
+							</div>
+						</div>
+
+						<div class="profile-content">
+							<div class="profile-name"><!--Shri Bhumik Barot-->Dr. Deven Pandya</div>
+
+							<div class="profile-designation">Joint Director</div>
+						</div>
+
+						<ul class="about"><!-- <li class="about-items">
+                                                                                 <i class="fa fa-user" aria-hidden="true"></i>
+                                                                                 <span class="about-item-name"><strong>Name :</strong></span>
+                                                                                 <span class="about-item-detail">Shri S. D. Vora</span>
+                                                                             </li> -->
+							<li class="about-items"><i aria-hidden="true" class="fa fa-phone"></i> <span
+									class="about-item-name"><strong>Phone:</strong></span> <span
+									class="about-item-detail">079 - 23257345</span></li>
+							<li class="about-items"><i aria-hidden="true" class="fas fa-map-marker-alt"></i> <span
+									class="about-item-name"><strong>Address:</strong></span> <span
+									class="about-item-detail">Gujarat State Data Center, near Police Bhavan, 382018 -
+									Gandhinagar </span></li>
+							<li class="about-items"><i aria-hidden="true" class="fa fa-envelope"></i> <span
+									class="about-item-name"><strong>Email:</strong></span> <span
+									class="about-item-detail"> <a href="#" title="Email">
+										jdit-gsdc[at]gujarat[dot]gov[dot]in</a></span></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="btn-box"><a class="theme-btn style-four" href="https://advait.gujarat.gov.in/"
+		onclick="return confirm('This link will take you to an external web site.');" target="_blank" title="Visit official website">Visit official
+		website </a></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+    </div>
+</section>
+
+<script>
+    var pagename = 'GujaratStateDataCenter';
+        //$(document).ready(function () {
+
+        //     var srcNodeList = document.querySelectorAll('[src],[href]');
+        //        for (var i = 0; i < srcNodeList.length; ++i) {
+        //          var item = srcNodeList[i];
+        //            if(item.getAttribute('src') !== null){
+        //                var src=new URL(item.src.toString()).pathname+"?"+new URL(item.src.toString()).searchParams.toString();
+        //                if(!src.startsWith(baseUrl))
+        //                {
+        //                    item.src = ResolveUrl(src);
+        //                }
+        //            }
+        //            if(item.getAttribute('href') !== null){
+        //                var href=new URL(item.href.toString()).pathname+"?"+new URL(item.href.toString()).searchParams.toString();
+        //                if(!href.startsWith(baseUrl))
+        //                {
+        //                    item.href = ResolveUrl(href);
+        //                }
+        //            }
+        //        }
+        //});
+</script>
+
+
+
+
+    <!--footer start-->
+    <!-- main-footer -->
+    <footer class="main-footer">
+        <div class="scene">
+            <img src="/ui/images/stars.png" alt="stars" class="stars">
+            <img src="/ui/images/space_ship.png" alt="ship" class="ship">
+            <!-- <img src="../ui/images/astronaut.png" class="astronaut"> -->
+            <img src="/ui/images/comet.png" alt="comet" class="comet">
+            <!-- <img src="../ui/images/moon.png" class="moon"> -->
+        </div>
+
+        <div class="image-box1">
+            <figure class="image-1">
+                <img src="/ui/images/space2.png" alt="Img">
+            </figure>
+        </div>
+        <div class="image-box2">
+            <figure class="image-2">
+                <img src="/ui/images/space.png" alt="Img">
+            </figure>
+        </div>
+        <div class="footer-top">
+            <div class="auto-container">
+                <div class="widget-section">
+                    <div class="row clearfix d-flex justify-content-center" id="dvFooter">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom style-one">
+            <div class="auto-container clearfix">
+                <div class="copyright pull-left">
+                    <p> © <a href="#">Department of Science & Technology, Government of Gujarat.</a></p>
+                </div>
+                <ul class="footer-nav pull-right">
+                    <li>
+                        <a href="#">
+<span> Last Updated : 25/06/2026</span>&nbsp;&nbsp;&nbsp;&nbsp;                        </a>
+                    </li>
+                    <li><a href="#">Total Visitors : <label id="CounterVisitor"></label></a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+    <!-- chat box Wrapper end -->
+
+    <!-- accessibility panel -->
+    <div class="uwaw uw-light-theme gradient-head uwaw-initial paid_widget" id="uw-main">
+        <div class="relative second-panel">
+            <h3>Accessibility options</h3>
+            <div class="uwaw-close" onclick="closeMain()"></div>
+        </div>
+        <div class="uwaw-body">
+            <div class="h-scroll">
+                <div class="uwaw-features">
+                    <div class="uwaw-features__item reset-feature" id="featureItem_sp">
+                        <button id="speak"
+                                class="uwaw-features__item__i" data-uw-reader-content="Enable the UserWay screen reader"
+                                aria-label="Enable the UserWay screen reader" aria-pressed="false">
+                            <span class="uwaw-features__item__icon"> <span class="ux4g-icon icon-speaker"> </span> </span>
+                            <span class="uwaw-features__item__name">Screen Reader</span> <span class="tick-active uwaw-features__item__enabled reset-tick" id="tickIcon_sp"
+                                                                                               style="display: none"> </span>
+                        </button>
+                    </div>
+                    <div class="uwaw-features__item reset-feature" id="featureItem">
+                        <button id="btn-s9"
+                                class="uwaw-features__item__i" data-uw-reader-content="Enable the UserWay screen reader"
+                                aria-label="Enable the UserWay screen reader" aria-pressed="false">
+                            <span class="uwaw-features__item__icon">
+                                <span class="ux4g-icon icon-bigger-text"> </span>
+                            </span><span class="uwaw-features__item__name">Bigger Text</span>
+                            <div class="uwaw-features__item__steps reset-steps" id="featureSteps">
+                                <!-- Steps span tags will be dynamically added here -->
+                            </div> <span class="tick-active uwaw-features__item__enabled reset-tick" id="tickIcon"
+                                         style="display: none"> </span>
+                        </button>
+                    </div>
+                    <div class="uwaw-features__item reset-feature" id="featureItem-st">
+                        <button id="btn-small-text"
+                                class="uwaw-features__item__i" data-uw-reader-content="Enable the UserWay screen reader"
+                                aria-label="Enable the UserWay screen reader" aria-pressed="false">
+                            <span class="uwaw-features__item__icon">
+                                <span class="ux4g-icon icon-small-text"> </span>
+                            </span><span class="uwaw-features__item__name">Small Text</span>
+                            <div class="uwaw-features__item__steps reset-steps" id="featureSteps-st">
+                                <!-- Steps span tags will be dynamically added here -->
+                            </div> <span class="tick-active uwaw-features__item__enabled reset-tick" id="tickIcon-st"
+                                         style="display: none"> </span>
+                        </button>
+                    </div>
+                    <div class="uwaw-features__item reset-feature" id="featureItem-lh">
+                        <button id="btn-s12"
+                                class="uwaw-features__item__i" data-uw-reader-content="Enable the UserWay screen reader"
+                                aria-label="Enable the UserWay screen reader" aria-pressed="false">
+                            <span class="uwaw-features__item__icon">
+                                <span class="ux4g-icon icon-line-hight"> </span>
+                            </span>
+                            <span class="uwaw-features__item__name">Line Height</span>
+                            <div class="uwaw-features__item__steps reset-steps" id="featureSteps-lh">
+                                <!-- Steps span tags will be dynamically added here -->
+                            </div> <span class="tick-active uwaw-features__item__enabled reset-tick" id="tickIcon-lh"
+                                         style="display: none"> </span>
+                        </button>
+                    </div>
+                    <div class="uwaw-features__item reset-feature" id="featureItem-ht">
+                        <button id="btn-s10"
+                                onclick="highlightLinks()" class="uwaw-features__item__i"
+                                data-uw-reader-content="Enable the UserWay screen reader"
+                                aria-label="Enable the UserWay screen reader" aria-pressed="false">
+                            <span class="uwaw-features__item__icon">
+                                <span class="ux4g-icon icon-highlight-links"> </span>
+                            </span> <span class="uwaw-features__item__name">Highlight Links</span> <span class="tick-active uwaw-features__item__enabled reset-tick" id="tickIcon-ht"
+                                                                                                         style="display: none"> </span>
+                        </button>
+                    </div>
+                    <div class="uwaw-features__item reset-feature" id="featureItem-ts">
+                        <button id="btn-s13"
+                                onclick="increaseAndReset()" class="uwaw-features__item__i"
+                                data-uw-reader-content="Enable the UserWay screen reader"
+                                aria-label="Enable the UserWay screen reader" aria-pressed="false">
+                            <span class="uwaw-features__item__icon">
+                                <span class="ux4g-icon icon-text-spacing"> </span>
+                            </span> <span class="uwaw-features__item__name">Text Spacing</span>
+                            <div class="uwaw-features__item__steps reset-steps" id="featureSteps-ts">
+                                <!-- Steps span tags will be dynamically added here -->
+                            </div> <span class="tick-active uwaw-features__item__enabled reset-tick" id="tickIcon-ts"
+                                         style="display: none"> </span>
+                        </button>
+                    </div>
+                    <div class="uwaw-features__item reset-feature" id="featureItem-df">
+                        <button id="btn-df"
+                                onclick="toggleFontFeature()" class="uwaw-features__item__i"
+                                data-uw-reader-content="Enable the UserWay screen reader"
+                                aria-label="Enable the UserWay screen reader" aria-pressed="false">
+                            <span class="uwaw-features__item__icon">
+                                <span class="ux4g-icon icon-dyslexia-font"> </span>
+                            </span> <span class="uwaw-features__item__name">Dyslexia Friendly</span> <span class="tick-active uwaw-features__item__enabled reset-tick" id="tickIcon-df"
+                                                                                                           style="display: none"> </span>
+                        </button>
+                    </div>
+                    <div class="uwaw-features__item reset-feature" id="featureItem-hi">
+                        <button id="btn-s11"
+                                onclick="toggleImages()" class="uwaw-features__item__i"
+                                data-uw-reader-content="Enable the UserWay screen reader"
+                                aria-label="Enable the UserWay screen reader" aria-pressed="false">
+                            <span class="uwaw-features__item__icon">
+                                <span class="ux4g-icon icon-hide-images"> </span>
+                            </span>
+                            <span class="uwaw-features__item__name">Hide Images</span> <span class="tick-active uwaw-features__item__enabled reset-tick" id="tickIcon-hi"
+                                                                                             style="display: none"> </span>
+                        </button>
+                    </div>
+                    <div class="uwaw-features__item reset-feature" id="featureItem-Cursor">
+                        <button id="btn-cursor"
+                                onclick="toggleCursorFeature()" class="uwaw-features__item__i"
+                                data-uw-reader-content="Enable the UserWay screen reader"
+                                aria-label="Enable the UserWay screen reader" aria-pressed="false">
+                            <span class="uwaw-features__item__icon"> <span class="ux4g-icon icon-cursor"> </span> </span>
+                            <span class="uwaw-features__item__name">Cursor</span> <span class="tick-active uwaw-features__item__enabled reset-tick" id="tickIcon-cursor"
+                                                                                        style="display: none"> </span>
+                        </button>
+                    </div>
+                    <div class="uwaw-features__item reset-feature" id="featureItem-ht-dark">
+                        <button id="dark-btn"
+                                class="uwaw-features__item__i" data-uw-reader-content="Enable the UserWay screen reader"
+                                aria-label="Enable the UserWay screen reader" aria-pressed="false">
+                            <span class="uwaw-features__item__name">
+                                <span class="light_dark_icon">
+                                    <input type="checkbox"
+                                           class="light_mode uwaw-featugres__item__i" id="checkbox" /> <label for="checkbox" class="checkbox-label">
+                                        <!-- <i class="fas fa-moon-stars"></i> --> <i class="fas fa-moon-stars">
+                                            <span class="ux4g-icon icon-moon"></span>
+                                        </i> <i class="fas fa-sun">
+                                            <span class="ux4g-icon icon-sun"></span>
+                                        </i> <span class="ball"></span>
+                                    </label>
+                                </span> <span class="uwaw-features__item__name">Light-Dark</span>
+                            </span>
+                            <span class="tick-active uwaw-features__item__enabled reset-tick" id="tickIcon-ht-dark"
+                                  style="display: none; pointer-events: none"> </span>
+                        </button>
+                    </div>
+                    <!-- Invert Colors Widget -->
+                    <div class="uwaw-features__item reset-feature" id="featureItem-ic">
+                        <button id="btn-invert"
+                                class="uwaw-features__item__i" data-uw-reader-content="Enable the UserWay screen reader"
+                                aria-label="Enable the UserWay screen reader" aria-pressed="false">
+                            <span class="uwaw-features__item__icon"> <span class="ux4g-icon icon-invert"> </span> </span>
+                            <span class="uwaw-features__item__name">Invert Colors</span> <span class="tick-active uwaw-features__item__enabled reset-tick" id="tickIcon-ic"
+                                                                                               style="display: none"> </span>
+                        </button>
+                    </div>
+                </div>
+            </div> <!-- Reset Button -->
+        </div>
+        <div class="reset-panel">
+            <!-- copyright accessibility bar -->
+            <div class="copyrights-accessibility">
+                <button class="btn-reset-all" id="reset-all" onclick="resetAll()">
+                    <span class="reset-icon"> </span> <span class="reset-btn-text">Reset All Settings</span>
+                </button>
+                <!-- <a href="https://www.ux4g.gov.in" target="_blank" class="copyright-text" contenteditable="false"
+                    style="cursor: pointer;"> <span class="uwaw-features__item__name ux4g-copy ux4g-copyright">Created
+                        by</span> <img src="https://www.ux4g.gov.in/assets/img/logo/ux4g-logo.svg" alt="logo"
+                        loading="lazy"> </a> -->
+            </div>
+        </div>
+    </div>
+    <button id="uw-widget-custom-trigger" class="uw-widget-custom-trigger" aria-label="Accessibility Widget"
+            data-uw-trigger="true" aria-haspopup="dialog">
+        <img src="data:image/svg+xml,%0A%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg clip-path='url(%23clip0_1_1506)'%3E%3Cpath d='M16 7C15.3078 7 14.6311 6.79473 14.0555 6.41015C13.4799 6.02556 13.0313 5.47894 12.7664 4.83939C12.5015 4.19985 12.4322 3.49612 12.5673 2.81719C12.7023 2.13825 13.0356 1.51461 13.5251 1.02513C14.0146 0.535644 14.6383 0.202301 15.3172 0.0672531C15.9961 -0.0677952 16.6999 0.00151652 17.3394 0.266423C17.9789 0.53133 18.5256 0.979934 18.9101 1.55551C19.2947 2.13108 19.5 2.80777 19.5 3.5C19.499 4.42796 19.1299 5.31762 18.4738 5.97378C17.8176 6.62994 16.928 6.99901 16 7Z' fill='white'/%3E%3Cpath d='M27 7.05L26.9719 7.0575L26.9456 7.06563C26.8831 7.08313 26.8206 7.10188 26.7581 7.12125C25.595 7.4625 19.95 9.05375 15.9731 9.05375C12.2775 9.05375 7.14313 7.67875 5.50063 7.21188C5.33716 7.14867 5.17022 7.09483 5.00063 7.05063C3.81313 6.73813 3.00063 7.94438 3.00063 9.04688C3.00063 10.1388 3.98188 10.6588 4.9725 11.0319V11.0494L10.9238 12.9081C11.5319 13.1413 11.6944 13.3794 11.7738 13.5856C12.0319 14.2475 11.8256 15.5581 11.7525 16.0156L11.39 18.8281L9.37813 29.84C9.37188 29.87 9.36625 29.9006 9.36125 29.9319L9.34688 30.0112C9.20188 31.0206 9.94313 32 11.3469 32C12.5719 32 13.1125 31.1544 13.3469 30.0037C13.5813 28.8531 15.0969 20.1556 15.9719 20.1556C16.8469 20.1556 18.6494 30.0037 18.6494 30.0037C18.8838 31.1544 19.4244 32 20.6494 32C22.0569 32 22.7981 31.0162 22.6494 30.0037C22.6363 29.9175 22.6206 29.8325 22.6019 29.75L20.5625 18.8294L20.2006 16.0169C19.9387 14.3788 20.1494 13.8375 20.2206 13.7106C20.2225 13.7076 20.2242 13.7045 20.2256 13.7013C20.2931 13.5763 20.6006 13.2963 21.3181 13.0269L26.8981 11.0763C26.9324 11.0671 26.9662 11.0563 26.9994 11.0438C27.9994 10.6688 28.9994 10.15 28.9994 9.04813C28.9994 7.94625 28.1875 6.73813 27 7.05Z' fill='white'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='clip0_1_1506'%3E%3Crect width='32' height='32' fill='white'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E%0A"><span>
+            Accessibility
+            Options
+        </span>
+    </button>
+    <!-- accessibility panel end-->
+
+    <!--Scroll to top-->
+    <button class="scroll-top scroll-to-target" data-target="html">
+        <span class="fas fa-angle-up"></span>
+    </button>
+    <!--back-to-top end-->
+    <!-- Javascript -->
+
+    <script src="/ui/js/jquery.js"></script>
+    <script src="/ui/js/popper.min.js"></script>
+    <script src="/ui/js/bootstrap.min.js"></script>
+    <script src="/ui/js/owl.js"></script>
+    <script src="/ui/js/jquery.fancybox.js"></script>
+    <script src="/ui/js/scrollbar.js"></script>
+    <script src="/ui/js/jquery.nivo.slider.js"></script>
+    <script src="/ui/js/script.js"></script>
+    <script src="/ui/js/main.js"></script>
+    <script src="/Admin/js/Secure/aes.js"></script>
+    <script src="/Admin/js/Secure/hash.js"></script>
+    <script src="/Admin/js/Common.js?dt=19072026409PM409"></script>
+    <script src="/ui/js/PageDetails/MainLayoutModule.js?v=SvvRkEQQvt697yHLaDUDAsTRPQV6PQj0eZ9dtpkMh5U"></script>
+    <script src="/Admin/vendors/js/sweetalert2.min.js?dt=19072026409PM409"></script>
+    <script src="https://img1.digitallocker.gov.in/ux4g/UX4G-CDN-accessibility/js/weights-v1.js"></script>
+    
+    <script>
+        var regexGlobalValidation = new RegExp(htmlDecode("^[^&lt;&gt;()]&#x2B;$"));
+        var regexName = new RegExp(htmlDecode("^[a-zA-Z ]&#x2B;$"));
+        var regexMobileNo = new RegExp(htmlDecode("^[6-9]{1}[0-9]{9}$"));
+        var regexPincode = new RegExp(htmlDecode("^[0-9]{6}$"));
+        var regexNumber = new RegExp(htmlDecode("^[0-9&#x8;]&#x2B;$"));
+        var regexEmail = new RegExp(htmlDecode("^([a-zA-Z0-9_.&#x2B;-])&#x2B;\\@(([a-zA-Z0-9-])&#x2B;\\.)&#x2B;([a-zA-Z0-9]{2,4})&#x2B;$"));
+        var regexPassword = new RegExp(htmlDecode("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\\s).{8,15}$"));
+        var regexURL = new RegExp(htmlDecode("^[-a-zA-Z0-9@:%_\\&#x2B;.~#?&amp;//=]&#x2B;$"));
+        var dateFormat = '';
+        var allowModalOutsideClick = false;
+        var allowKeyboardInputOnTime = false;
+        var allowKeyboardInputOnDate = false;
+        var allowInspectElement = false;
+        //document.getElementById('uw-widget-custom-trigger2').addEventListener('click', function () { openMain(); });
+    </script>
+
+    
+    <script type="text/javascript">
+                
+        function GetSearch() {
+            var serchtext = $('#txtGlobalSearch').val();
+            window.location.replace(ResolveUrl("/Search?serch=" + serchtext));
+        }
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',  // Your site's primary language
+                includedLanguages: 'en,zh-TW,gu,hi',  // Languages to include, separated by commas
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element');
+        }
+    </script>
+
+
+    <script src="https://translation-plugin.bhashini.co.in/v2/website_translation_utility.js" translation-language-list="en,hi,gu" data-pos-x="95" data-pos-y="2"></script>
+    <script src="/Admin/js/saransh.min.js?dt=19072026409PM409" defer=""></script>
+</body>
+
+</html>

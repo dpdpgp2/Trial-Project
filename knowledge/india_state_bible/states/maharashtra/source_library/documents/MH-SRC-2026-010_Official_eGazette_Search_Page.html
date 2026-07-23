@@ -1,0 +1,302 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1"><title>
+	View Gazettes
+</title><link rel="stylesheet" href="../../STYLES/Site.css" type="text/css" />
+    <script src="../Scripts/jquery-1.7.1.min.js" type="text/javascript"></script>
+    <script src="../Scripts/jquery-ui-1.8.17.custom.min.js" type="text/javascript"></script>
+    <script src="../Scripts/ddsmoothmenu.js" type="text/javascript"></script>
+    <link href="../../Styles/ddsmoothmenu.css" rel="stylesheet" type="text/css" />
+    <script src="../pirobox_extended/js/jquery.min.js" type="text/javascript"></script>
+    <link href="../../pirobox_extended/css_pirobox/style_2/style.css" rel="stylesheet" type="text/css" />
+    <script src="../pirobox_extended/js/pirobox_extended.js" type="text/javascript"></script>
+    <script src="../pirobox_extended/js/pirobox_extended_min.js" type="text/javascript"></script>
+    <script src="../pirobox_extended/js/jquery-ui-1.8.2.custom.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $().piroBox_ext({
+                piro_speed: 700,
+                bg_alpha: 0.5,
+                piro_scroll: true // pirobox always positioned at the center of the page
+            });
+        });
+    </script>
+    
+
+    <script type="text/javascript">
+
+        function fnOpenPopUp(pth) {
+            window.open("GazetteCart.aspx?sc=p", "Gazette", "-self", "width=800px,height=600px,location=no,menubar=no,toolbar=no,scrollbars=yes,resizable=yes,status=yes");
+        }
+
+            var openMyModal = function (source) {
+
+            var mySessionVar = ''; //make sure that you have defined the session variable
+            if (mySessionVar != "") {
+                var curdate = new Date();
+                var curyear = curdate.getFullYear();
+                var curmon = curdate.getMonth();
+                var curdt = curdate.getDate();
+                var curhour = curdate.getHours();
+                var curmin = curdate.getMinutes();
+                var cursec = curdate.getSeconds();
+                var tranid = curyear.toString() + curmon.toString() + curdt.toString() + curhour.toString() + curmin.toString() + cursec.toString();
+
+            }
+            else {
+                modalWindow.windowId = "myModal";
+                modalWindow.width = 480;
+                modalWindow.height = 300;
+                modalWindow.content = "<iframe width='480' height='300' frameborder='0' scrolling='no' allowtransparency='true' src='" + source + "'></iframe>";
+                modalWindow.open();
+            }
+        };
+
+    </script>
+
+    <script language="javascript" type="text/javascript">
+
+        function chkvalidation() {
+            var ddlSection = document.getElementById('CPH_ddlSection').value;
+            SelIndex = document.getElementById('CPH_ddlSection').selectedIndex;
+            if (SelIndex <= 0) {
+                alert('Please select section name');
+                document.getElementById('CPH_ddlSection').focus();
+                return false;
+            }
+        }
+
+   </script>
+
+<link href="/WebResource.axd?d=L5M9b8VG8nMTAgsInhdWNSN6ANLaBD7YK_FB_bhFoAFs29syB2T6uPcKQtHQnqPSFVvwtdNgD4OdgyAOR69YBitEE2Q3mIE8qCAs0dCkZlSL0zo4UFtFcjHFrRxYoyn6JJs_VlA_H5ISdnB6fsfQThAN4EFvtYphE2gQ-g1a3eE1&amp;t=635229594089419557" type="text/css" rel="stylesheet" /></head>
+<body>
+    <form method="post" action="./" id="form1">
+<input type="hidden" name="ScriptManager1_HiddenField" id="ScriptManager1_HiddenField" value="" />
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwULLTExODc0MzY1OTkPFgIeB0dhemV0dGUykg4AAQAAAP////8BAAAAAAAAAAwCAAAATlN5c3RlbS5EYXRhLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OQUBAAAAFVN5c3RlbS5EYXRhLkRhdGFUYWJsZQMAAAAZRGF0YVRhYmxlLlJlbW90aW5nVmVyc2lvbglYbWxTY2hlbWELWG1sRGlmZkdyYW0DAQEOU3lzdGVtLlZlcnNpb24CAAAACQMAAAAGBAAAAN8IPD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTE2Ij8+DQo8eHM6c2NoZW1hIHhtbG5zPSIiIHhtbG5zOnhzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxL1hNTFNjaGVtYSIgeG1sbnM6bXNkYXRhPSJ1cm46c2NoZW1hcy1taWNyb3NvZnQtY29tOnhtbC1tc2RhdGEiPg0KICA8eHM6ZWxlbWVudCBuYW1lPSJUYWJsZTEiPg0KICAgIDx4czpjb21wbGV4VHlwZT4NCiAgICAgIDx4czpzZXF1ZW5jZT4NCiAgICAgICAgPHhzOmVsZW1lbnQgbmFtZT0iUmluIiB0eXBlPSJ4czpzdHJpbmciIG1zZGF0YTp0YXJnZXROYW1lc3BhY2U9IiIgbWluT2NjdXJzPSIwIiAvPg0KICAgICAgICA8eHM6ZWxlbWVudCBuYW1lPSJSZWdObyIgdHlwZT0ieHM6c3RyaW5nIiBtc2RhdGE6dGFyZ2V0TmFtZXNwYWNlPSIiIG1pbk9jY3Vycz0iMCIgLz4NCiAgICAgICAgPHhzOmVsZW1lbnQgbmFtZT0iRnJvbURhdGUiIHR5cGU9InhzOnN0cmluZyIgbXNkYXRhOnRhcmdldE5hbWVzcGFjZT0iIiBtaW5PY2N1cnM9IjAiIC8+DQogICAgICAgIDx4czplbGVtZW50IG5hbWU9IlRvRGF0ZSIgdHlwZT0ieHM6c3RyaW5nIiBtc2RhdGE6dGFyZ2V0TmFtZXNwYWNlPSIiIG1pbk9jY3Vycz0iMCIgLz4NCiAgICAgICAgPHhzOmVsZW1lbnQgbmFtZT0iUHJpY2UiIHR5cGU9InhzOmRlY2ltYWwiIG1zZGF0YTp0YXJnZXROYW1lc3BhY2U9IiIgbWluT2NjdXJzPSIwIiAvPg0KICAgICAgICA8eHM6ZWxlbWVudCBuYW1lPSJQdXJjaGFzZVF1YW50aXR5IiB0eXBlPSJ4czppbnQiIG1zZGF0YTp0YXJnZXROYW1lc3BhY2U9IiIgbWluT2NjdXJzPSIwIiAvPg0KICAgICAgPC94czpzZXF1ZW5jZT4NCiAgICA8L3hzOmNvbXBsZXhUeXBlPg0KICA8L3hzOmVsZW1lbnQ+DQogIDx4czplbGVtZW50IG5hbWU9InRtcERhdGFTZXQiIG1zZGF0YTpJc0RhdGFTZXQ9InRydWUiIG1zZGF0YTpNYWluRGF0YVRhYmxlPSJUYWJsZTEiIG1zZGF0YTpVc2VDdXJyZW50TG9jYWxlPSJ0cnVlIj4NCiAgICA8eHM6Y29tcGxleFR5cGU+DQogICAgICA8eHM6Y2hvaWNlIG1pbk9jY3Vycz0iMCIgbWF4T2NjdXJzPSJ1bmJvdW5kZWQiIC8+DQogICAgPC94czpjb21wbGV4VHlwZT4NCiAgPC94czplbGVtZW50Pg0KPC94czpzY2hlbWE+BgUAAACGAzxkaWZmZ3I6ZGlmZmdyYW0geG1sbnM6bXNkYXRhPSJ1cm46c2NoZW1hcy1taWNyb3NvZnQtY29tOnhtbC1tc2RhdGEiIHhtbG5zOmRpZmZncj0idXJuOnNjaGVtYXMtbWljcm9zb2Z0LWNvbTp4bWwtZGlmZmdyYW0tdjEiPg0KICA8dG1wRGF0YVNldD4NCiAgICA8VGFibGUxIGRpZmZncjppZD0iVGFibGUxMSIgbXNkYXRhOnJvd09yZGVyPSIwIj4NCiAgICAgIDxSaW4gLz4NCiAgICAgIDxSZWdObyAvPg0KICAgICAgPEZyb21EYXRlIC8+DQogICAgICA8VG9EYXRlIC8+DQogICAgICA8UHJpY2U+MC4wPC9QcmljZT4NCiAgICAgIDxQdXJjaGFzZVF1YW50aXR5PjA8L1B1cmNoYXNlUXVhbnRpdHk+DQogICAgPC9UYWJsZTE+DQogIDwvdG1wRGF0YVNldD4NCjwvZGlmZmdyOmRpZmZncmFtPgQDAAAADlN5c3RlbS5WZXJzaW9uBAAAAAZfTWFqb3IGX01pbm9yBl9CdWlsZAlfUmV2aXNpb24AAAAACAgICAIAAAAAAAAA//////////8LFgJmD2QWAgIDD2QWAgIJD2QWBAIHD2QWAmYPZBYEAgEPZBYCAgEPEA8WBh4NRGF0YVRleHRGaWVsZAUMRElWSVNJT05OQU1FHg5EYXRhVmFsdWVGaWVsZAUKRElWSVNJT05JRB4LXyFEYXRhQm91bmRnZBAVCBAtLS0tLVNlbGVjdC0tLS0tD0NFTlRSQUwgU0VDVElPTg5LT0tBTiBESVZJU0lPTg1QVU5FIERJVklTSU9ODk5BU0lLIERJVklTSU9OD05BR1BVUiBESVZJU0lPThFBTVJBVkFUSSBESVZJU0lPThNBVVJBTkdBQkFEIERJVklTSU9OFQgQLS0tLS1TZWxlY3QtLS0tLQExATIBMwE0ATUBNgE3FCsDCGdnZ2dnZ2dnZGQCAw9kFgICAQ8QDxYGHwEFC1NFQ1RJT05OQU1FHwIFCVNFQ1RJT05JRB8DZ2QQFRIQLS0tLS1TZWxlY3QtLS0tLQhQYXJ0IC0gMQlQYXJ0IC0xIEwJUGFydCAtMSBBElBhcnQgdHdvIChTYW5raXJuKRVQYXJ0IHR3byAoc3VwcGxpbWVudCkZUGFydCB0d28gKENoYW5nZSBJbiBOYW1lKRBQYXJ0IDQgKE1hcmF0aGkpClBhcnQgNCAtIEEJUGFydCAtNCBCCFBhcnQgNCBDEFBhcnQgNSAoTWFyYXRoaSkRUGFydCA1QSAoRW5nbGlzaCkHUGFydCAtNg5QYXJ0IDcgKEhpbmRpKRBQYXJ0IDggKEVuZ2xpc2gpI01haGFyYXNodHJhIFNoYXNhbiBSYWpwYXRyYSBQYXJ0LUlJJE1haGFyYXNodHJhIFNoYXNhbiBSYWpwYXRyYSBQYXJ0LVhJSRUSEC0tLS0tU2VsZWN0LS0tLS0BMQEyATMBNAE1ATYBNwE4ATkCMTACMTECMTICMTMCMTQCMTUCMTcCMTgUKwMSZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnFgFmZAILDzwrABECARAWABYAFgAMFCsAAGQYAQUTY3RsMDAkQ1BIJEdyaWRWaWV3Mg9nZCBqoFQT6sdgY38g9cncLXa7Nxj64FswdTzeFTvqdzsU" />
+
+
+<script src="/ScriptResource.axd?d=DlfwyGACB_epZKbZmlsCddk1xlA_EH3-bB4_ACcrjpe9_pMmPtO8UZY0_vhHMwi4zz9mgUesGBonQ3Aa72IHKZpW54-TN4tTKK3hFhgZrQhZZ6csHu_ypH1D60wGo5RGMaDy8EW0H9sRM_JqrI33zd_2tAyYw7M9Vm02bojq531b5J54w2rMzBqfQl0bL3U30&amp;t=2a9d95e3" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+if (typeof(Sys) === 'undefined') throw new Error('ASP.NET Ajax client-side framework failed to load.');
+//]]>
+</script>
+
+<script src="/Forms/GazetteSearch.aspx/?_TSM_HiddenField_=ScriptManager1_HiddenField&amp;_TSM_CombinedScripts_=%3b%3bAjaxControlToolkit%2c+Version%3d1.0.10920.32880%2c+Culture%3dneutral%2c+PublicKeyToken%3d28f01b0e84b6d53e%3aen-GB%3a816bbca1-959d-46fd-928f-6347d6f2c9c3%3a865923e8%3a9b7907bc%3a411fea1c%3ae7c87f07%3a91bd373d%3abbfda34c%3a30a78ec5%3a9349f837%3ad4245214" type="text/javascript"></script>
+<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="C7385081" />
+    
+    
+<div id="header"><img src="../PICS/Gazatte.jpg" alt="" /></div>
+    
+<div class="nav">
+    <div class="ddsmoothmenu" id="smoothmenu1">
+        <ul>
+            <li>
+                <a id="Menu1_lnkHome" href="https://dgps.maharashtra.gov.in">HOME</a></li>
+            <li>
+                </li>
+            <li>
+                <a id="Menu1_lnkGazette" href="../Aboutus_PDF.aspx">ABOUT GAZETTE</a>
+                
+            </li>
+            <li>
+                <a id="Menu1_lnkAboutUs" href="../Aboutus_PDF.aspx">HELP</a>
+              
+            </li>
+
+           
+           
+            <li>
+                </li>
+        </ul>
+    </div>
+</div>
+<script type="text/javascript">
+    ddsmoothmenu.init({
+        mainmenuid: "smoothmenu1", //menu DIV id
+        orientation: 'h', //Horizontal or vertical menu: Set to "h" or "v"
+        classname: 'ddsmoothmenu', //class added to menu's outer DIV
+        //customtheme: ["#1c5a80", "#18374a"],
+        contentsource: "markup" //"markup" or ["container_id", "path_to_menu_file"]
+    })
+</script>
+
+    <div id="section">
+        
+        
+    <h1>
+        View Gazettes</h1>
+    <ul class="pagination">
+        <li>
+            </li>
+        <li>
+            </li>
+        <li>
+            <span id="CPH_LabelYear" class="middleLabel"></span></li>
+    </ul>
+    <div class="clear">
+    </div>
+    <table id="CPH_Table1" class="t_view">
+	<tr>
+		<td>
+                <span id="CPH_lblDivision">Division</span>
+            </td>
+		<td>
+                <select name="ctl00$CPH$ddldivision" id="CPH_ddldivision">
+			<option value="-----Select-----">-----Select-----</option>
+			<option value="1">CENTRAL SECTION</option>
+			<option value="2">KOKAN DIVISION</option>
+			<option value="3">PUNE DIVISION</option>
+			<option value="4">NASIK DIVISION</option>
+			<option value="5">NAGPUR DIVISION</option>
+			<option value="6">AMRAVATI DIVISION</option>
+			<option value="7">AURANGABAD DIVISION</option>
+
+		</select>
+            </td>
+		<td>
+                <span id="CPH_lblSection">Section</span>
+            </td>
+		<td>
+                <select name="ctl00$CPH$ddlSection" id="CPH_ddlSection">
+			<option selected="selected" value="-----Select-----">-----Select-----</option>
+			<option value="1">Part - 1</option>
+			<option value="2">Part -1 L</option>
+			<option value="3">Part -1 A</option>
+			<option value="4">Part two (Sankirn)</option>
+			<option value="5">Part two (suppliment)</option>
+			<option value="6">Part two (Change In Name)</option>
+			<option value="7">Part 4 (Marathi)</option>
+			<option value="8">Part 4 - A</option>
+			<option value="9">Part -4 B</option>
+			<option value="10">Part 4 C</option>
+			<option value="11">Part 5 (Marathi)</option>
+			<option value="12">Part 5A (English)</option>
+			<option value="13">Part -6</option>
+			<option value="14">Part 7 (Hindi)</option>
+			<option value="15">Part 8 (English)</option>
+			<option value="17">Maharashtra Shasan Rajpatra Part-II</option>
+			<option value="18">Maharashtra Shasan Rajpatra Part-XII</option>
+
+		</select>
+            </td>
+	</tr>
+	<tr>
+		<td>
+                <span id="CPH_lblfromDate">From Date</span>
+            </td>
+		<td>
+                <input name="ctl00$CPH$txtfromDate" type="text" maxlength="10" id="CPH_txtfromDate" tabindex="9" onkeypress="return isCharacter();" />
+                (DD/MM/YYYY)
+                
+                   
+                <br />
+                
+                <br />
+                
+            </td>
+		<td>
+                <span id="CPH_lblToDate" style="display:inline-block;">To Date</span>
+            </td>
+		<td>
+                <input name="ctl00$CPH$txtToDate" type="text" maxlength="10" id="CPH_txtToDate" tabindex="9" onkeypress="return isCharacter();" />
+                (DD/MM/YYYY)
+                
+                 
+                &nbsp;
+                <br />
+                
+                <br />
+                
+            </td>
+	</tr>
+	<tr>
+		<td>
+                <span id="CPH_lblGazetteType" style="display:inline-block;">Gazette Type</span>
+            </td>
+		<td>
+                <select name="ctl00$CPH$ddlGazetteType" id="CPH_ddlGazetteType">
+			<option value="">---Select---</option>
+			<option value="0">Ordinary</option>
+			<option value="1">Extra - Ordinary</option>
+
+		</select>
+            </td>
+		<td>
+                &nbsp;
+
+                Section Information
+            </td>
+		<td>
+               <span id="CPH_lbl_SectionInfo" style="display:inline-block;"></span>
+            </td>
+	</tr>
+	<tr>
+		<td colspan="4" align="center">
+                <input type="submit" name="ctl00$CPH$btnSearch" value="Search" onclick="javascript:return chkvalidation();" id="CPH_btnSearch" class="button" />
+
+                <input type="submit" name="ctl00$CPH$btnReset" value="Reset" id="CPH_btnReset" class="button" />
+            </td>
+	</tr>
+	<tr>
+		<td colspan="4">
+                
+            </td>
+	</tr>
+</table>
+
+    <p style="padding:7px;background:#f5faff;border:1px dashed #00468b;color:#00468b;border-radius:5px;line-height:170%"><b> सूचना :-</b> महाराष्ट्र शासन राजपत्र, भाग दोन-नाव, वय व धर्म बदल व भाग दोन संकीर्ण सूचना व जाहिरातींचा विभाग या भागांत प्रसिद्ध झालेल्या जाहिराती अनुक्रमे दिनांक १० जून, २०१४ व दिनांक ४ जून, २०१५ पासून 
+व उर्वरित महाराष्ट्र शासन राजपत्राचे भाग दिनांक १ फेब्रुवारी, २०१५ पासून ईलेक्ट्रॉनिक राजपत्र स्वरूपात उपलब्ध आहेत. वरील नमूद केलेल्या दिनांकापूर्वीची महाराष्ट्र शासनाची सर्व राजपत्र संचालक, 
+पुराभिलेख संचालनालय, १५६, सर कावसजी जहांगीर रेडीमनी इमारत (एलफिन्स्टन महाविद्यालय), 
+महात्मा गांधी मार्ग, काळा घोडा, फोर्ट, मुंबई ४०० ०३२ या कार्यालयात उपलब्ध होऊ शकतील.
+</p>
+    <table>
+        <tr>
+            <td align="right">
+                <ul class="pagination" style="text-align: center; vertical-align: middle">
+                    <li style="vertical-align: middle">
+                        </li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+    <div>
+
+</div>
+    <ul class="pagination" style="text-align: center; vertical-align: middle">
+        <li style="vertical-align: middle">
+            </li>
+    </ul>
+    <ul class="bottom-links">
+        
+        
+        
+        
+    </ul>
+
+        <div class="clear"></div>
+    </div>
+    
+<div id="footer">
+    <p>© This is the official Website of Gazette Publication Maharashtra, India. All Rights Reserved.</p>
+    <ul>
+        <li><a href="https://mahait.org/" target=_blank><img src="../PICS/MIT-logo.png" /></a></li>
+    </ul>
+</div>
+
+    
+
+<script type="text/javascript">
+//<![CDATA[
+Sys.Application.add_init(function() {
+    $create(AjaxControlToolkit.CalendarBehavior, {"format":"dd/MM/yyyy","id":"CPH_CalFromDate"}, null, null, $get("CPH_txtfromDate"));
+});
+Sys.Application.add_init(function() {
+    $create(AjaxControlToolkit.CalendarBehavior, {"format":"dd/MM/yyyy","id":"CPH_CalToDate"}, null, null, $get("CPH_txtToDate"));
+});
+//]]>
+</script>
+</form>
+</body>
+</html>

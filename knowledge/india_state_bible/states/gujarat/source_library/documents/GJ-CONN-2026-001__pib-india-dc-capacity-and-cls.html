@@ -1,0 +1,1842 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1"><title>
+	Press Release Page | Press Information Bureau
+</title><link href="css/style.css" rel="stylesheet" type="text/css" /><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><link rel="alternate stylesheet" href="css/change.css" media="screen" title="change" /><link rel="alternate stylesheet" href="css/green.css" media="screen" title="green" /><link rel="alternate stylesheet" href="css/yellow.css" media="screen" title="yellow" /><link rel="stylesheet" type="text/css" href="css/prtint.css" media="print" /><link rel="stylesheet" href="css/style3.1.css" type="text/css" />
+
+
+      <script src="js/jquery.min.js" type="text/javascript"></script>
+      <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="true" /><link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet" />
+
+      <script type="text/javascript">
+            $(document).ready(function () {
+                  function getParameterByName(name) {
+                        var url = window.location.href;
+                        name = name.replace(/[\[\]]/g, '\\$&');
+                        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+                              results = regex.exec(url);
+                        if (!results) return null;
+                        if (!results[2]) return '';
+                        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+                  }
+                  // Get the IDs from the current page's URL
+                  let prid = parseInt(getParameterByName('PRID'), 10);
+
+                  if (!isNaN(prid) && prid > 0) {
+                        $.ajax({
+                              type: "POST",
+                              url: "AjaxMethod.aspx/UpdatePRHitCount",
+                              async: false,
+                              data: JSON.stringify({ 'PermId': prid }),
+                              contentType: "application/json; charset=utf-8",
+                              dataType: "json",
+                              success: function (response) {
+                                    console.log(response);
+                              },
+                              error: function (error) {
+                                    console.log("Error in AJAX request", error);
+                              }
+                        });
+                  } else {
+                        console.log("Invalid parameters:", prid);
+                  }
+
+            });
+      </script>
+      <style type="text/css">
+            .table-responsive {
+                  width: 100%;
+                  overflow-x: auto;
+            }
+
+            .banner {
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  background-color: #000;
+                  color: #fff;
+                  padding: 20px;
+            }
+
+            full-width {
+                  width: 100%;
+            }
+
+            .logo-left, .logo-center, .countdown {
+                  display: flex;
+                  align-items: center;
+            }
+
+                  .logo-left img, .logo-center img {
+                        height: 70px;
+                  }
+
+            .countdown {
+                  text-align: center;
+                  background-color: #444;
+                  border-radius: 10px;
+                  padding: 10px;
+                  border: 2px solid grey;
+            }
+
+            .firstnumber {
+                  color: #000000;
+                  position: absolute;
+                  top: 50px;
+                  right: 90px;
+                  font-size: 30px;
+            }
+
+            .secondnumber {
+                  position: absolute;
+                  color: #000000;
+                  right: 45px;
+                  top: 50px;
+                  font-size: 30px;
+            }
+
+            .countdown .days {
+                  font-size: 35px;
+                  color: gold;
+            }
+
+            .countdown p {
+                  margin: 0;
+            }
+
+            .countdown .text {
+                  font-size: 16px;
+            }
+
+            a {
+                  word-break: break-all;
+            }
+
+            iframe, img {
+                  max-width: 100%;
+            }
+
+            @media(max-width:1199px) {
+                  .firstnumber {
+                        top: 40px;
+                        right: 72px;
+                        font-size: 30px;
+                  }
+
+                  .secondnumber {
+                        right: 35px;
+                        top: 40px;
+                        font-size: 30px;
+                  }
+            }
+
+            @media(max-width:990px) {
+                  .firstnumber {
+                        top: 25px;
+                        right: 54px;
+                        font-size: 30px;
+                  }
+
+                  .secondnumber {
+                        right: 25px;
+                        top: 25px;
+                        font-size: 30px;
+                  }
+            }
+
+            @media(max-width:768px) {
+                  .countdown, .days {
+                        font-size: 12px !important;
+                  }
+
+
+                  .firstnumber {
+                        top: 25%;
+                        right: 8%;
+                        font-size: 30px;
+                  }
+
+                  .secondnumber {
+                        right: 4.5%;
+                        top: 25%;
+                        font-size: 30px;
+                  }
+            }
+
+            @media(max-width:475px) {
+                  .countdown, .days {
+                        font-size: 10px !important;
+                        top: 20%;
+                  }
+
+                  .bannerimgdiv {
+                        padding: 0 !important;
+                  }
+
+                  .bannerimg {
+                        width: 108% !important;
+                  }
+            }
+      </style>
+      <script type="text/javascript">
+            $(function () {
+                  $("[id*=printPDF]").click(function () {
+                        $("[id*=hfGridHtml]").val($("#PdfDiv").html());
+                  });
+            });
+            $(function () {
+                  $("[id*=printPDFEvent]").click(function () {
+                        $("[id*=hfGridHtml]").val($("#PdfDiv").html());
+                  });
+            });
+      </script>
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112591026-1"></script>
+      <script>
+
+            window.dataLayer = window.dataLayer || [];
+
+            function gtag() { dataLayer.push(arguments); }
+
+            gtag('js', new Date());
+
+
+
+            gtag('config', 'UA-112591026-1');
+
+      </script>
+
+<meta property="og:title" content="Data centre capacity in the country has grown from 375 MW in 2020 to more than 1500 MW" /><meta property="og:url" content="www.pib.gov.in/Pressreleaseshare.aspx?PRID=2241783" /><meta property="og:description" content="In line with Hon’ble Prime Minister Shri Narendra Modi&#39;s vision, the Government is democratising the" /><meta property="og:image" content="https:/pib.gov.in/images/indian-emblem.png" />
+                                <script>!function(e){var n="https://s.go-mpulse.net/boomerang/";if("False"=="True")e.BOOMR_config=e.BOOMR_config||{},e.BOOMR_config.PageParams=e.BOOMR_config.PageParams||{},e.BOOMR_config.PageParams.pci=!0,n="https://s2.go-mpulse.net/boomerang/";if(window.BOOMR_API_key="C4E7H-KSCMC-422L4-W3EM5-U36MF",function(){function e(){if(!i){var e=document.createElement("script");e.id="boomr-scr-as",e.src=window.BOOMR.url,e.async=!0,o.parentNode.appendChild(e),i=!0}}function t(e){i=!0;var n,t,a,r,d=document,O=window;if(window.BOOMR.snippetMethod=e?"if":"i",t=function(e,n){var t=d.createElement("script");t.id=n||"boomr-if-as",t.src=window.BOOMR.url,BOOMR_lstart=(new Date).getTime(),e=e||d.body,e.appendChild(t)},!window.addEventListener&&window.attachEvent&&navigator.userAgent.match(/MSIE [67]\./))return window.BOOMR.snippetMethod="s",void t(o.parentNode,"boomr-async");a=document.createElement("IFRAME"),a.src="about:blank",a.title="",a.role="presentation",a.loading="eager",r=(a.frameElement||a).style,r.width=0,r.height=0,r.border=0,r.display="none",o.parentNode.appendChild(a);try{O=a.contentWindow,d=O.document.open()}catch(_){n=document.domain,a.src="javascript:var d=document.open();d.domain='"+n+"';void(0);",O=a.contentWindow,d=O.document.open()}if(n)d._boomrl=function(){this.domain=n,t()},d.write("<bo"+"dy onload='document._boomrl();'>");else if(O._boomrl=function(){t()},O.addEventListener)O.addEventListener("load",O._boomrl,!1);else if(O.attachEvent)O.attachEvent("onload",O._boomrl);d.close()}function a(e){window.BOOMR_onload=e&&e.timeStamp||(new Date).getTime()}if(!window.BOOMR||!window.BOOMR.version&&!window.BOOMR.snippetExecuted){window.BOOMR=window.BOOMR||{},window.BOOMR.snippetStart=(new Date).getTime(),window.BOOMR.snippetExecuted=!0,window.BOOMR.snippetVersion=12,window.BOOMR.url=n+"C4E7H-KSCMC-422L4-W3EM5-U36MF";var o=document.currentScript||document.getElementsByTagName("script")[0],i=!1,r=document.createElement("link");if(r.relList&&"function"==typeof r.relList.supports&&r.relList.supports("preload")&&"as"in r)window.BOOMR.snippetMethod="p",r.href=window.BOOMR.url,r.rel="preload",r.as="script",r.addEventListener("load",e),r.addEventListener("error",function(){t(!0)}),setTimeout(function(){if(!i)t(!0)},3e3),BOOMR_lstart=(new Date).getTime(),o.parentNode.appendChild(r);else t(!1);if(window.addEventListener)window.addEventListener("load",a,!1);else if(window.attachEvent)window.attachEvent("onload",a)}}(),"".length>0)if(e&&"performance"in e&&e.performance&&"function"==typeof e.performance.setResourceTimingBufferSize)e.performance.setResourceTimingBufferSize();!function(){if(BOOMR=e.BOOMR||{},BOOMR.plugins=BOOMR.plugins||{},!BOOMR.plugins.AK){var n=""=="true"?1:0,t="",a="gesl2kyxh5wkc2s4wpcq-f-610c3aeb6-clientnsv4-s.akamaihd.net",o="false"=="true"?2:1,i={"ak.v":"41","ak.cp":"1825201","ak.ai":parseInt("1215205",10),"ak.ol":"0","ak.cr":12,"ak.ipv":4,"ak.proto":"h2","ak.rid":"318b0d5","ak.r":37691,"ak.a2":n,"ak.m":"dscb","ak.n":"ff","ak.cport":50796,"ak.gh":"23.63.108.158","ak.quicv":"","ak.tlsv":"tls1.3","ak.0rtt":"","ak.0rtt.ed":"","ak.csrc":"-","ak.acc":"","ak.t":"1784460229","ak.ak":"hOBiQwZUYzCg5VSAfCLimQ==9wwkCAag8mKXL60pgMsu4GtM8E6RqeS9N+E4S3sWuBVeHK1SP/bxVFzQayl6FYGOMWWr/JIjxV8K94H/3fduP/NWCrRxiuDCTzM/pXCvnW4i/Z4VaN3dsGKVNGPcvtXBmv+NfEx5pG/ggo/UNQ8VIQ2jnVvqWNYYSW7tlM92/Vd3z10qQ3cbuCF8GyRiGBiNsknfNE6lvbrkgXX3RcEIbRKT6ABSHaAOYo3DfciwMET21RUjghg35PtD5k3xnZVfvpAPr5Xw1ySvONtBw+zhnauFqbftBduqjVtC608AFewJHpx8VpaWf7Ac2SwPKlr3Ecz4EbHKGJgk6WDg2Ntu2AScVxS0SZmN+gP6IQEIMd+vq6lSS+smvaHVzABHZRllPfButwobHiBzjDh+ZmM6HQ5iNB8gHaw/Ooriy9IEoZk=","ak.pv":"9","ak.dpoabenc":"","ak.tf":o};if(""!==t)i["ak.ruds"]=t;var r={i:!1,av:function(n){var t="http.initiator";if(n&&(!n[t]||"spa_hard"===n[t]))i["ak.feo"]=void 0!==e.aFeoApplied?1:0,BOOMR.addVar(i)},rv:function(){var e=["ak.cport","ak.cr","ak.csrc","ak.gh","ak.ipv","ak.m","ak.n","ak.ol","ak.proto","ak.quicv","ak.tlsv","ak.0rtt","ak.0rtt.ed","ak.r","ak.acc","ak.t","ak.tf"];BOOMR.removeVar(e)}};BOOMR.plugins.AK={akVars:i,akDNSPreFetchDomain:a,init:function(){if(!r.i){var e=BOOMR.subscribe;e("before_beacon",r.av,null,null),e("onbeacon",r.rv,null,null),r.i=!0}return this},is_complete:function(){return!0}}}}()}(window);</script></head>
+<body>
+      <form method="post" action="./PressReleasePage.aspx?PRID=2241783&amp;reg=6&amp;lang=1" id="form1">
+<div class="aspNetHidden">
+<input type="hidden" name="sc_HiddenField" id="sc_HiddenField" value="" />
+<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="" />
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="" />
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="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" />
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+var theForm = document.forms['form1'];
+if (!theForm) {
+    theForm = document.form1;
+}
+function __doPostBack(eventTarget, eventArgument) {
+    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+        theForm.__EVENTTARGET.value = eventTarget;
+        theForm.__EVENTARGUMENT.value = eventArgument;
+        theForm.submit();
+    }
+}
+//]]>
+</script>
+
+
+<script src="/WebResource.axd?d=b94hX14NMWluUQ9a73g0LYFvtKhY52TK8cbDkYB_F2GuPre4tdh-ebiiI4xuhXnRu6Q5dQjaQA4oN3PEeL0GrtKEyEY1&amp;t=638942408819057530" type="text/javascript"></script>
+
+
+<script src="/ScriptResource.axd?d=YwOa_0w_u3oCLFqmIIOf-XEz4GWZ1DuyQIpxIA4LVkywj39sZSps12NbK5wNl5XN9JF3m7d-ey7BFDgj6i0380qRQ5IMWCL54sYNVU1IjMmiOWpp0&amp;t=ffffffffecf8d3f2" type="text/javascript"></script>
+<script src="/ScriptResource.axd?d=_shmykYI80CxCNR43Ii1nLy9PBGhuSe6SPp3CEYu0wDEuLqDAuIcsXVNhTIgQn0iyiwPorMflXuK31FftDX9GnB0m366MCEoOmY-eKQ3YAO9xRL0gIigzgRbtbVOgSQkJbJpFg2&amp;t=ffffffffecf8d3f2" type="text/javascript"></script>
+<script src="/PressReleasePage.aspx?_TSM_HiddenField_=sc_HiddenField&amp;_TSM_CombinedScripts_=%3b%3bAjaxControlToolkit%2c+Version%3d3.5.7.123%2c+Culture%3dneutral%2c+PublicKeyToken%3d28f01b0e84b6d53e%3aen-US%3a5a4df314-b4a2-4da2-a207-9284f1b1e96c%3ade1feab2%3af2c8e708%3a720a52bf%3af9cec9bc%3a589eaa30%3aa67c2700%3aab09e3fe%3a87104b7c%3a8613aea7%3a3202a5a2%3abe6fb298" type="text/javascript"></script>
+<div class="aspNetHidden">
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="59B53027" />
+	<input type="hidden" name="__VIEWSTATEENCRYPTED" id="__VIEWSTATEENCRYPTED" value="" />
+	<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="AuOSDeQfe5PwTVXQ0IrCLuuGAh8NDb8+oqy1aiyKlHY1n1ouTdcOiEb+R5zPuDpemeGcj7IOpGzTanhpya7jmy2IBhdCKP+65L/HWyorC4mSRZM/JvRgcObFcCn+O2ZUAhlAlFYqN5R5g1M8W9+rIjAunnu90YJBopnqrmg0/OBN2YsGVvy+Lx0g3/cTqFL1P7lJ8MMsngdUHb+eMFTGkxF/REhG/5t+ckKY6CbG010XXa121QpYKdYnvOf3nyYcF/CsoytzH8qJFlagzHYBV7f8Z/IrCJzhzUf4YYevui5GRqBG" />
+</div>
+                              
+            <div id="templateCss"></div>
+            <script type="text/javascript">
+//<![CDATA[
+Sys.WebForms.PageRequestManager._initialize('sc', 'form1', ['tupdate12','update12'], [], [], 90, '');
+//]]>
+</script>
+
+            <input type="hidden" name="hfGridHtml" id="hfGridHtml" />
+            <div class="container" style='margin-bottom: 50px;'>
+                  <div id="accessories">
+
+                        
+                        <div class="pull-right" style="display: flex">
+                              <div id="voll"></div>
+                              <div id="vollDT"></div>
+                              
+                              
+<div class="print-icons">
+<input type="image" name="Print1$print" id="Print1_print" aria-label="Print" src="images/printer_icon.png" alt="print page button" style="padding: 5px 10px 5px 10px;" />
+</div>
+                        </div>
+                  </div>
+                  <input type="hidden" name="hydpermid" id="hydpermid" value="2241783" />
+                  
+
+
+
+                  <div class="innner-page-main-about-us-content-right-part">
+
+                        <div id="MinistryName" class="MinistryNameSubhead text-center">
+                              Ministry of Electronics & IT
+                        </div>
+                        
+                        <div id="lg_g"><div class='log_oo'>  <img src='https://static.pib.gov.in/WriteReadData/specificdocs/photo/2021/aug/ph202183101.png' alt='azadi ka amrit mahotsav' /> </div></div>
+
+
+
+
+
+                        <div class="text-center event-heading-background">
+                              
+                              <h2 id="Titleh2">
+                                    Data centre capacity in the country has grown from 375 MW in 2020 to more than 1500 MW
+                              </h2>
+                              <h3 id="Subtitleh3">
+                                    <span id="ltrSubtitle"><br/>Four submarine cable systems currently under being commissioned at various Cable Landing Stations (CLS); three submarine cable systems are under planning</span>
+                              </h3>
+                        </div>
+
+                        <div id="PrDateTime" class="ReleaseDateSubHeaddateTime text-center pt20">
+                              Posted On:
+                18 MAR 2026 4:04PM by PIB Delhi
+                        </div>
+                        
+                        <div class='pt20'>
+                        </div>
+                        <input type="hidden" name="hydphotoUrl" id="hydphotoUrl" />
+                        
+                        <p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">In line with Hon&rsquo;ble Prime Minister Shri Narendra Modi&#39;s vision, the Government is democratising the development and usage of technology. </span></span></span></span></p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">The focus is facilitating establishment of data centres in the country which will help strengthen digital infrastructure and improve delivery of digital services across various sectors.</span></span></span></span></p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Data Centre industry in India is growing at a steady pace. Data centre capacity in the country has grown from 375 MW in 2020 to more than 1500 MW till 2025. </span></span></span></span></p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Data centres are spread across the country and as per industry sources major capacity is in following cities: </span></span></span></span></p>
+
+<table align="center" border="1" bordercolor="#ccc" cellpadding="5" cellspacing="0" class="Table" style="border-collapse:collapse">
+	<tbody>
+		<tr>
+			<td style="width:77.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><strong><span style="color:black">Sl. No.</span></strong></span></span></span></p>
+			</td>
+			<td style="width:151.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><strong><span style="color:black">City</span></strong></span></span></span></p>
+			</td>
+			<td>
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><strong><span style="color:black">Operational Capacity (in Megawatt)</span></strong></span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:77.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">1</span></span></span></span></p>
+			</td>
+			<td style="width:151.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Mumbai / Navi Mumbai</span></span></span></span></p>
+			</td>
+			<td>
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">790</span></span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:77.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">2</span></span></span></span></p>
+			</td>
+			<td style="width:151.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Chennai</span></span></span></span></p>
+			</td>
+			<td>
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">305</span></span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:77.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">3</span></span></span></span></p>
+			</td>
+			<td style="width:151.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Bengaluru</span></span></span></span></p>
+			</td>
+			<td>
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">182</span></span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:77.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">4</span></span></span></span></p>
+			</td>
+			<td style="width:151.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Hyderabad</span></span></span></span></p>
+			</td>
+			<td>
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">152</span></span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:77.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">5</span></span></span></span></p>
+			</td>
+			<td style="width:151.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Delhi-NCR/Noida</span></span></span></span></p>
+			</td>
+			<td>
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">76</span></span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:77.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">6</span></span></span></span></p>
+			</td>
+			<td style="width:151.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Other (Pune, Kolkata)</span></span></span></span></p>
+			</td>
+			<td>
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">15</span></span></span></span></p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Four (4) submarine cable systems are currently under being commissioned at various Cable Landing Stations (CLS) by different Telecom Service Providers (TSPs). </span></span></span></span></p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">The details are placed at <strong>Table-1 of Annexure-I</strong>.</span></span></span></span></p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Further, three (3) submarine cable systems are under planning by various TSPs for which applications have been submitted to DoT. </span></span></span></span></p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">The details are placed at <strong>Table-2 of Annexure-I </strong>and as on date, Government is not planning to establish new Sub-Sea Gateways.</span></span></span></span></p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Reserve Bank of India (RBI) issued a circular DPSS. CO.OD. No 2785/06.08.005/2017-18 dated 6th April 2018 &amp; FAQs thereto dated 26.06.2019 on &ldquo;Storage of Payment System Data&rdquo; advising all system providers to ensure that the entire data relating to payment systems operated by them is stored in a system only in India.</span></span></span></span></p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">The policies of the Government of India are aimed at ensuring a safe, trusted and accountable cyberspace with sufficient data storage capacity within country.</span></span></span></span></p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:center"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">*******</span></span></span></span></p>
+
+<p style="margin-left:18pt; margin-right:13.5pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:18pt; margin-right:13.5pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><strong><span style="color:black">Annexure-I</span></strong></span></span></span></p>
+
+<p style="margin-left:18pt; margin-right:13.5pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><strong><u><span style="color:black">Table-1: List of Submarine Cable Systems </span></u></strong></span></span></span></p>
+
+<table align="center" border="1" bordercolor="#ccc" cellpadding="5" cellspacing="0" class="Table" style="border-collapse:collapse">
+	<tbody>
+		<tr>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong><span style="color:black">Sl No.</span></strong></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong><span style="color:black">Name of the Submarine Cable System</span></strong></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong><span style="color:black">Name of the Telecom Service Provider</span></strong></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong><span style="color:black">Location of the Cable Landing Station (CLS)</span></strong></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong><span style="color:black">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Status</span></strong></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">1</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">India Europe Xpress (IEX)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">M/s Reliance Jio Infocomm Ltd (RJIL)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Mumbai (Maharashtra)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Under commissioning</span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">2</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">SEA-ME-WE-6</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">M/s Bharti Airtel Ltd (BAL)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Mumbai (Maharashtra), Chennai (Tamil Nadu)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Under commissioning</span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">3</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">2Africa</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">M/s Bharti Airtel Ltd (BAL)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Mumbai (Maharashtra)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Under commissioning</span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">4</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Raman Cable</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">M/s Sify Technologies Ltd (Sify)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Mumbai (Maharashtra)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Under commissioning</span></span></span></p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<p style="margin-left:18pt; margin-right:13.5pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:18pt; margin-right:13.5pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><strong><u><span style="color:black">Table-2: List of planned Submarine Cable Systems </span></u></strong></span></span></span></p>
+
+<table align="center" border="1" bordercolor="#ccc" cellpadding="5" cellspacing="0" class="Table" style="border-collapse:collapse">
+	<tbody>
+		<tr>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong><span style="color:black">Sl No.</span></strong></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong><span style="color:black">Name of the Submarine Cable System</span></strong></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong><span style="color:black">Name of the Telecom Service Provider</span></strong></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong><span style="color:black">Location of the Cable Landing Station (CLS)</span></strong></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong><span style="color:black">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Status</span></strong></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">1</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Wyasa Cable System</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">M/s Tata Communications Ltd (TCL)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Chennai (Tamil Nadu)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Under planning. Application has been submitted</span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">2</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Indian Ocean Cable (IOC)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">M/s Reliance Jio Infocomm Ltd (RJIL)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Raigad (Maharashtra)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Under planning. Application has been submitted</span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">3</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">WABAN Cable System</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">M/s Sify Technologies Ltd (Sify)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Mumbai (Maharashtra)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Under planning. Application has been submitted</span></span></span></p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<p style="text-align:justify">&nbsp;</p>
+
+<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white">This information was submitted by Union Minister of State for Electronics and Information Technology Shri Jitin Prasada in Lok Sabha on 18.03.2026.</span></span></span></p>
+
+<p style="text-align:center"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white">****</span></span></span></p>
+
+<p style="text-align:justify"><strong><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px">MSZ</span></span></strong></p>
+
+
+                        
+                        <div id="reel_pic">
+                        </div>
+
+
+
+                        
+                        <br />
+                        <span id="ReleaseId">(Release ID: 2241783)</span>
+                        <span id="lblViews">Visitor Counter : 1623</span>
+                        <div>
+                              
+                        </div>
+                        
+
+                        <span id="lblRefPhoto"></span>
+
+                        <div class="BackgroundRelease">
+                              
+                        </div>
+                        <div>
+                              
+                        </div>
+                        <div class="ReleaseLang">Read this release in: 
+                        
+                                    
+                                    <a href='https://pib.gov.in/PressReleasePage.aspx?PRID=2242107' target="_blank">
+                                          Urdu </a>
+                              
+                                    ,
+                              
+                                    
+                                    <a href='https://pib.gov.in/PressReleasePage.aspx?PRID=2242184' target="_blank">
+                                          हिन्दी </a>
+                              
+                        </div>
+
+                        <div class="RelTag">
+                              <ul>
+                                    
+                              </ul>
+                        </div>
+                        <div class="clear">
+                        </div>
+                        <div id="RelLink" class="RelLink">
+                              <ul>
+                                    
+                                    
+                              </ul>
+                        </div>
+                        <center>
+                              
+                        </center>
+                  </div>
+
+                  <div id="update12">
+	
+                              
+                              <input type="hidden" name="Hidden" id="Hidden" />
+                              <div id="P_CategoryManagement" class="ModalWindow" style="border-width:0px;height:60%;width:60%;overflow:auto;display: none">
+		
+                                    <div>
+                                          <input type="image" name="btnClose" id="btnClose" src="images/close_flat_icon.png" />
+                                    </div>
+                                    <div id="description">
+                                    </div>
+                                    <div class="text-center">
+                                          <h2>
+                                                
+                                                <br>
+                                                
+                                          </h2>
+                                    </div>
+                                    <br />
+                                    <div class="clear">
+                                    </div>
+                                    
+                              
+	</div>
+                        
+</div>
+            </div>
+            
+            <div id="PdfDiv" style="display: none;">
+                  <table width="100%">
+                        <tr>
+                              <td style="font-weight: 200; text-align: center">
+                                    Ministry of Electronics & IT
+                                    <div style="height: 30px; width: 100%;">
+                                    </div>
+                                    <div style="font-weight: 200; text-align: center; font-size: 30px;">
+                                          Data centre capacity in the country has grown from 375 MW in 2020 to more than 1500 MW
+                                    </div>
+                                    <div style="height: 30px; width: 100%;">
+                                    </div>
+                                    <div style="font-weight: 200; text-align: center; font-size: 30px;">
+                                          <div style='height:30px;width:100%;'></div>Four submarine cable systems currently under being commissioned at various Cable Landing Stations (CLS); three submarine cable systems are under planning
+                                    </div>
+                                    <div style="height: 30px; width: 100%;">
+                                    </div>
+                                    <div style="text-align: center; font-size: 14px;">
+                                          Posted On:
+                        18 MAR 2026 4:04PM by PIB Delhi
+                                    </div>
+                                    <div style="height: 30px; width: 100%;">
+                                    </div>
+                                    <div style="font-weight: 200; text-align: left; font-size: 16px;">
+                                          <p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">In line with Hon&rsquo;ble Prime Minister Shri Narendra Modi&#39;s vision, the Government is democratising the development and usage of technology. </span></span></span></span></p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">The focus is facilitating establishment of data centres in the country which will help strengthen digital infrastructure and improve delivery of digital services across various sectors.</span></span></span></span></p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Data Centre industry in India is growing at a steady pace. Data centre capacity in the country has grown from 375 MW in 2020 to more than 1500 MW till 2025. </span></span></span></span></p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Data centres are spread across the country and as per industry sources major capacity is in following cities: </span></span></span></span></p>
+
+<table align="center" border="1" bordercolor="#ccc" cellpadding="5" cellspacing="0" class="Table" style="border-collapse:collapse">
+	<tbody>
+		<tr>
+			<td style="width:77.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><strong><span style="color:black">Sl. No.</span></strong></span></span></span></p>
+			</td>
+			<td style="width:151.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><strong><span style="color:black">City</span></strong></span></span></span></p>
+			</td>
+			<td>
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><strong><span style="color:black">Operational Capacity (in Megawatt)</span></strong></span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:77.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">1</span></span></span></span></p>
+			</td>
+			<td style="width:151.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Mumbai / Navi Mumbai</span></span></span></span></p>
+			</td>
+			<td>
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">790</span></span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:77.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">2</span></span></span></span></p>
+			</td>
+			<td style="width:151.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Chennai</span></span></span></span></p>
+			</td>
+			<td>
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">305</span></span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:77.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">3</span></span></span></span></p>
+			</td>
+			<td style="width:151.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Bengaluru</span></span></span></span></p>
+			</td>
+			<td>
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">182</span></span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:77.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">4</span></span></span></span></p>
+			</td>
+			<td style="width:151.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Hyderabad</span></span></span></span></p>
+			</td>
+			<td>
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">152</span></span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:77.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">5</span></span></span></span></p>
+			</td>
+			<td style="width:151.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Delhi-NCR/Noida</span></span></span></span></p>
+			</td>
+			<td>
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">76</span></span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td style="width:77.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">6</span></span></span></span></p>
+			</td>
+			<td style="width:151.6pt">
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Other (Pune, Kolkata)</span></span></span></span></p>
+			</td>
+			<td>
+			<p style="margin-left:1.7pt; margin-right:13.6pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">15</span></span></span></span></p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Four (4) submarine cable systems are currently under being commissioned at various Cable Landing Stations (CLS) by different Telecom Service Providers (TSPs). </span></span></span></span></p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">The details are placed at <strong>Table-1 of Annexure-I</strong>.</span></span></span></span></p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Further, three (3) submarine cable systems are under planning by various TSPs for which applications have been submitted to DoT. </span></span></span></span></p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">The details are placed at <strong>Table-2 of Annexure-I </strong>and as on date, Government is not planning to establish new Sub-Sea Gateways.</span></span></span></span></p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">Reserve Bank of India (RBI) issued a circular DPSS. CO.OD. No 2785/06.08.005/2017-18 dated 6th April 2018 &amp; FAQs thereto dated 26.06.2019 on &ldquo;Storage of Payment System Data&rdquo; advising all system providers to ensure that the entire data relating to payment systems operated by them is stored in a system only in India.</span></span></span></span></p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">The policies of the Government of India are aimed at ensuring a safe, trusted and accountable cyberspace with sufficient data storage capacity within country.</span></span></span></span></p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:0cm; margin-right:-2.3pt; text-align:center"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><span style="color:black">*******</span></span></span></span></p>
+
+<p style="margin-left:18pt; margin-right:13.5pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:18pt; margin-right:13.5pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><strong><span style="color:black">Annexure-I</span></strong></span></span></span></p>
+
+<p style="margin-left:18pt; margin-right:13.5pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><strong><u><span style="color:black">Table-1: List of Submarine Cable Systems </span></u></strong></span></span></span></p>
+
+<table align="center" border="1" bordercolor="#ccc" cellpadding="5" cellspacing="0" class="Table" style="border-collapse:collapse">
+	<tbody>
+		<tr>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong><span style="color:black">Sl No.</span></strong></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong><span style="color:black">Name of the Submarine Cable System</span></strong></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong><span style="color:black">Name of the Telecom Service Provider</span></strong></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong><span style="color:black">Location of the Cable Landing Station (CLS)</span></strong></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong><span style="color:black">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Status</span></strong></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">1</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">India Europe Xpress (IEX)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">M/s Reliance Jio Infocomm Ltd (RJIL)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Mumbai (Maharashtra)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Under commissioning</span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">2</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">SEA-ME-WE-6</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">M/s Bharti Airtel Ltd (BAL)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Mumbai (Maharashtra), Chennai (Tamil Nadu)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Under commissioning</span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">3</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">2Africa</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">M/s Bharti Airtel Ltd (BAL)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Mumbai (Maharashtra)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Under commissioning</span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">4</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Raman Cable</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">M/s Sify Technologies Ltd (Sify)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Mumbai (Maharashtra)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Under commissioning</span></span></span></p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<p style="margin-left:18pt; margin-right:13.5pt; text-align:justify">&nbsp;</p>
+
+<p style="margin-left:18pt; margin-right:13.5pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white"><strong><u><span style="color:black">Table-2: List of planned Submarine Cable Systems </span></u></strong></span></span></span></p>
+
+<table align="center" border="1" bordercolor="#ccc" cellpadding="5" cellspacing="0" class="Table" style="border-collapse:collapse">
+	<tbody>
+		<tr>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong><span style="color:black">Sl No.</span></strong></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong><span style="color:black">Name of the Submarine Cable System</span></strong></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong><span style="color:black">Name of the Telecom Service Provider</span></strong></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong><span style="color:black">Location of the Cable Landing Station (CLS)</span></strong></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong><span style="color:black">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Status</span></strong></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">1</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Wyasa Cable System</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">M/s Tata Communications Ltd (TCL)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Chennai (Tamil Nadu)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Under planning. Application has been submitted</span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">2</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Indian Ocean Cable (IOC)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">M/s Reliance Jio Infocomm Ltd (RJIL)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Raigad (Maharashtra)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Under planning. Application has been submitted</span></span></span></p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">3</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">WABAN Cable System</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">M/s Sify Technologies Ltd (Sify)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Mumbai (Maharashtra)</span></span></span></p>
+			</td>
+			<td>
+			<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">Under planning. Application has been submitted</span></span></span></p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<p style="text-align:justify">&nbsp;</p>
+
+<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white">This information was submitted by Union Minister of State for Electronics and Information Technology Shri Jitin Prasada in Lok Sabha on 18.03.2026.</span></span></span></p>
+
+<p style="text-align:center"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="background-color:white">****</span></span></span></p>
+
+<p style="text-align:justify"><strong><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px">MSZ</span></span></strong></p>
+
+                                    </div>
+                                    <div style="height: 30px; width: 100%;">
+                                    </div>
+                                    <div style="height: 30px; width: 100%;">
+                                    </div>
+                                    <div style="font-weight: 100; text-align: left; font-size: 16px;">
+                                          (Release ID: 2241783)
+                                    </div>
+                                    <div style="height: 30px; width: 100%;">
+                                    </div>
+                              </td>
+                        </tr>
+                        <tr>
+                              <td style="font-weight: 200; text-align: center; font-size: 24px;"></td>
+                        </tr>
+                  </table>
+            </div>
+            <div class="clearfix">
+            </div>
+
+            
+
+            <div class="section1">
+                  <div id="frst_t">
+                        <div id="arr_rm"><div class='sticky-social_mb'><ul class='social_mb'><a href='http://www.facebook.com/share.php?u=https://pib.gov.in/PressReleasePage.aspx?PRID=2241783' target='_blank'><li class='fb_b'   ><img  src='https://static.pib.gov.in/WriteReadData/userfiles/socialmedianew/facebook.jpg' alt='Share on facebook'  width='40' /></li></a><a href='https://twitter.com/intent/tweet?url=https://pib.gov.in/PressReleasePage.aspx?PRID=2241783&text=Data centre capacity in the country has grown from 375 MW in 2020 to more than 1500 MW' target='_blank'><li class='twitter_r'  ><img  src='https://static.pib.gov.in/WriteReadData/specificdocs/photo/2023/aug/ph2023818240601.jpg' alt='Share on twitter' width='40' /> </li></a><a href='https://api.whatsapp.com/send?text=https://pib.gov.in/PressReleasePage.aspx?PRID=2241783' target='_blank'><li class='whatsapp_r'  ><img  src='https://static.pib.gov.in/WriteReadData/userfiles/socialmedianew/whatsapp1.png' alt='Share on whatsapp' width='40' /></li></a><a href='https://mail.google.com/mail/?view=cm&fs=1&tf=1&to=&su=Data centre capacity in the country has grown from 375 MW in 2020 to more than 1500 MW&body=https://pib.gov.in/PressReleasePage.aspx?PRID=2241783&ui=2&tf=1&pli=1' title='Share by Email' target='_blank'><li class='fa-envelope_r' ><img  src='https://static.pib.gov.in/WriteReadData/userfiles/socialmedianew/email1.png' alt='Share on email'  width='40' /></li></a><a href='https://www.linkedin.com/shareArticle?mini=true&url=https://pib.gov.in/PressReleasePage.aspx?PRID=2241783&title=Data centre capacity in the country has grown from 375 MW in 2020 to more than 1500 MW&summary=My%20favorite%20developer%20program&source=LinkedIn' target='_blank'><li class='fa-linkedin_r'  ><img  src='https://static.pib.gov.in/WriteReadData/userfiles/socialmedianew/linkedin.png' alt='Share on linkedin' width='40' /></li></a></ul></div></div>
+                  </div>
+                  <div id="second_t">
+                        <div id="sndr_rm"><div class='sticky-social'><ul class='social'><a href='http://www.facebook.com/share.php?u=https://pib.gov.in/PressReleasePage.aspx?PRID=2241783' target='_blank'><li class='fb_b'   ><img  src='https://static.pib.gov.in/WriteReadData/userfiles/socialmedianew/facebook.jpg' alt='Share on facebook'  width='35' /></li></a><a href='https://twitter.com/intent/tweet?url=https://pib.gov.in/PressReleasePage.aspx?PRID=2241783&text=Data centre capacity in the country has grown from 375 MW in 2020 to more than 1500 MW' target='_blank'><li class='twitter_r'  ><img  src='https://static.pib.gov.in/WriteReadData/specificdocs/photo/2023/aug/ph2023818240601.jpg' alt='Share on twitter' width='35' /> </li></a><a href='https://api.whatsapp.com/send?text=https://pib.gov.in/PressReleasePage.aspx?PRID=2241783' target='_blank'><li class='whatsapp_r'  ><img  src='https://static.pib.gov.in/WriteReadData/userfiles/socialmedianew/whatsapp1.png' alt='Share on whatsapp' width='35' /></li></a><a href='https://mail.google.com/mail/?view=cm&fs=1&tf=1&to=&su=Data centre capacity in the country has grown from 375 MW in 2020 to more than 1500 MW&body=https://pib.gov.in/PressReleasePage.aspx?PRID=2241783&ui=2&tf=1&pli=1' title='Share by Email' target='_blank'><li class='fa-envelope_r' ><img  src='https://static.pib.gov.in/WriteReadData/userfiles/socialmedianew/email1.png' alt='Share on email'  width='35' /></li></a><a href='https://www.linkedin.com/shareArticle?mini=true&url=https://pib.gov.in/PressReleasePage.aspx?PRID=2241783&title=Data centre capacity in the country has grown from 375 MW in 2020 to more than 1500 MW&summary=My%20favorite%20developer%20program&source=LinkedIn' target='_blank'><li class='fa-linkedin_r'  ><img  src='https://static.pib.gov.in/WriteReadData/userfiles/socialmedianew/linkedin.png' alt='Share on linkedin' width='35' /></li></a></ul></div></div>
+                  </div>
+            </div>
+            <input type="hidden" name="ltrTitlee" id="ltrTitlee" value="Data centre capacity in the country has grown from 375 MW in 2020 to more than 1500 MW" />
+            <input type="hidden" name="ltrSubtitlee" id="ltrSubtitlee" value="&lt;br/>Four submarine cable systems currently under being commissioned at various Cable Landing Stations (CLS); three submarine cable systems are under planning" />
+            <input type="hidden" name="ltrDescriptionn" id="ltrDescriptionn" value="&lt;p style=&quot;margin-left:0cm; margin-right:-2.3pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>In line with Hon&amp;rsquo;ble Prime Minister Shri Narendra Modi&amp;#39;s vision, the Government is democratising the development and usage of technology. &lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+
+&lt;p style=&quot;margin-left:0cm; margin-right:-2.3pt; text-align:justify&quot;>&amp;nbsp;&lt;/p>
+
+&lt;p style=&quot;margin-left:0cm; margin-right:-2.3pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>The focus is facilitating establishment of data centres in the country which will help strengthen digital infrastructure and improve delivery of digital services across various sectors.&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+
+&lt;p style=&quot;margin-left:0cm; margin-right:-2.3pt; text-align:justify&quot;>&amp;nbsp;&lt;/p>
+
+&lt;p style=&quot;margin-left:0cm; margin-right:-2.3pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>Data Centre industry in India is growing at a steady pace. Data centre capacity in the country has grown from 375 MW in 2020 to more than 1500 MW till 2025. &lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+
+&lt;p style=&quot;margin-left:0cm; margin-right:-2.3pt; text-align:justify&quot;>&amp;nbsp;&lt;/p>
+
+&lt;p style=&quot;margin-left:0cm; margin-right:-2.3pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>Data centres are spread across the country and as per industry sources major capacity is in following cities: &lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+
+&lt;table align=&quot;center&quot; border=&quot;1&quot; bordercolor=&quot;#ccc&quot; cellpadding=&quot;5&quot; cellspacing=&quot;0&quot; class=&quot;Table&quot; style=&quot;border-collapse:collapse&quot;>
+	&lt;tbody>
+		&lt;tr>
+			&lt;td style=&quot;width:77.6pt&quot;>
+			&lt;p style=&quot;margin-left:1.7pt; margin-right:13.6pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;strong>&lt;span style=&quot;color:black&quot;>Sl. No.&lt;/span>&lt;/strong>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td style=&quot;width:151.6pt&quot;>
+			&lt;p style=&quot;margin-left:1.7pt; margin-right:13.6pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;strong>&lt;span style=&quot;color:black&quot;>City&lt;/span>&lt;/strong>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;margin-left:1.7pt; margin-right:13.6pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;strong>&lt;span style=&quot;color:black&quot;>Operational Capacity (in Megawatt)&lt;/span>&lt;/strong>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+		&lt;/tr>
+		&lt;tr>
+			&lt;td style=&quot;width:77.6pt&quot;>
+			&lt;p style=&quot;margin-left:1.7pt; margin-right:13.6pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>1&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td style=&quot;width:151.6pt&quot;>
+			&lt;p style=&quot;margin-left:1.7pt; margin-right:13.6pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>Mumbai / Navi Mumbai&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;margin-left:1.7pt; margin-right:13.6pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>790&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+		&lt;/tr>
+		&lt;tr>
+			&lt;td style=&quot;width:77.6pt&quot;>
+			&lt;p style=&quot;margin-left:1.7pt; margin-right:13.6pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>2&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td style=&quot;width:151.6pt&quot;>
+			&lt;p style=&quot;margin-left:1.7pt; margin-right:13.6pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>Chennai&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;margin-left:1.7pt; margin-right:13.6pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>305&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+		&lt;/tr>
+		&lt;tr>
+			&lt;td style=&quot;width:77.6pt&quot;>
+			&lt;p style=&quot;margin-left:1.7pt; margin-right:13.6pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>3&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td style=&quot;width:151.6pt&quot;>
+			&lt;p style=&quot;margin-left:1.7pt; margin-right:13.6pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>Bengaluru&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;margin-left:1.7pt; margin-right:13.6pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>182&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+		&lt;/tr>
+		&lt;tr>
+			&lt;td style=&quot;width:77.6pt&quot;>
+			&lt;p style=&quot;margin-left:1.7pt; margin-right:13.6pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>4&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td style=&quot;width:151.6pt&quot;>
+			&lt;p style=&quot;margin-left:1.7pt; margin-right:13.6pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>Hyderabad&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;margin-left:1.7pt; margin-right:13.6pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>152&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+		&lt;/tr>
+		&lt;tr>
+			&lt;td style=&quot;width:77.6pt&quot;>
+			&lt;p style=&quot;margin-left:1.7pt; margin-right:13.6pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>5&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td style=&quot;width:151.6pt&quot;>
+			&lt;p style=&quot;margin-left:1.7pt; margin-right:13.6pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>Delhi-NCR/Noida&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;margin-left:1.7pt; margin-right:13.6pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>76&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+		&lt;/tr>
+		&lt;tr>
+			&lt;td style=&quot;width:77.6pt&quot;>
+			&lt;p style=&quot;margin-left:1.7pt; margin-right:13.6pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>6&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td style=&quot;width:151.6pt&quot;>
+			&lt;p style=&quot;margin-left:1.7pt; margin-right:13.6pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>Other (Pune, Kolkata)&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;margin-left:1.7pt; margin-right:13.6pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>15&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+		&lt;/tr>
+	&lt;/tbody>
+&lt;/table>
+
+&lt;p style=&quot;margin-left:0cm; margin-right:-2.3pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>Four (4) submarine cable systems are currently under being commissioned at various Cable Landing Stations (CLS) by different Telecom Service Providers (TSPs). &lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+
+&lt;p style=&quot;margin-left:0cm; margin-right:-2.3pt; text-align:justify&quot;>&amp;nbsp;&lt;/p>
+
+&lt;p style=&quot;margin-left:0cm; margin-right:-2.3pt; text-align:justify&quot;>&amp;nbsp;&lt;/p>
+
+&lt;p style=&quot;margin-left:0cm; margin-right:-2.3pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>The details are placed at &lt;strong>Table-1 of Annexure-I&lt;/strong>.&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+
+&lt;p style=&quot;margin-left:0cm; margin-right:-2.3pt; text-align:justify&quot;>&amp;nbsp;&lt;/p>
+
+&lt;p style=&quot;margin-left:0cm; margin-right:-2.3pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>Further, three (3) submarine cable systems are under planning by various TSPs for which applications have been submitted to DoT. &lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+
+&lt;p style=&quot;margin-left:0cm; margin-right:-2.3pt; text-align:justify&quot;>&amp;nbsp;&lt;/p>
+
+&lt;p style=&quot;margin-left:0cm; margin-right:-2.3pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>The details are placed at &lt;strong>Table-2 of Annexure-I &lt;/strong>and as on date, Government is not planning to establish new Sub-Sea Gateways.&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+
+&lt;p style=&quot;margin-left:0cm; margin-right:-2.3pt; text-align:justify&quot;>&amp;nbsp;&lt;/p>
+
+&lt;p style=&quot;margin-left:0cm; margin-right:-2.3pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>Reserve Bank of India (RBI) issued a circular DPSS. CO.OD. No 2785/06.08.005/2017-18 dated 6th April 2018 &amp;amp; FAQs thereto dated 26.06.2019 on &amp;ldquo;Storage of Payment System Data&amp;rdquo; advising all system providers to ensure that the entire data relating to payment systems operated by them is stored in a system only in India.&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+
+&lt;p style=&quot;margin-left:0cm; margin-right:-2.3pt; text-align:justify&quot;>&amp;nbsp;&lt;/p>
+
+&lt;p style=&quot;margin-left:0cm; margin-right:-2.3pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>The policies of the Government of India are aimed at ensuring a safe, trusted and accountable cyberspace with sufficient data storage capacity within country.&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+
+&lt;p style=&quot;margin-left:0cm; margin-right:-2.3pt; text-align:justify&quot;>&amp;nbsp;&lt;/p>
+
+&lt;p style=&quot;margin-left:0cm; margin-right:-2.3pt; text-align:center&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;span style=&quot;color:black&quot;>*******&lt;/span>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+
+&lt;p style=&quot;margin-left:18pt; margin-right:13.5pt; text-align:justify&quot;>&amp;nbsp;&lt;/p>
+
+&lt;p style=&quot;margin-left:18pt; margin-right:13.5pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;strong>&lt;span style=&quot;color:black&quot;>Annexure-I&lt;/span>&lt;/strong>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+
+&lt;p style=&quot;margin-left:18pt; margin-right:13.5pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;strong>&lt;u>&lt;span style=&quot;color:black&quot;>Table-1: List of Submarine Cable Systems &lt;/span>&lt;/u>&lt;/strong>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+
+&lt;table align=&quot;center&quot; border=&quot;1&quot; bordercolor=&quot;#ccc&quot; cellpadding=&quot;5&quot; cellspacing=&quot;0&quot; class=&quot;Table&quot; style=&quot;border-collapse:collapse&quot;>
+	&lt;tbody>
+		&lt;tr>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;strong>&lt;span style=&quot;color:black&quot;>Sl No.&lt;/span>&lt;/strong>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;strong>&lt;span style=&quot;color:black&quot;>Name of the Submarine Cable System&lt;/span>&lt;/strong>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;strong>&lt;span style=&quot;color:black&quot;>Name of the Telecom Service Provider&lt;/span>&lt;/strong>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;strong>&lt;span style=&quot;color:black&quot;>Location of the Cable Landing Station (CLS)&lt;/span>&lt;/strong>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;strong>&lt;span style=&quot;color:black&quot;>&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; Status&lt;/span>&lt;/strong>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+		&lt;/tr>
+		&lt;tr>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>1&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>India Europe Xpress (IEX)&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>M/s Reliance Jio Infocomm Ltd (RJIL)&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>Mumbai (Maharashtra)&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>Under commissioning&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+		&lt;/tr>
+		&lt;tr>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>2&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>SEA-ME-WE-6&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>M/s Bharti Airtel Ltd (BAL)&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>Mumbai (Maharashtra), Chennai (Tamil Nadu)&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>Under commissioning&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+		&lt;/tr>
+		&lt;tr>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>3&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>2Africa&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>M/s Bharti Airtel Ltd (BAL)&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>Mumbai (Maharashtra)&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>Under commissioning&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+		&lt;/tr>
+		&lt;tr>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>4&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>Raman Cable&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>M/s Sify Technologies Ltd (Sify)&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>Mumbai (Maharashtra)&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>Under commissioning&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+		&lt;/tr>
+	&lt;/tbody>
+&lt;/table>
+
+&lt;p style=&quot;margin-left:18pt; margin-right:13.5pt; text-align:justify&quot;>&amp;nbsp;&lt;/p>
+
+&lt;p style=&quot;margin-left:18pt; margin-right:13.5pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>&lt;strong>&lt;u>&lt;span style=&quot;color:black&quot;>Table-2: List of planned Submarine Cable Systems &lt;/span>&lt;/u>&lt;/strong>&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+
+&lt;table align=&quot;center&quot; border=&quot;1&quot; bordercolor=&quot;#ccc&quot; cellpadding=&quot;5&quot; cellspacing=&quot;0&quot; class=&quot;Table&quot; style=&quot;border-collapse:collapse&quot;>
+	&lt;tbody>
+		&lt;tr>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;strong>&lt;span style=&quot;color:black&quot;>Sl No.&lt;/span>&lt;/strong>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;strong>&lt;span style=&quot;color:black&quot;>Name of the Submarine Cable System&lt;/span>&lt;/strong>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;strong>&lt;span style=&quot;color:black&quot;>Name of the Telecom Service Provider&lt;/span>&lt;/strong>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;strong>&lt;span style=&quot;color:black&quot;>Location of the Cable Landing Station (CLS)&lt;/span>&lt;/strong>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;strong>&lt;span style=&quot;color:black&quot;>&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; Status&lt;/span>&lt;/strong>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+		&lt;/tr>
+		&lt;tr>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>1&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>Wyasa Cable System&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>M/s Tata Communications Ltd (TCL)&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>Chennai (Tamil Nadu)&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>Under planning. Application has been submitted&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+		&lt;/tr>
+		&lt;tr>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>2&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>Indian Ocean Cable (IOC)&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>M/s Reliance Jio Infocomm Ltd (RJIL)&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>Raigad (Maharashtra)&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>Under planning. Application has been submitted&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+		&lt;/tr>
+		&lt;tr>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>3&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>WABAN Cable System&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>M/s Sify Technologies Ltd (Sify)&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>Mumbai (Maharashtra)&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+			&lt;td>
+			&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>Under planning. Application has been submitted&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+			&lt;/td>
+		&lt;/tr>
+	&lt;/tbody>
+&lt;/table>
+
+&lt;p style=&quot;text-align:justify&quot;>&amp;nbsp;&lt;/p>
+
+&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>This information was submitted by Union Minister of State for Electronics and Information Technology Shri Jitin Prasada in Lok Sabha on 18.03.2026.&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+
+&lt;p style=&quot;text-align:center&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;background-color:white&quot;>****&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+
+&lt;p style=&quot;text-align:justify&quot;>&lt;strong>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>MSZ&lt;/span>&lt;/span>&lt;/strong>&lt;/p>
+" />
+            <script type="text/javascript">
+                  var mPlayer = document.getElementById("background_music");
+                  var mPlayAction = document.getElementById("playbutton");
+
+                  var isPlaying = false;
+
+                  function playAudio() {
+                        mPlayer.play();
+                        isPlaying = true;
+                        document.getElementById('stopA').style.display = "block";
+                        document.getElementById('playA').style.display = "none";
+                  }
+
+                  function pauseAudio() {
+                        mPlayer.pause();
+                        isPlaying = false;
+                        document.getElementById('playA').style.display = "block";
+                        document.getElementById('stopA').style.display = "none";
+                  }
+                  //function HandleAudio() {
+                  //    if (isPlaying == true) {
+                  //        //Playing already Pause it
+                  //        pauseAudio();
+                  //    } else {
+                  //        //Play the music
+                  //        playAudio();
+                  //    }
+                  //}
+            </script>
+            <script type="text/javascript">
+                  var synth = window.speechSynthesis;
+
+            
+                  function CleanHtml(html) {
+
+                        html = html.replace(/<script[\s\S]*?<\/script>/gi, '');
+
+                        return html;
+                  }
+                  function stripHtml(html) {
+                        let tmp = document.createElement("DIV");
+                        tmp.innerHTML = CleanHtml(html);
+                        return tmp.textContent || tmp.innerText || "";
+                  }
+            </script>
+            <script type="text/javascript">
+                  $(document).ready(function () {
+                        //for responsive tables
+                        $("table").each(function () {
+                              if (!$(this).closest(".table-responsive").length) {
+                                    $(this).wrap("<div class='table-responsive'></div>");
+                              }
+                        });
+
+                        var width = $(window).width();
+                        if (width < 768) {
+
+                              // Extra Small Device
+                              document.getElementById('frst_t').style.display = "block";
+                              document.getElementById('second_t').style.display = "none";
+
+                        } else if (width < 991) {
+                              document.getElementById('frst_t').style.display = "block";
+                              document.getElementById('second_t').style.display = "none";
+                              // Small Device
+
+                        } else if (width < 1199) {
+                              document.getElementById('frst_t').style.display = "none";
+                              document.getElementById('second_t').style.display = "block";
+                              // Medium Device
+
+                        } else {
+                              document.getElementById('frst_t').style.display = "none";
+                              document.getElementById('second_t').style.display = "block";
+                              // Large Device
+
+                        }
+                  });
+            </script>
+            <script type="text/javascript">
+                  $(document).ready(function () {
+                        var width = $(window).width();
+                        if (width < 768) {
+
+                              // Extra Small Device
+                              document.getElementById('frst_t').style.display = "block";
+                              document.getElementById('second_t').style.display = "none";
+
+                        } else if (width < 991) {
+                              document.getElementById('frst_t').style.display = "block";
+                              document.getElementById('second_t').style.display = "none";
+                              // Small Device
+
+                        } else if (width < 1199) {
+                              document.getElementById('frst_t').style.display = "none";
+                              document.getElementById('second_t').style.display = "block";
+                              // Medium Device
+
+                        } else {
+                              document.getElementById('frst_t').style.display = "none";
+                              document.getElementById('second_t').style.display = "block";
+                              // Large Device
+
+                        }
+                  });
+            </script>
+            
+            <style type="text/css">
+                  @media print {
+                        .sticky-social, .sticky-social_mb, .pull-right, #printPDF {
+                              display: none !important;
+                        }
+                  }
+
+                  .f_vl {
+                        padding-right: 30px;
+                        font-size: 17px;
+                        cursor: pointer;
+                  }
+
+                  .log_oo {
+                        // width: 20%;
+                        display: flex;
+                        justify-content: space-between;
+                  }
+
+                        .log_oo img {
+                              width: 150px;
+                              /*width: 100%;
+                    height: auto;*/
+                        }
+
+                  .sticky-social_mb {
+                        position: fixed;
+                        bottom: 0px;
+                        padding: 0px;
+                        margin: 0px;
+                        width: 100%;
+                  }
+
+                  .social_mb {
+                        list-style: none;
+                        display: flex;
+                        width: 100%;
+                        margin-bottom: -8px;
+                  }
+
+                        .social_mb a {
+                              padding: 8px 0px;
+                              font-size: 30px;
+                              transition: all 0.8s ease-in-out;
+                              width: 20% !important;
+                              text-align: center;
+                        }
+            </style>
+            <style type="text/css">
+                  .section1 {
+                        position: relative;
+                        padding: 10px 0px;
+                        width: 100%;
+                  }
+
+
+
+                  .sticky-social {
+                        position: fixed;
+                        top: 20px;
+                        left: 0px;
+                        padding: 0px;
+                        margin: 0px;
+                  }
+
+                  .social {
+                        list-style: none;
+                  }
+
+                        .social a li {
+                              padding: 8px 12px;
+                              font-size: 25px;
+                              transition: all 0.8s ease-in-out;
+                        }
+
+                              .social a li:hover {
+                                    margin-right: -30px;
+                                    box-shadow: 2px 5px 10px grey;
+                              }
+
+                                    .social a li:hover .fa {
+                                          margin-left: 20px;
+                                    }
+
+                  .fb_b {
+                        /* background-color: rgb(59, 89, 152);*/
+                        background-color: rgba(65,103,178,255);
+                  }
+
+                  .twitter_r {
+                        /* background-color: rgb(29, 161, 242);*/
+                        background-color: #000000;
+                  }
+
+                  .whatsapp_r {
+                        /* background-color: rgb(77, 194, 71);*/
+                        background-color: rgba(13,191,67,255);
+                  }
+
+                  .fa-envelope_r {
+                        /* background-color: rgb(219, 68, 55);*/
+                        background-color: #e2123d;
+                  }
+
+                  .fa-linkedin_r {
+                        background-color: rgb(0, 119, 181);
+                  }
+            </style>
+            <style type="text/css">
+                  @media only screen and (max-device-width: 767px) {
+                        p span img {
+                              max-width: 90% !important;
+                              height: auto !important;
+                        }
+
+                        p img {
+                              max-width: 90% !important;
+                              height: auto !important;
+                        }
+
+                        h2 {
+                              font-size: 20px !important;
+                              font-weight: 600 !important;
+                        }
+
+                        h3 {
+                              font-size: 18px !important;
+                              font-weight: 600 !important;
+                        }
+                  }
+            </style>
+            <style type="text/css">
+                  /* === Film Roll Badge Styling(IFFI2025 countdown) === */
+                  .film-roll-badge {
+                        position: absolute;
+                        top:82%;
+                        right: 20px;
+                        width: 230px;
+                        height: 70px;
+                        background: repeating-linear-gradient( to right, #9a2375 0px, #9a2375 18px, #6e2b8b 18px, #6e2b8b 36px );
+                        border-top: 8px solid #9a2375;
+                        border-bottom: 8px solid #9a2375;
+                        border-radius: 8px;
+                        overflow: hidden;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+                        animation: moveFilm 8s linear infinite;
+                        z-index: 10;
+                  }
+
+                        /* film sprocket holes */
+                        .film-roll-badge::before,
+                        .film-roll-badge::after {
+                              content: "";
+                              position: absolute;
+                              width: 100%;
+                              height: 10px;
+                              background: repeating-linear-gradient( to right, #9a2375 0px, #9a2375 10px, #fff 10px, #fff 20px );
+                              left: 0;
+                              z-index: 2;
+                        }
+
+                        .film-roll-badge::before {
+                              top: -4px;
+                        }
+
+                        .film-roll-badge::after {
+                              bottom: -4px;
+                        }
+
+                  .film-roll-inner {
+                        position: relative;
+                        height: 100%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        animation: flicker 2s infinite ease-in-out;
+                  }
+
+                  .countdown-text {
+                        font-size: 1.3rem;
+                        font-weight: 700;
+                        color: #fff;
+                        text-shadow: 0 0 6px rgba(255, 255, 255, 0.4), 0 0 10px #000;
+                        white-space: nowrap;
+                  }
+
+                  /* === Animations === */
+                  @keyframes moveFilm {
+                        0% {
+                              background-position: 0 0;
+                        }
+
+                        100% {
+                              background-position: 120px 0;
+                        }
+                  }
+
+                  @keyframes flicker {
+                        0%, 100% {
+                              opacity: 1;
+                        }
+
+                        50% {
+                              opacity: 0.9;
+                        }
+
+                        25% {
+                              opacity: 0.95;
+                        }
+
+                        75% {
+                              opacity: 0.85;
+                        }
+                  }
+
+                  /* === Responsive Adjustments === */
+                  @media (max-width: 1500px) {
+                        .film-roll-badge {
+                              top: 68%;
+                              right: 18px;
+                              /* width: 220px; */
+                              height: 65px;
+                              font-size: 0.85rem;
+                        }
+
+                        .press-section {
+                              margin-top: 35px;
+                        }
+                  }
+
+                  @media (max-width: 992px) {
+                        .film-roll-badge {
+                              top: 52%;
+                              right: 10px;
+                               width: 200px; 
+                              height: 60px;
+                        }
+                  }
+
+                  @media (max-width: 768px) {
+                        .film-roll-badge {
+                              top: 56%;
+                              right: 10px;
+                               width: 124px; 
+                              height: 55px;
+                        }
+
+                        .countdown-text {
+                              font-size: 0.9rem;
+                        }
+                  }
+
+                  @media (max-width: 576px) {
+                        .film-roll-badge {
+                              top: 59%;
+                              right: 5px;
+                              /* width: 160px; */
+                              height: 50px;
+                        }
+
+                        .countdown-text {
+                              font-size: 0.85rem;
+                        }
+                  }
+            </style>
+          <script type="text/javascript">
+                const festivalStart = new Date("2025-11-20T00:00:00").getTime();
+                const festivalEnd = new Date("2025-11-28T23:59:59").getTime();
+
+                const countdownElement = document.getElementById("countdown");
+
+                const interval = setInterval(() => {
+                      const now = new Date().getTime();
+
+                      // BEFORE FESTIVAL — show days + hours left
+                      if (now < festivalStart) {
+                            const diff = festivalStart - now;
+                            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+                            countdownElement.innerHTML = `
+              ${days} Day${days !== 1 ? 's' : ''} 
+              ${hours} Hour${hours !== 1 ? 's' : ''} to go
+          `;
+
+                      }
+
+                      // DURING FESTIVAL — show 56th IFFI - Day X
+                      else if (now >= festivalStart && now <= festivalEnd) {
+                            const dayNumber = Math.floor((now - festivalStart) / (1000 * 60 * 60 * 24)) + 1;
+                            countdownElement.innerHTML = `56th IFFI - Day ${dayNumber}`;
+                      }
+
+                      // AFTER FESTIVAL — new message
+                      else {
+                            countdownElement.innerHTML = `✨ IFFI closes but never ends…`;
+
+                            // Width change logic
+                            const elements = document.querySelectorAll('.film-roll-badge');
+                            elements.forEach(el => el.style.width = "350px");
+
+                            clearInterval(interval);
+                      }
+
+                }, 1000);
+          </script>
+ <script type="text/javascript">
+
+               const miffStart = new Date("2026-06-15T00:00:00").getTime();
+               const miffEnd = new Date("2026-06-15T23:59:59").getTime();
+
+               const miffElement = document.getElementById("miff");
+
+               if (miffElement) {
+
+                   const miffInterval = setInterval(() => {
+
+                       const now = new Date().getTime();
+
+                       // Before MIFF
+                       if (now < miffStart) {
+
+                           const diff = miffStart - now;
+                           const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                           const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+        
+
+                   /*  miffElement.innerHTML = `${days} Day${days !== 1 ? 's' : ''} ${hours} Hour${hours !== 1 ? 's' : ''} to MIFF`;*/
+                           miffElement.innerHTML = `${days} Day${days === 1 ? '' : 's'} to MIFF ...`;
+
+
+                     }
+
+                       // During MIFF
+                       else if (now >= miffStart && now <= miffEnd) {
+
+                           const dayNumber =
+                               Math.floor((now - miffStart) / (1000 * 60 * 60 * 24)) + 1;
+
+                           miffElement.innerHTML = `19th MIFF - Day ${dayNumber}`;
+                       }
+
+                       // After MIFF
+                       else {
+
+                           miffElement.innerHTML = `✨ MIFF concludes, cinema lives on...`;
+
+                           document.querySelectorAll('.film-roll-badge')
+                               .forEach(el => el.style.width = "350px");
+
+                           clearInterval(miffInterval);
+                       }
+
+                   }, 1000);
+               }
+
+</script>
+
+      
+
+<script type="text/javascript">
+//<![CDATA[
+(function() {var fn = function() {$get("sc_HiddenField").value = '';Sys.Application.remove_init(fn);};Sys.Application.add_init(fn);})();Sys.Application.add_init(function() {
+    $create(Sys.Extended.UI.ModalPopupBehavior, {"BackgroundCssClass":"modalBackground","PopupControlID":"P_CategoryManagement","dynamicServicePath":"/PressReleasePage.aspx","id":"mpe"}, null, null, $get("Hidden"));
+});
+//]]>
+</script>
+<input type="hidden" name="__ncforminfo" value="fYYoU3vysCqw3vD7U-cYGoIvDl33Z02ab2XheoYHZny-IK0eMHugw7Uo6DxbdWYM-QTjvxS8UoNEW2lWkioPSvAt9kywt2L2oCQTYlCNE_AuBDLhzjpO7A=="/></form>
+</body>
+</html>
+
