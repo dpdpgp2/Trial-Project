@@ -29,6 +29,7 @@ from dc_ai import (_chat, _json_obj, load_cache, save_cache,   # noqa: F401
                    _parse_date, _now, test_connection)
 
 CRITERIA_PATH = os.path.join(os.path.dirname(__file__), "docs", "TAG_BD_CRITERIA.md")
+_SCHEMA = "v2-events"    # bump when the per-feed item shape changes (busts the per-feed cache)
 _ORG_FEEDS = ("ss1", "ss3")   # only News + Disclosure rankers extract value-chain orgs
 _HIGH, _MED = dc.FEE_VIABILITY_DEAL_USD["high"], dc.FEE_VIABILITY_DEAL_USD["medium"]
 
@@ -254,7 +255,9 @@ def spotlight(ss, tabs, register=None):
                 result[feed] = {"generated_at": _now(), "window_days": dc.SPOTLIGHT_DAYS,
                                 "status": "empty", "items": [], "orgs": []}
                 continue
-            h = hashlib.sha1((repr(cs) + today_s).encode("utf-8")).hexdigest()
+            # _SCHEMA in the hash busts the cache when the output format changes (else a
+            # same-day rerun serves last-good rows in an older schema the export can't read).
+            h = hashlib.sha1((repr(cs) + today_s + _SCHEMA).encode("utf-8")).hexdigest()
             if hashes.get(feed) == h and last.get(feed):
                 result[feed] = dict(last[feed], status="cached")
             else:
