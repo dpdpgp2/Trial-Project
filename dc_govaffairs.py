@@ -214,7 +214,11 @@ def attach(ranked, tabs, classify_fn=_llm_classify, web_fn=_web_snippet):
     web_pending = []
     for r in ranked:
         co_lc = _norm(r.get("company"))
-        if r.get("inhouse_govaffairs") or f"web:{co_lc}" in items or budget <= 0:
+        # Curated names are flagged with only a generic note — still run web ONCE to attach a real
+        # citation (flag stays True regardless). Non-curated already-flagged rows already have real
+        # job/news evidence, so skip them to save credits.
+        already_sourced = r.get("inhouse_govaffairs") and r.get("govaffairs_source") != "curated"
+        if already_sourced or f"web:{co_lc}" in items or budget <= 0:
             continue
         snip = web_fn(r["company"])
         items[f"web:{co_lc}"] = False               # attempted -> don't re-query (updated if True)

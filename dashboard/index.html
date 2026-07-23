@@ -155,11 +155,11 @@ tr.flash>td{animation:flashbg 2.1s ease-out}
 .tag.geo{background:#F7EDEA;color:var(--navy)}.tag.plain{background:var(--bg);color:var(--ink-2)}
 .tag.hi{background:var(--pos-bg);color:var(--pos)}.tag.md{background:var(--tact-bg);color:var(--tact)}.tag.lo{background:var(--bg);color:var(--ink-3)}
 .tag.foreign{background:#F3EAFA;color:var(--osint)}
-.gaflag{position:relative;display:inline-block;margin-left:6px;font-size:10px;font-weight:600;color:var(--disc);background:#FBEAE4;border:1px solid #E7C4B7;border-radius:10px;padding:1px 7px;cursor:pointer;vertical-align:middle;white-space:nowrap}
-.gaflag:hover{background:#F6DDD3}
-.gabub{display:none;position:absolute;z-index:60;top:150%;left:0;width:250px;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 26px rgba(30,33,60,.16);padding:10px 12px;font-size:11px;font-weight:400;color:var(--ink-2);cursor:default;white-space:normal;text-align:left}
+.gaflag{position:relative;display:inline-block;margin-left:6px;font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#fff;background:var(--neg);border:1px solid var(--neg);border-radius:11px;padding:2px 9px;cursor:pointer;vertical-align:middle;white-space:nowrap}
+.gaflag:hover{background:#8F1D16;border-color:#8F1D16}
+.gabub{display:none;position:absolute;z-index:60;top:150%;left:0;width:320px;background:#fff;border:1px solid var(--line-2);border-radius:9px;box-shadow:0 10px 30px rgba(30,33,60,.22);padding:12px 14px;font-size:12px;font-weight:400;color:var(--ink);cursor:default;white-space:normal;text-align:left;line-height:1.5;text-transform:none;letter-spacing:0}
 .gabub.on{display:block}
-.gabub b{color:var(--ink);font-size:12px}.gabub .gasrc{color:var(--ink-3);margin:3px 0}.gabub .ganote{margin:4px 0;font-style:italic}
+.gabub b{color:var(--neg);font-size:13px;display:block;margin-bottom:6px}.gabub .gasrc{color:var(--ink-3);margin:3px 0}.gabub .ganote{margin:5px 0;color:var(--ink-2);font-style:italic}
 .aichip{font-size:10px;font-weight:600;color:var(--acid-dk);background:#FBF3E2;border-radius:4px;padding:1px 6px;margin-right:6px;letter-spacing:.3px;text-transform:uppercase;white-space:nowrap}
 
 /* tables */
@@ -263,6 +263,17 @@ function govBadge(p){
   return ` <span class="gaflag" onclick="toggleGa('${id}',event)" title="in-house government-affairs \u2014 harder for TAG to win">\u26a0 gov-affairs${bubble}</span>`;
 }
 function toggleGa(id,ev){ev.stopPropagation();document.querySelectorAll('.gabub.on').forEach(el=>{if(el.id!==id)el.classList.remove('on');});const el=document.getElementById(id);if(el)el.classList.toggle('on');}
+// MD/Analyst rows don't carry the gov-affairs fields — look the prospect up by name. Account labels
+// can bundle several companies ("AirTrunk + Blackstone") — badge every flagged one that appears.
+// ponytail: word-boundary substring match; tighten to exact-only if it ever over-matches.
+function govBadgeByName(name){
+  if(!name)return '';
+  const hay=String(name).toLowerCase();
+  return (DATA.prospects||[]).filter(p=>{
+    const c=String(p.company||'').trim().toLowerCase();
+    return c && new RegExp('\\b'+c.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b').test(hay);
+  }).map(govBadge).join('');
+}
 function metric(lbl,icon,val,delta,dir){return `<div class="metric"><div class="lbl"><i class="ti ${icon}"></i>${lbl}</div><div class="val mono">${val}</div><div class="delta ${dir||'flat'}">${delta||''}</div></div>`;}
 function emptyState(msg){return `<div class="empty"><i class="ti ti-inbox" style="font-size:26px;display:block;margin-bottom:8px;color:var(--line-2)"></i>${esc(msg)}</div>`;}
 function toggleEl(id,expId){const el=document.getElementById(id);if(el)el.style.display=el.style.display==='none'?'':'none';const x=document.getElementById(expId);if(x)x.classList.toggle('open');}
@@ -496,7 +507,7 @@ function prospectCard(p,i){
   ].join('');
   const evList=evd.map(x=>`<div class="cart"><div class="cs">${esc(x.r.publisher||'—')}</div><div class="ch" title="${esc(x.r.headline)}">${titleLink(x.r.headline,x.r.url)}</div><div class="cd">${shortDate(x.r.date)}</div>${extLink(x.r.url)||'<span style="width:16px"></span>'}</div>`).join('');
   return `<div class="prospect ${priBorder(p.bd_priority)}" id="hit-pros-${p._x??i}"><div class="ptop"><div class="prank">${i+1}</div><div class="pmain">
-    <div class="pco"><h3>${esc(p.company)}</h3>${chips}</div>
+    <div class="pco"><h3>${esc(p.company)}</h3>${chips}${govBadge(p)}</div>
     ${p.trigger?`<div class="ptrigger"><span class="tk"><i class="ti ti-bolt"></i>Trigger</span>${esc(p.trigger)}</div>`:''}
     <div class="pthesis">${p.why_now?`<b>Why now:</b> ${esc(p.why_now)}`:''}${p.why_now&&p.tag_play?' · ':''}${p.tag_play?`<b>TAG play:</b> ${esc(p.tag_play)}`:''}</div>
     </div>
@@ -529,7 +540,7 @@ function viewMD(){
   const rows=DATA.md_view||[];
   const cols=[{label:'Priority',key:'priority'},{label:'Account',key:'account'},{label:'Type',key:'type'},{label:'Trigger',style:'width:20%'},{label:'TAG wedge'},{label:'Buyer'},{label:'Access path'},{label:'Next action'}];
   const ai=v=>v?esc(v).replace('🤖AI-draft: ','<span class="stchip dev">AI</span> '):'—';
-  const rowFn=m=>`<tr><td><span class="tag ${priCls(m.priority)}">${esc(m.priority||'—')}</span></td><td class="cellh"><b>${esc(m.account||'—')}</b></td>
+  const rowFn=m=>`<tr><td><span class="tag ${priCls(m.priority)}">${esc(m.priority||'—')}</span></td><td class="cellh"><b>${esc(m.account||'—')}</b>${govBadgeByName(m.account)}</td>
     <td>${dash(m.type)}</td><td style="font-size:12px">${dash(m.trigger)}</td><td>${dash(m.tag_wedge)}</td><td style="font-size:12px">${ai(m.buyer)}</td><td style="font-size:12px">${ai(m.access_path)}</td><td style="font-size:12px">${ai(m.next_action)}</td></tr>`;
   return `<div class="eyebrow">One-screen partner brief</div><div class="phead"><h1>MD View</h1></div>
   <p class="psub">The distilled call sheet — priority accounts, the trigger, and TAG's wedge. Built for a 90-second read.</p>
@@ -553,7 +564,7 @@ function playCard(p,i){
   const streams=(p.streams||[]).map(s=>`<span class="tag plain">${esc(s)}</span>`).join('');
   const evList=evd.map(x=>`<div class="cart"><div class="cs">${esc(x.r.publisher||'—')}</div><div class="ch" title="${esc(x.r.headline)}">${titleLink(x.r.headline,x.r.url)}</div><div class="cd">${shortDate(x.r.date)}</div>${extLink(x.r.url)||'<span style="width:16px"></span>'}</div>`).join('');
   return `<div class="prospect ${dl!=null&&dl>=0?'pri1':''}"><div class="ptop"><div class="prank">${i+1}</div><div class="pmain">
-    <div class="pco"><h3>${esc(p.company)}</h3>${streams}${confTag(p.confidence)}${abChip}</div>
+    <div class="pco"><h3>${esc(p.company)}</h3>${streams}${confTag(p.confidence)}${abChip}${govBadgeByName(p.company)}</div>
     <div class="ptrigger"><span class="tk"><i class="ti ti-target-arrow"></i>Play</span>${esc(p.headline)}</div>
     <div class="pthesis"><b>Why now:</b> ${esc(p.why_now)}</div>
     <div class="pthesis"><b>State hook:</b> ${esc(p.state_hook||'—')}</div></div></div>
@@ -606,7 +617,7 @@ function viewDesk(){
   html+=plays||`<div class="panel">${emptyState('No cross-corroborated fresh plays — the Analyst Desk populates on the next pipeline run.')}</div>`;
   if((t.watchlist||[]).length){
     html+=`<div class="shead"><h2><i class="ti ti-eye"></i>Watchlist<span class="sx">not yet actionable — what would trigger a move</span></h2></div><div class="panel">`
-      +t.watchlist.map(w=>`<div class="brow"><div class="bled" style="background:var(--tact)"></div><div class="bmain"><div class="bh">${esc(w.company)}</div><div class="bm">${esc(w.note)}</div></div></div>`).join('')+`</div>`;
+      +t.watchlist.map(w=>`<div class="brow"><div class="bled" style="background:var(--tact)"></div><div class="bmain"><div class="bh">${esc(w.company)}${govBadgeByName(w.company)}</div><div class="bm">${esc(w.note)}</div></div></div>`).join('')+`</div>`;
   }
   html+=`<div class="shead"><h2><i class="ti ti-message-question"></i>Ask the analyst<span class="sx">answered from sheet data on the next pipeline run</span></h2></div>
   <div class="panel">
