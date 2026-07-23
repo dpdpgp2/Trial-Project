@@ -404,6 +404,22 @@ function streamHero(s,n){
     <div><h1>Data Centres · ${s.name}</h1><p>${s.sheet} · ${s.desc}</p></div>
     <div class="sstats"><div class="sstat"><span class="n">${n}</span><span class="l">${s.unit}</span></div></div></div>`;
 }
+// "Most Important — last 48h": AI-ranked top slice atop News / Policy / Disclosure streams.
+// Renders from each item's own title+url. Empty / missing feed -> nothing (graceful).
+function spotlightPanel(feed){
+  const sp=(DATA.spotlight||{})[feed];
+  if(!sp||!sp.items||!sp.items.length){
+    return sp&&sp.status==='empty'?`<div class="panel" style="margin-bottom:16px"><h3><i class="ti ti-flame"></i>Most Important — last 48h</h3><div style="font-size:12px;color:var(--ink-3)">Nothing material in the last ${(sp.window_days||2)} days.</div></div>`:'';
+  }
+  const rows=sp.items.map(it=>`<div style="display:flex;gap:10px;align-items:baseline;padding:7px 0;border-top:1px solid var(--line)">
+    <span class="mono" style="color:var(--ink-3);min-width:18px">${it.rank||''}</span>
+    <div style="flex:1">
+      <div>${titleLink(it.title,it.url)} ${extLink(it.url)}</div>
+      ${it.reason?`<div style="font-size:12px;color:var(--ink-2);margin-top:2px">${esc(it.reason)}</div>`:''}
+      ${(it.criteria_hits||[]).length?`<div class="tagwrap" style="margin-top:4px">${it.criteria_hits.map(h=>`<span class="tag plain">${esc(h)}</span>`).join('')}</div>`:''}
+    </div></div>`).join('');
+  return `<div class="panel" style="margin-bottom:16px"><h3><i class="ti ti-flame"></i>Most Important — last 48h <span style="font-weight:400;color:var(--ink-3);font-size:12px">· AI-ranked top ${sp.items.length}</span></h3>${rows}</div>`;
+}
 function viewStreamNews(s){
   const rows=(DATA.events||[]).map((e,i)=>Object.assign({_i:i},e));
   const cols=[{label:'Event',key:'headline',style:'width:40%'},{label:'Articles',key:'n_articles'},{label:'Sources',key:'n_sources'},{label:'Layer',key:'layer'},{label:'Geo',key:'geo'},{label:'Last seen',key:'last_seen'},{label:''}];
@@ -413,7 +429,7 @@ function viewStreamNews(s){
       <td class="mono">${e.n_articles??'—'}</td><td class="mono">${e.n_sources??'—'}</td><td>${dash(e.layer)}</td><td><span class="tag geo">${esc(e.geo||'—')}</span></td><td class="mono">${shortDate(e.last_seen)}</td><td>${esc(e.event_id||'')}</td></tr>
     <tr id="sub-ev${e._i}" class="subrow" style="display:none"><td colspan="7">${arts||emptyState('No linked articles.')}</td></tr>`;
   };
-  return streamHero(s,rows.length)+renderTable('tblNews',cols,rows,rowFn,'last_seen');
+  return streamHero(s,rows.length)+spotlightPanel('ss1')+renderTable('tblNews',cols,rows,rowFn,'last_seen');
 }
 function viewStreamPolicy(s){
   const rows=(DATA.policy||[]).map((p,i)=>Object.assign({_i:i},p));
@@ -421,7 +437,7 @@ function viewStreamPolicy(s){
   const rowFn=p=>`<tr id="hit-policy-${p._i}"><td class="mono">${shortDate(p.date)}</td><td><span class="tag geo">${esc(p.geo||'—')}</span></td>
     <td><span class="tag plain">${esc(p.policy_class||p.type||'—')}</span></td>
     <td class="cellh">${titleLink(p.title,p.url)}</td><td>${dash(p.source)}</td><td>${extLink(p.url)}</td></tr>`;
-  return streamHero(s,rows.length)+renderTable('tblPolicy',cols,rows,rowFn,'date');
+  return streamHero(s,rows.length)+spotlightPanel('ss2')+renderTable('tblPolicy',cols,rows,rowFn,'date');
 }
 function viewStreamDisclosure(s){
   const rows=(DATA.disclosures||[]).map((d,i)=>Object.assign({_i:i},d));
@@ -429,7 +445,7 @@ function viewStreamDisclosure(s){
   const rowFn=d=>`<tr id="hit-disc-${d._i}"><td class="mono">${shortDate(d.filed_date)}</td><td class="cellh"><b>${esc(d.filer||'—')}</b>${d.signals?`<div class="tagwrap">${[...new Set(String(d.signals).split(';').map(s=>s.trim()).filter(Boolean))].map(s=>`<span class="tag plain">${esc(s.replace('|',' · '))}</span>`).join('')}</div>`:''}</td>
     <td><span class="tag plain mono">${esc(d.form||'—')}</span></td><td>${dash(d.region)}</td><td>${dash(d.deal_type)}</td><td>${confTag(d.confidence)}</td>
     <td>${dash(d.relevance)}${d.evidence?`<div class="qev">${esc(d.evidence)}</div>`:''}</td><td>${extLink(d.url)}</td></tr>`;
-  return streamHero(s,rows.length)+renderTable('tblDisc',cols,rows,rowFn,'filed_date');
+  return streamHero(s,rows.length)+spotlightPanel('ss3')+renderTable('tblDisc',cols,rows,rowFn,'filed_date');
 }
 function viewStreamOsint(s){
   const rows=(DATA.osint||[]).map((o,i)=>Object.assign({_i:i},o));
@@ -447,7 +463,36 @@ function viewStreamRanked(s){
     <td class="mono">${num(p.momentum,1)}</td><td><span class="tag geo">${esc(p.geo||'—')}</span></td>
     <td>${dash(p.india_presence)}${p.expansion_stage?` <span style="color:var(--ink-3)">/ ${esc(p.expansion_stage)}</span>`:''}</td>
     <td>${dash(p.tag_play)}</td><td style="font-size:12px;color:var(--ink-2)">${dash(p.why_now)}</td><td class="mono">${dash(p.deal_value)}</td></tr>`;
-  return streamHero(s,rows.length)+scoreHelp()+renderTable('tblRank',cols,rows,rowFn,'signal_score');
+  return streamHero(s,rows.length)+scoreHelp()+renderTable('tblRank',cols,rows,rowFn,'signal_score')+proposedPanel();
+}
+// Proposed Operators: value-chain names discovered from the 48h news, human-promoted.
+// Promote hits /api/promote (password-gated GitHub-Issue drop) — the next run approves + unions.
+function proposedPanel(){
+  const ops=(DATA.proposed_operators||[]);
+  if(!ops.length)return '';
+  const seg=s=>`<span class="tag plain">${esc(s||'—')}</span>`;
+  const ver=v=>v?`<span class="tag plain mono">✓ ${esc(v)}</span>`:`<span style="color:var(--ink-3);font-size:12px">unverified</span>`;
+  const row=o=>{
+    const st=(o.status||'proposed');
+    const act=st==='approved'?`<span class="tag foreign">approved</span>`
+      :o.promotable?`<button class="fbtn" style="border:1px solid var(--line-2);padding:5px 10px" onclick="promoteOp(this,'${esc(String(o.name).replace(/'/g,"\\'"))}','${esc(o.evidence_url||'')}')"><i class="ti ti-arrow-up"></i>Promote</button>`
+      :`<span style="color:var(--ink-3);font-size:12px">context only</span>`;
+    return `<div class="brow"><div class="bled" style="background:var(--talent)"></div><div class="bmain" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div class="bh" style="flex:1;min-width:140px;white-space:normal;overflow:visible">${o.evidence_url?titleLink(o.name,o.evidence_url):esc(o.name)} ${seg(o.segment)} ${ver(o.verified_by)}</div>
+      <div style="display:flex;align-items:center;gap:8px">${act}</div></div></div>`;
+  };
+  return `<div class="shead" style="margin-top:22px"><h2><i class="ti ti-sitemap"></i>Proposed operators<span class="sx">value-chain names from the 48h news — promote operators TAG can advise</span></h2></div>
+    <div class="panel"><div style="display:flex;gap:8px;margin-bottom:10px"><input id="promP" type="password" placeholder="Password" style="width:120px;padding:9px 12px;border:1px solid var(--line-2);border-radius:8px;font:inherit;font-size:13px"><span id="promMsg" style="font-size:12px;color:var(--ink-3);align-self:center">Only operators are promotable; suppliers are context.</span></div>
+    ${ops.map(row).join('')}</div>`;
+}
+function promoteOp(btn,name,url){
+  const p=document.getElementById('promP'),m=document.getElementById('promMsg');
+  m.textContent='Promoting…';
+  fetch('/api/promote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,segment:'operator',evidence_url:url,password:p.value})})
+    .then(async r=>{const d=await r.json().catch(()=>({}));
+      if(r.ok){m.textContent=d.status==='already queued'?'Already queued.':'Queued — added to the watchlist after the next run.';btn.outerHTML='<span class="tag foreign">queued</span>';}
+      else m.textContent=d.error||('Error '+r.status);})
+    .catch(()=>{m.textContent='Network error — try again.'});
 }
 function viewStreamPipeline(s){
   const bd=(DATA.prospects||[]).filter(p=>p.bd_priority);
