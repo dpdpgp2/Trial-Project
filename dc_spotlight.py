@@ -85,11 +85,16 @@ def _candidates(feed, rows, today):
         if not rid or not d or d < cutoff:
             continue
         text = " ".join((textf(r) or "").split())
+        # title used for near-duplicate detection (same story from many sources -> one pick).
+        # SS3 folds in the unique accession so distinct filings never merge.
+        title = (r.get("title") or "").strip() if feed != "ss3" \
+            else f"{r.get('filer', '')} {rid}"
         out.append({
             "id": rid,
             "date": d.isoformat(),
             "url": r.get("url") or "",
             "text": text[:220],
+            "title": title,
             "deal": "" if feed == "ss2" else _deal_bucket(text),
             "state": ", ".join(dc_states.map_state(text)),
         })
@@ -113,8 +118,10 @@ RANK_SYSTEM = (
     "judge deal value and state attractiveness on THOSE, not on headline-guessing.\n"
     "Return the TOP {maxn} rows by BD relevance, weighing: cross-border motion (foreign/GCC->India) "
     "heaviest, then deal bucket, then P1-state + valid policy, then trigger freshness/novelty. "
-    "Drop hyperscaler-as-client rows and thin single-source chatter. If FEWER than {maxn} rows are "
-    "genuinely BD-relevant, RETURN FEWER — a padded list is worse than a short one.{loosen}{orgs}\n\n"
+    "Drop hyperscaler-as-client rows and thin single-source chatter. NEVER return the SAME STORY "
+    "twice — if several rows cover one story/announcement, pick the single best article and drop the "
+    "rest. If FEWER than {maxn} rows are genuinely BD-relevant, RETURN FEWER — a padded list is worse "
+    "than a short one.{loosen}{orgs}\n\n"
     "OUTPUT — ONLY this JSON object, no prose, no markdown fences:\n"
     '{{"items":[{{"id":"<id copied exactly>","reason":"<one line, <=160 chars, why it matters to TAG>",'
     '"criteria_hits":["cross-border"|"deal"|"P1-state"|"trigger"|"novel"]}}]{orgs_schema}}}'
@@ -150,17 +157,44 @@ def _rank_feed(key, feed, cands, loosen=False):
     return _validate_items(obj, cands, want_orgs)
 
 
+# tokens ignored when comparing headlines — generic words that don't distinguish a story.
+_DUP_STOP = {"the", "a", "an", "to", "in", "of", "for", "and", "on", "at", "with", "its",
+             "is", "as", "by", "it", "data", "centre", "center", "datacentre", "datacenter",
+             "india", "indian", "new", "plans", "plan", "set", "eyes"}
+
+
+def _title_tokens(title):
+    import re
+    toks = re.findall(r"[a-z0-9]+", (title or "").lower())
+    return {t for t in toks if t not in _DUP_STOP and len(t) > 1}
+
+
+def _is_dup(tokens, kept):
+    """Overlap-coefficient near-dupe check vs already-kept headlines (>=0.7 = same story)."""
+    if not tokens:
+        return False
+    for kt in kept:
+        inter = len(tokens & kt)
+        if inter and inter / min(len(tokens), len(kt)) >= 0.7:
+            return True
+    return False
+
+
 def _validate_items(obj, cands, want_orgs):
-    """Drop fabricated ids; clip fields; dedup; cap at SPOTLIGHT_MAX_PER_FEED."""
+    """Drop fabricated ids; drop near-duplicate stories; clip; cap at SPOTLIGHT_MAX_PER_FEED."""
     valid = {c["id"]: c for c in cands}
-    items, seen = [], set()
+    items, seen, kept_titles = [], set(), []
     for it in (obj.get("items") or []):
         if not isinstance(it, dict):
             continue
         rid = str(it.get("id") or "").strip()
         if rid not in valid or rid in seen:
             continue
+        toks = _title_tokens(valid[rid].get("title"))
+        if _is_dup(toks, kept_titles):        # same story from another source -> skip
+            continue
         seen.add(rid)
+        kept_titles.append(toks)
         hits = [str(h)[:24] for h in (it.get("criteria_hits") or [])][:5]
         items.append({"id": rid, "rank": len(items) + 1,
                       "reason": str(it.get("reason") or "")[:160],
@@ -209,11 +243,21 @@ def _judge(key, fresh):
 
 
 def _fallback_items(cands):
-    """Deterministic ranking when the model is unavailable: deal bucket then recency."""
+    """Deterministic ranking when the model is unavailable: deal bucket then recency,
+    with the same near-duplicate-story dedup as the AI path."""
     order = {"≥$500M": 2, "≥$50M": 1, "": 0}
     ranked = sorted(cands, key=lambda c: (order.get(c["deal"], 0), c["date"]), reverse=True)
-    return [{"id": c["id"], "rank": i + 1, "reason": "", "criteria_hits": [], "url": c["url"]}
-            for i, c in enumerate(ranked[: dc.SPOTLIGHT_MAX_PER_FEED])]
+    items, kept = [], []
+    for c in ranked:
+        toks = _title_tokens(c.get("title"))
+        if _is_dup(toks, kept):
+            continue
+        kept.append(toks)
+        items.append({"id": c["id"], "rank": len(items) + 1, "reason": "",
+                      "criteria_hits": [], "url": c["url"]})
+        if len(items) >= dc.SPOTLIGHT_MAX_PER_FEED:
+            break
+    return items
 
 
 def spotlight(ss, tabs, register=None):
@@ -306,6 +350,11 @@ def demo():
              "summary": "foreign operator entering India", "url": "https://x/1", "entities": "AirTrunk"},
             {"id": "n2", "date": d0, "title": "Local vendor ships racks in Pune", "summary": "",
              "url": "https://x/2", "entities": ""},
+            # same story from 2 more sources -> must collapse to ONE pick (event_id NOT used)
+            {"id": "dupA", "date": d0, "title": "HCLTech to Build First India Data Centre in Odisha, Targets 2027",
+             "summary": "", "url": "https://x/a", "entities": "HCLTech"},
+            {"id": "dupB", "date": d0, "title": "HCLTech likely to build its first India data centre in Odisha",
+             "summary": "", "url": "https://x/b", "entities": "HCLTech"},
             {"id": "nOld", "date": stale, "title": "Old news", "summary": "", "url": "https://x/3"},
         ],
         "ss2": [  # this feed the judge fails once, then passes after widen
@@ -352,6 +401,7 @@ def demo():
     assert "GHOST" not in ss1_ids, "fabricated id not dropped"
     assert "nOld" not in ss1_ids, "stale row not excluded"
     assert {"n1", "n2"} <= set(ss1_ids), "in-window rows missing"
+    assert len([i for i in ss1_ids if i in ("dupA", "dupB")]) == 1, "near-duplicate story not collapsed"
     orgs = {o["name"] for o in r["ss1"]["orgs"]}
     assert "AirTrunk" not in orgs and "NewCo Power" in orgs, "org dedup/extract wrong"
     assert not r["ss2"]["orgs"], "policy feed must not extract orgs"
