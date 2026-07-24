@@ -29,7 +29,7 @@ from dc_ai import (_chat, _json_obj, load_cache, save_cache,   # noqa: F401
                    _parse_date, _now, test_connection)
 
 CRITERIA_PATH = os.path.join(os.path.dirname(__file__), "docs", "TAG_BD_CRITERIA.md")
-_SCHEMA = "v2-events"    # bump when the per-feed item shape changes (busts the per-feed cache)
+_SCHEMA = "v3-events"    # bump when item shape OR clustering prompt changes (busts the per-feed cache)
 _ORG_FEEDS = ("ss1", "ss3")   # only News + Disclosure rankers extract value-chain orgs
 _HIGH, _MED = dc.FEE_VIABILITY_DEAL_USD["high"], dc.FEE_VIABILITY_DEAL_USD["medium"]
 
@@ -117,14 +117,18 @@ RANK_SYSTEM = (
     "=== TAG BD CRITERIA (verbatim grounding) ===\n{criteria}\n\n{states}\n\n"
     "Each row is pre-tagged with a deterministic deal bucket (deal=) and matched state (state=) — "
     "judge deal value and state attractiveness on THOSE, not on headline-guessing.\n"
-    "FIRST cluster the rows into EVENTS: group every row that covers the SAME story / announcement / "
-    "deal into ONE event, even when different outlets word the headline differently or name the state "
-    "vs its city (e.g. 'Odisha' and its capital 'Bhubaneswar' are the same place). List ALL the row "
-    "ids that belong to each event. Every row id appears in AT MOST ONE event.\n"
-    "THEN return the TOP {maxn} EVENTS by BD relevance, weighing: cross-border motion (foreign/GCC->"
-    "India) heaviest, then deal bucket, then P1-state + valid policy, then trigger freshness/novelty. "
-    "Drop hyperscaler-as-client events and thin single-source chatter. If FEWER than {maxn} events are "
-    "genuinely BD-relevant, RETURN FEWER — a padded list is worse than a short one.{loosen}{orgs}\n\n"
+    "FIRST cluster the rows into EVENTS. Group two rows into ONE event ONLY when they report the SAME "
+    "announcement by the SAME company/project — even if outlets word the headline differently or name "
+    "the state vs its city (e.g. 'Odisha' and its capital 'Bhubaneswar'). NEVER merge DIFFERENT "
+    "companies, different projects, or unrelated stories into one event — those are SEPARATE events "
+    "(e.g. an HCLTech Odisha build and a Ping Identity launch and a TCS land deal are THREE events, "
+    "never one). List ALL row ids in each event; every row id appears in AT MOST ONE event.\n"
+    "THEN return the TOP {maxn} DISTINCT events by BD relevance, weighing: cross-border motion "
+    "(foreign/GCC->India) heaviest, then deal bucket, then P1-state + valid policy, then trigger "
+    "freshness/novelty. Drop hyperscaler-as-client events and thin single-source chatter. AIM FOR {maxn} "
+    "distinct events — surface every genuinely distinct BD-relevant story as its OWN event; return fewer "
+    "ONLY when the window truly holds fewer distinct stories. Do NOT collapse several real, different "
+    "stories into one to shorten the list.{loosen}{orgs}\n\n"
     "OUTPUT — ONLY this JSON object, no prose, no markdown fences:\n"
     '{{"items":[{{"heading":"<one-line event heading, <=120 chars>",'
     '"reason":"<one line, <=160 chars, why this event matters to TAG>",'
