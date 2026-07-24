@@ -427,7 +427,7 @@ function spotlightPanel(feed,compact){
     return `<div ${compact?open:''} style="display:flex;gap:10px;align-items:baseline;padding:9px 0;border-top:1px solid var(--line)${compact?';':''}">
       <span class="mono" style="color:var(--ink-3);min-width:18px">${it.rank||''}</span>
       <div style="flex:1">
-        <div style="font-weight:500">${head} ${arts.length>1?`<span class="tag plain" title="${arts.length} articles clustered into this event">${arts.length} sources</span>`:''}</div>
+        <div style="font-weight:500">${it.tier==='opportunity'?'<span class="tag foreign" title="Genuine TAG India-market-entry play">TAG play</span> ':''}${head} ${arts.length>1?`<span class="tag plain" title="${arts.length} articles clustered into this event">${arts.length} sources</span>`:''}</div>
         ${it.reason?`<div style="font-size:12px;color:var(--ink-2);margin-top:2px">${esc(it.reason)}</div>`:''}
         ${(it.criteria_hits||[]).length?`<div class="tagwrap" style="margin-top:4px">${it.criteria_hits.map(h=>`<span class="tag plain">${esc(h)}</span>`).join('')}</div>`:''}
         ${(!compact&&arts.length>1)?`<div style="font-size:12px;margin-top:5px;line-height:1.9">${links}</div>`:''}

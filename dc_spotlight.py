@@ -29,7 +29,7 @@ from dc_ai import (_chat, _json_obj, load_cache, save_cache,   # noqa: F401
                    _parse_date, _now, test_connection)
 
 CRITERIA_PATH = os.path.join(os.path.dirname(__file__), "docs", "TAG_BD_CRITERIA.md")
-_SCHEMA = "v3-events"    # bump when item shape OR clustering prompt changes (busts the per-feed cache)
+_SCHEMA = "v4-events"    # bump when item shape OR ranker prompt changes (busts the per-feed cache)
 _ORG_FEEDS = ("ss1", "ss3")   # only News + Disclosure rankers extract value-chain orgs
 _HIGH, _MED = dc.FEE_VIABILITY_DEAL_USD["high"], dc.FEE_VIABILITY_DEAL_USD["medium"]
 
@@ -123,14 +123,21 @@ RANK_SYSTEM = (
     "companies, different projects, or unrelated stories into one event — those are SEPARATE events "
     "(e.g. an HCLTech Odisha build and a Ping Identity launch and a TCS land deal are THREE events, "
     "never one). List ALL row ids in each event; every row id appears in AT MOST ONE event.\n"
-    "THEN return the TOP {maxn} DISTINCT events by BD relevance, weighing: cross-border motion "
-    "(foreign/GCC->India) heaviest, then deal bucket, then P1-state + valid policy, then trigger "
-    "freshness/novelty. Drop hyperscaler-as-client events and thin single-source chatter. AIM FOR {maxn} "
-    "distinct events — surface every genuinely distinct BD-relevant story as its OWN event; return fewer "
-    "ONLY when the window truly holds fewer distinct stories. Do NOT collapse several real, different "
-    "stories into one to shorten the list.{loosen}{orgs}\n\n"
+    "THEN return the TOP {maxn} most important DATA-CENTRE events of the window, RANKED by BD relevance. "
+    "This is a FULL top-{maxn} briefing, not a shortlist — surface the desk's whole picture:\n"
+    "  • tier='opportunity' — a genuine TAG India-market-entry play: a cross-border mover INTO India, a "
+    "real trigger (land/capex/JV/energy), an attractive state. Rank these FIRST.\n"
+    "  • tier='context' — other notable DC news worth knowing but NOT a direct TAG India-entry play: US / "
+    "global deals, hyperscaler moves, India market milestones, GCC/Saudi builds. Rank these BELOW the "
+    "opportunities, still by importance.\n"
+    "Order: all opportunities first (most relevant first), then context. FILL UP TO {maxn} events when the "
+    "window holds that many real DC stories. Drop ONLY pure market-research / vendor spam (e.g. headlines "
+    "like 'X Market Forecast/Size/Analysis', 'Adaptor Market', 'AC Fans Market') and non-data-centre "
+    "noise. Weigh relevance by: cross-border motion (foreign/GCC->India) heaviest, then deal bucket, then "
+    "P1-state + valid policy, then trigger freshness/novelty.{loosen}{orgs}\n\n"
     "OUTPUT — ONLY this JSON object, no prose, no markdown fences:\n"
     '{{"items":[{{"heading":"<one-line event heading, <=120 chars>",'
+    '"tier":"opportunity"|"context",'
     '"reason":"<one line, <=160 chars, why this event matters to TAG>",'
     '"criteria_hits":["cross-border"|"deal"|"P1-state"|"trigger"|"novel"],'
     '"article_ids":["<id copied exactly>", ...]}}]{orgs_schema}}}'
@@ -185,8 +192,9 @@ def _validate_items(obj, cands, want_orgs):
             continue
         used.update(ids)
         hits = [str(h)[:24] for h in (it.get("criteria_hits") or [])][:5]
+        tier = "opportunity" if str(it.get("tier") or "").lower() == "opportunity" else "context"
         items.append({"rank": len(items) + 1,
-                      "heading": str(it.get("heading") or "")[:120],
+                      "heading": str(it.get("heading") or "")[:120], "tier": tier,
                       "reason": str(it.get("reason") or "")[:160],
                       "criteria_hits": hits, "article_ids": ids})
         if len(items) >= dc.SPOTLIGHT_MAX_PER_FEED:
@@ -237,8 +245,8 @@ def _fallback_items(cands):
     cluster, so each event is a single article (heading = its title)."""
     order = {"≥$500M": 2, "≥$50M": 1, "": 0}
     ranked = sorted(cands, key=lambda c: (order.get(c["deal"], 0), c["date"]), reverse=True)
-    return [{"rank": i + 1, "heading": (c.get("title") or "")[:120], "reason": "",
-             "criteria_hits": [], "article_ids": [c["id"]]}
+    return [{"rank": i + 1, "heading": (c.get("title") or "")[:120], "tier": "context",
+             "reason": "", "criteria_hits": [], "article_ids": [c["id"]]}
             for i, c in enumerate(ranked[: dc.SPOTLIGHT_MAX_PER_FEED])]
 
 
@@ -369,13 +377,13 @@ def demo():
         import json as _j
         events = []
         if "dupA" in ids and "dupB" in ids:                    # HCLTech story from 2 sources -> 1 event
-            events.append({"heading": "HCLTech first India DC in Odisha", "reason": "cross-border first-mover",
-                           "criteria_hits": ["cross-border", "trigger"],
+            events.append({"heading": "HCLTech first India DC in Odisha", "tier": "opportunity",
+                           "reason": "cross-border first-mover", "criteria_hits": ["cross-border", "trigger"],
                            "article_ids": ["dupA", "dupB", "GHOST"]})   # GHOST invented -> dropped
             rest = [i for i in ids if i not in ("dupA", "dupB")]
         else:
             rest = ids
-        for i in rest:
+        for i in rest:                                          # no tier -> defaults to 'context'
             events.append({"heading": f"event {i}", "reason": "matters",
                            "criteria_hits": ["cross-border"], "article_ids": [i]})
         out = {"items": events}
@@ -398,6 +406,9 @@ def demo():
     assert len(all_ids) == len(set(all_ids)), "an article was double-counted across events"
     hcl = [it for it in ss1 if set(it["article_ids"]) & {"dupA", "dupB"}]
     assert len(hcl) == 1 and set(hcl[0]["article_ids"]) == {"dupA", "dupB"}, "same story not clustered into one event"
+    assert hcl[0]["tier"] == "opportunity", "tier not passed through"
+    assert all(it["tier"] in ("opportunity", "context") for it in ss1), "tier missing/invalid"
+    assert [it for it in ss1 if it["tier"] == "context"], "context tier not defaulted"
     orgs = {o["name"] for o in r["ss1"]["orgs"]}
     assert "AirTrunk" not in orgs and "NewCo Power" in orgs, "org dedup/extract wrong"
     assert not r["ss2"]["orgs"], "policy feed must not extract orgs"

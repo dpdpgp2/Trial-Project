@@ -354,6 +354,7 @@ def _spotlight_payload(spotlight, tabs):
                 continue
             items.append({"rank": _i(it.get("rank")),
                           "heading": _clip(it.get("heading") or arts[0]["title"], 200),
+                          "tier": "opportunity" if it.get("tier") == "opportunity" else "context",
                           "reason": _clip(it.get("reason"), 200),
                           "criteria_hits": [str(h)[:24] for h in (it.get("criteria_hits") or [])][:5],
                           "articles": arts})
@@ -539,7 +540,8 @@ def _selfcheck():
                    "evidence_ids": ["n1"]}]
     fixture_spot = {   # ss1 event clusters the two AirTrunk articles (n1 + n2) into one
         "ss1": {"generated_at": "2026-07-17 05:00 UTC", "window_days": 2, "status": "ok",
-                "items": [{"rank": 1, "heading": "AirTrunk Mumbai campus", "reason": "foreign mover into India",
+                "items": [{"rank": 1, "heading": "AirTrunk Mumbai campus", "tier": "opportunity",
+                           "reason": "foreign mover into India",
                            "criteria_hits": ["cross-border", "deal"], "article_ids": ["n1", "n2"]}],
                 "orgs": [{"name": "NewCo Power", "segment": "energy/power"}]},
         "ss2": {"generated_at": "2026-07-17 05:00 UTC", "window_days": 2, "status": "ok",
@@ -558,6 +560,7 @@ def _selfcheck():
     probs = validate(data)
     assert not probs, probs
     ev = data["spotlight"]["ss1"]["items"][0]
+    assert ev["tier"] == "opportunity", "spotlight tier not carried"
     assert len(ev["articles"]) == 2 and {a["id"] for a in ev["articles"]} == {"n1", "n2"}, "event links not resolved"
     assert ev["articles"][0]["title"].startswith("AirTrunk") and ev["articles"][0]["url"], "article not enriched"
     assert data["spotlight"]["ss3"]["status"] == "empty", "empty spotlight feed lost"
