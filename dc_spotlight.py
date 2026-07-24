@@ -29,7 +29,7 @@ from dc_ai import (_chat, _json_obj, load_cache, save_cache,   # noqa: F401
                    _parse_date, _now, test_connection)
 
 CRITERIA_PATH = os.path.join(os.path.dirname(__file__), "docs", "TAG_BD_CRITERIA.md")
-_SCHEMA = "v4-events"    # bump when item shape OR ranker prompt changes (busts the per-feed cache)
+_SCHEMA = "v5-events"    # bump when item shape OR ranker prompt/call changes (busts the per-feed cache)
 _ORG_FEEDS = ("ss1", "ss3")   # only News + Disclosure rankers extract value-chain orgs
 _HIGH, _MED = dc.FEE_VIABILITY_DEAL_USD["high"], dc.FEE_VIABILITY_DEAL_USD["medium"]
 
@@ -171,25 +171,30 @@ def _rank_feed(key, feed, cands, loosen=False):
         criteria=_criteria(), states=_state_matrix_line(), maxn=dc.SPOTLIGHT_MAX_PER_FEED,
         window=_window_days(feed), loosen=_LOOSEN if loosen else "",
         orgs=_ORGS_INSTR if want_orgs else "", orgs_schema=_ORGS_SCHEMA if want_orgs else "")
+    # Short SURROGATE ids (r1, r2, …) instead of raw ids: SS3 accessions like
+    # "0001575872-26-000526" are long and the model mangles them when echoing, which would
+    # drop every event at id-validation. The model only ever handles r-ids; we map back here.
+    sur = {f"r{i + 1}": c["id"] for i, c in enumerate(cands)}
     user = "ROWS (id | date | state | deal | text):\n" + "\n".join(
-        f"{c['id']} | {c['date']} | {c['state'] or '-'} | {c['deal'] or '-'} | {c['text']}"
-        for c in cands)
+        f"r{i + 1} | {c['date']} | {c['state'] or '-'} | {c['deal'] or '-'} | {c['text']}"
+        for i, c in enumerate(cands))
     obj = _json_obj(_chat(key, system, user, max_tokens=1500, temperature=0.1))
-    return _validate_items(obj, cands, want_orgs)
+    return _validate_items(obj, cands, want_orgs, sur)
 
 
-def _validate_items(obj, cands, want_orgs):
-    """LLM-clustered EVENTS: keep only real article ids, each id in one event only, drop empty
-    events, clip, cap at SPOTLIGHT_MAX_PER_FEED. The LLM does the same-story clustering; this is
-    the id-existence + no-double-count guard on top."""
+def _validate_items(obj, cands, want_orgs, sur=None):
+    """LLM-clustered EVENTS: map surrogate ids back to real ids, keep only real ids, each id in
+    one event only, drop empty events, clip, cap. The LLM does the clustering; this is the
+    id-existence + no-double-count guard on top."""
     valid = {c["id"]: c for c in cands}
+    sur = sur or {}
     items, used = [], set()
     for it in (obj.get("items") or []):
         if not isinstance(it, dict):
             continue
         ids, seen = [], set()
         for raw in (it.get("article_ids") or []):
-            rid = str(raw).strip()
+            rid = sur.get(str(raw).strip(), str(raw).strip())   # surrogate -> real (or real as-is)
             if rid in valid and rid not in used and rid not in seen:
                 seen.add(rid)
                 ids.append(rid)
@@ -377,17 +382,18 @@ def demo():
             import json as _j
             return _j.dumps({"feeds": feeds})
         calls["rank"] += 1                                     # ranker call
-        # cluster same-story rows into one event; +a fabricated id (must be dropped)
-        ids = [ln.split(" | ")[0] for ln in user.splitlines() if " | " in ln]
+        # rows carry SURROGATE ids (r1, r2, …); cluster by TEXT (HCLTech), +a fabricated id.
         import json as _j
+        parsed = [(ln.split(" | ")[0], ln.lower()) for ln in user.splitlines() if " | " in ln]
+        hcl = [sid for sid, ln in parsed if "hcltech" in ln]
         events = []
-        if "dupA" in ids and "dupB" in ids:                    # HCLTech story from 2 sources -> 1 event
+        if len(hcl) >= 2:                                       # HCLTech story from 2 sources -> 1 event
             events.append({"heading": "HCLTech first India DC in Odisha", "tier": "opportunity",
                            "reason": "cross-border first-mover", "criteria_hits": ["cross-border", "trigger"],
-                           "article_ids": ["dupA", "dupB", "GHOST"]})   # GHOST invented -> dropped
-            rest = [i for i in ids if i not in ("dupA", "dupB")]
+                           "article_ids": hcl + ["GHOST"]})     # GHOST invented -> dropped
+            rest = [sid for sid, _ in parsed if sid not in hcl]
         else:
-            rest = ids
+            rest = [sid for sid, _ in parsed]
         for i in rest:                                          # no tier -> defaults to 'context'
             events.append({"heading": f"event {i}", "reason": "matters",
                            "criteria_hits": ["cross-border"], "article_ids": [i]})
