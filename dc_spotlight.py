@@ -192,7 +192,8 @@ def _rank_feed(key, feed, cands, loosen=False):
     user = "ROWS (id | date | state | deal | text):\n" + "\n".join(
         f"r{i + 1} | {c['date']} | {c['state'] or '-'} | {c['deal'] or '-'} | {c['text']}"
         for i, c in enumerate(cands))
-    obj = _json_obj(_chat(key, system, user, max_tokens=1500, temperature=0.1))
+    # up to 10 events × (heading + reason + several ids) can exceed 1500 and truncate -> empty
+    obj = _json_obj(_chat(key, system, user, max_tokens=2600, temperature=0.1))
     return _validate_items(obj, cands, want_orgs, sur)
 
 
@@ -334,11 +335,22 @@ def spotlight(ss, tabs, register=None):
                         except Exception as e:
                             print(f"  [spotlight] {feed} widen non-fatal: {e}")
                 for feed, (items, orgs) in fresh.items():
-                    status = "ok" if items else "empty"
-                    result[feed] = {"generated_at": _now(), "window_days": _window_days(feed),
-                                    "status": status, "items": items, "orgs": orgs}
-                for feed in need:
-                    hashes[feed] = need[feed]
+                    if items:
+                        result[feed] = {"generated_at": _now(), "window_days": _window_days(feed),
+                                        "status": "ok", "items": items, "orgs": orgs}
+                        hashes[feed] = need[feed]      # cache only a real result
+                    else:
+                        # ranker returned nothing (LLM variance / truncated JSON) but the window
+                        # HAS rows — never blank a populated feed: keep last-good, else deterministic.
+                        # Leave the hash stale so the next run retries the ranker.
+                        prev = last.get(feed)
+                        if prev and prev.get("items"):
+                            print(f"  [spotlight] {feed} empty this pass; keeping last good")
+                            result[feed] = dict(prev, status="cached")
+                        else:
+                            result[feed] = {"generated_at": _now(), "window_days": _window_days(feed),
+                                            "status": "fallback", "items": _fallback_items(cands[feed]),
+                                            "orgs": orgs}
 
         cache.update({"spotlight": result, "spot_hash": hashes, "spot_ts": _now()})
         save_cache(cache)
