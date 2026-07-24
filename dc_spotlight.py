@@ -29,7 +29,7 @@ from dc_ai import (_chat, _json_obj, load_cache, save_cache,   # noqa: F401
                    _parse_date, _now, test_connection)
 
 CRITERIA_PATH = os.path.join(os.path.dirname(__file__), "docs", "TAG_BD_CRITERIA.md")
-_SCHEMA = "v5-events"    # bump when item shape OR ranker prompt/call changes (busts the per-feed cache)
+_SCHEMA = "v6-events"    # bump when item shape OR ranker prompt/call changes (busts the per-feed cache)
 _ORG_FEEDS = ("ss1", "ss3")   # only News + Disclosure rankers extract value-chain orgs
 _HIGH, _MED = dc.FEE_VIABILITY_DEAL_USD["high"], dc.FEE_VIABILITY_DEAL_USD["medium"]
 
@@ -117,8 +117,9 @@ RANK_SYSTEM = (
     "detailed thinking off\n\n"
     "You are a business-development analyst for The Asia Group (TAG). Rank the recent rows (last "
     "{window} days) of ONE data-stream by BD relevance for TAG, grounded ONLY on the CRITERIA below and the rows "
-    "given. Never invent companies, deals, states, or ids — copy every id character-for-character "
-    "from a row; invented ids are deleted by a validator.\n\n"
+    "given. Never invent companies, deals, states, or ids — copy every row id (r1, r2, …) exactly; "
+    "invented ids are deleted by a validator.\n\n"
+    "{feedhint}"
     "=== TAG BD CRITERIA (verbatim grounding) ===\n{criteria}\n\n{states}\n\n"
     "Each row is pre-tagged with a deterministic deal bucket (deal=) and matched state (state=) — "
     "judge deal value and state attractiveness on THOSE, not on headline-guessing.\n"
@@ -147,6 +148,18 @@ RANK_SYSTEM = (
     '"criteria_hits":["cross-border"|"deal"|"P1-state"|"trigger"|"novel"],'
     '"article_ids":["<id copied exactly>", ...]}}]{orgs_schema}}}'
 )
+# Per-feed framing: the ranker is news/deal-shaped by default, so tell it how to read the
+# slower feeds (policy items and regulatory filings are events too, not just headlines).
+_FEED_HINT = {
+    "ss2": ("FEED = POLICY. These rows are state/central data-centre POLICY items (incentive "
+            "schemes, GOs, rules, land/power terms). A new or updated DC policy IS an event — "
+            "rank by state attractiveness (P1 first) and how actionable it is for a TAG client.\n\n"),
+    "ss3": ("FEED = DISCLOSURES. These rows are SEC/regulatory FILINGS, not news. Treat ANY filing "
+            "showing a real data-centre signal (capacity commitment, capex, India/GCC exposure, "
+            "expansion, JV) as an event — a SINGLE filing is a valid event. Low-confidence or "
+            "hyperscaler filings are tier='context', NOT dropped. Drop only filings with genuinely "
+            "no data-centre content.\n\n"),
+}
 _LOOSEN = ("\nRELEVANCE BAR LOOSENED: the strict pass found too little — include weaker-but-real "
            "rows this time, but STAY inside the given window and still drop pure noise.")
 _ORGS_INSTR = ("\nALSO extract DC value-chain company NAMES mentioned in these rows, each tagged by "
@@ -169,7 +182,8 @@ def _rank_feed(key, feed, cands, loosen=False):
     want_orgs = feed in _ORG_FEEDS
     system = RANK_SYSTEM.format(
         criteria=_criteria(), states=_state_matrix_line(), maxn=dc.SPOTLIGHT_MAX_PER_FEED,
-        window=_window_days(feed), loosen=_LOOSEN if loosen else "",
+        window=_window_days(feed), feedhint=_FEED_HINT.get(feed, ""),
+        loosen=_LOOSEN if loosen else "",
         orgs=_ORGS_INSTR if want_orgs else "", orgs_schema=_ORGS_SCHEMA if want_orgs else "")
     # Short SURROGATE ids (r1, r2, …) instead of raw ids: SS3 accessions like
     # "0001575872-26-000526" are long and the model mangles them when echoing, which would
