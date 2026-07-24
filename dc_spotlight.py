@@ -29,7 +29,7 @@ from dc_ai import (_chat, _json_obj, load_cache, save_cache,   # noqa: F401
                    _parse_date, _now, test_connection)
 
 CRITERIA_PATH = os.path.join(os.path.dirname(__file__), "docs", "TAG_BD_CRITERIA.md")
-_SCHEMA = "v6-events"    # bump when item shape OR ranker prompt/call changes (busts the per-feed cache)
+_SCHEMA = "v7-events"    # bump when item shape OR ranker prompt/call changes (busts the per-feed cache)
 _ORG_FEEDS = ("ss1", "ss3")   # only News + Disclosure rankers extract value-chain orgs
 _HIGH, _MED = dc.FEE_VIABILITY_DEAL_USD["high"], dc.FEE_VIABILITY_DEAL_USD["medium"]
 
