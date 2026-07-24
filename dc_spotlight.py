@@ -18,6 +18,7 @@ A failure anywhere -> deterministic (deal-bucket + recency) fallback and/or last
 Grounding rubric passed verbatim: docs/TAG_BD_CRITERIA.md.
 """
 import os
+import re
 import hashlib
 from datetime import datetime, timezone, timedelta
 
@@ -29,7 +30,10 @@ from dc_ai import (_chat, _json_obj, load_cache, save_cache,   # noqa: F401
                    _parse_date, _now, test_connection)
 
 CRITERIA_PATH = os.path.join(os.path.dirname(__file__), "docs", "TAG_BD_CRITERIA.md")
-_SCHEMA = "v7-events"    # bump when item shape OR ranker prompt/call changes (busts the per-feed cache)
+# DC-relevance gate for the noisy Policy feed (see _candidates).
+_DC_GATE = re.compile(r"data.?cent(er|re)|colocation|\bcolo\b|hyperscal|server farm|"
+                      r"\bdata centre\b|data-cent", re.I)
+_SCHEMA = "v8-events"    # bump when item shape OR ranker prompt/call changes (busts the per-feed cache)
 _ORG_FEEDS = ("ss1", "ss3")   # only News + Disclosure rankers extract value-chain orgs
 _HIGH, _MED = dc.FEE_VIABILITY_DEAL_USD["high"], dc.FEE_VIABILITY_DEAL_USD["medium"]
 
@@ -95,6 +99,11 @@ def _candidates(feed, rows, today):
         # SS3 folds in the unique accession so distinct filings never merge.
         title = (r.get("title") or "").strip() if feed != "ss3" \
             else f"{r.get('filer', '')} {rid}"
+        # SS2 Policy ingestion leaks non-DC noise (facial-recognition, OTT bans, Qatari gold
+        # prices). Gate policy candidates to actually-DC rows so the ranker sees signal and the
+        # deterministic fallback can't surface junk. News/Disclosures are already on-topic.
+        if feed == "ss2" and not _DC_GATE.search(f"{title} {text} {r.get('policy_class', '')}"):
+            continue
         out.append({
             "id": rid,
             "date": d.isoformat(),
