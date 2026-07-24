@@ -84,6 +84,11 @@ def main():
     a2 = dc_sheets.read_tab(sheet, dc.SS2_POLICY_TAB)
     a3 = dc_sheets.read_tab(sheet, dc.SS3_DISCLOSE_TAB)
     a4 = dc_sheets.read_tab(sheet, dc.SS4_OSINT_TAB)
+    try:                      # runtime-union approved operators into the watchlist BEFORE ranking
+        import dc_operators
+        dc_operators.union_watchlist(sheet)
+    except Exception as e:
+        print(f"  [operators] union non-fatal: {e}")
     ranked = dc_score.rank(a1, a2, a3, a4)
 
     # India entity spine: resolve SS5 operators against MCA (link SS5 by CIN) +
@@ -276,13 +281,29 @@ def main():
     except Exception as e:
         print(f"  [bd] non-fatal error: {e}")
 
-    computed, tri, qa = {}, None, []
+    computed, tri, qa, spot = {}, None, [], None
     try:
         computed = dc_dashboard.compute(tabs)
         print(f"  Dashboard -> {dc_dashboard.write(sheet, computed, register)} rows")
         tri = dc_ai.triangulate(sheet, tabs, computed, register)
     except Exception as e:
         print(f"  [dashboard/ai] non-fatal error: {e}")
+
+    # 48h Spotlight (per-feed AI highlight + value-chain org extraction). Non-fatal.
+    try:
+        import dc_spotlight
+        spot = dc_spotlight.spotlight(sheet, tabs, register)
+    except Exception as e:
+        print(f"  [spotlight] non-fatal error: {e}")
+
+    # Proposed Operators (Feature B): discover+verify value-chain names, merge human
+    # promotions from promote-operator issues, runtime-union approved names. Non-fatal.
+    ops = None
+    try:
+        import dc_operators
+        ops = dc_operators.run(sheet, spot, register)
+    except Exception as e:
+        print(f"  [operators] non-fatal error: {e}")
 
     # Ask-the-Analyst: answer queued dashboard questions (GitHub Issues queue).
     try:
@@ -305,7 +326,8 @@ def main():
         health = {**h2, **h3, **hr, **hj}
         data = dc_export.build(tabs, computed or {"movers": ranked}, register,
                                pipe=pipe, gcc=gcc, md_rows=md_rows,
-                               triangulation=tri, qa=qa, health=health)
+                               triangulation=tri, qa=qa, health=health, spotlight=spot,
+                               proposed_operators=ops)
         dc_export.write(data)
     except Exception as e:
         print(f"  [export] non-fatal error: {e}")

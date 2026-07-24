@@ -663,6 +663,18 @@ CITY_STATE_MAP = {
     "shimla": "Himachal Pradesh", "kangra": "Himachal Pradesh",
 }
 
+# --- 48h Spotlight + Operators (per-feed AI highlight + value-chain discovery) -----
+SPOTLIGHT_DAYS          = 2
+SPOTLIGHT_MAX_PER_FEED  = 10
+SPOTLIGHT_MAX_ROWS      = 400          # safety valve vs a feed malfunction
+SPOTLIGHT_FEEDS         = ("ss1", "ss2", "ss3")   # OSINT excluded
+SPOTLIGHT_MAX_WIDEN     = 2             # judge-driven retries per failing feed
+OPERATOR_SEGMENTS       = ["operator", "energy/power", "cooling/coolant",
+                           "hardware/compute", "transmission/network"]
+PROPOSED_OPERATORS_TAB  = "Proposed Operators"
+PROMOTE_ISSUE_LABEL     = "promote-operator"
+PROPOSED_OPERATORS_STALE_DAYS = 30      # un-promoted rows expire after this
+
 # --- Sheet header freeze (append-only discipline; offline migration test) -----
 # dc_export self-check compares live writer headers against these frozen lists.
 # APPEND new columns at the END and update here in the same PR; any insert or

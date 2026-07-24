@@ -32,7 +32,8 @@ CAP_QA = 200
 CONTRACT_KEYS = ["schema_version", "sector", "generated_at", "scoring_version",
                  "kpis", "emphasis", "heatmaps", "prospects", "gcc_watch",
                  "md_view", "events", "policy", "disclosures", "osint",
-                 "evidence_register", "triangulation", "qa", "states", "health"]
+                 "evidence_register", "triangulation", "qa", "states", "health",
+                 "spotlight", "proposed_operators"]
 
 # Frozen writer headers (append-only discipline). A new column is legal ONLY as an
 # append: update the frozen list in the same PR. Insert/rename fails _selfcheck.
@@ -97,7 +98,7 @@ def _tier(source, url):
 
 # --------------------------------------------------------------------------- build
 def build(tabs, computed, register, pipe=None, gcc=None, md_rows=None,
-          triangulation=None, qa=None, health=None):
+          triangulation=None, qa=None, health=None, spotlight=None, proposed_operators=None):
     """Pure function over pipeline in-memory objects -> contract dict."""
     ss1 = tabs.get("ss1") or []
     ss2 = tabs.get("ss2") or []
@@ -245,6 +246,8 @@ def build(tabs, computed, register, pipe=None, gcc=None, md_rows=None,
                 "next_action": m[7] or None}
                for m in (md_rows or []) if len(m) >= 8]
 
+    spot = _spotlight_payload(spotlight, tabs)
+
     hm = {"markets": computed.get("markets", []), "layers": computed.get("layers", []),
           "geo": computed.get("geo_hm", {}), "policy": computed.get("policy_hm", {}),
           "commercial": computed.get("comm_hm", {})}
@@ -291,7 +294,75 @@ def build(tabs, computed, register, pipe=None, gcc=None, md_rows=None,
         "qa": (qa or [])[:CAP_QA],
         "health": {"feeds": feeds},
         "states": _states_payload(tabs),
+        "spotlight": spot,
+        "proposed_operators": _proposed_payload(proposed_operators),
     }
+
+
+def _proposed_payload(proposed):
+    """Proposed Operators queue -> whitelisted, capped. `promotable` computed from segment
+    (operators only; suppliers are context). Accepts the dc_operators.run() dict or a list."""
+    rows = proposed.get("proposed") if isinstance(proposed, dict) else proposed
+    out = []
+    for r in (rows or [])[:200]:
+        if not isinstance(r, dict) or not r.get("name"):
+            continue
+        seg = str(r.get("segment") or "").lower()
+        out.append({"name": _clip(r.get("name"), 80), "segment": seg,
+                    "promotable": seg == "operator",
+                    "status": r.get("status") or "proposed",
+                    "verified_by": r.get("verified_by") or None,
+                    "evidence_url": r.get("evidence_url") or None,
+                    "first_seen": r.get("first_seen") or None})
+    return out
+
+
+def _spotlight_payload(spotlight, tabs):
+    """Per-feed 48h highlight -> whitelisted, capped. Each item is an LLM-clustered EVENT;
+    its article_ids are resolved here to the cited article links (title/url/source/date) from
+    the raw tabs. Events render from those links directly (no evidence_register pinning)."""
+    if not isinstance(spotlight, dict):
+        return {}
+    row_by = {}
+    for feed, idf in (("ss1", "id"), ("ss2", "id"), ("ss3", "accession")):
+        for r in tabs.get(feed) or []:
+            rid = str(r.get(idf) or "").strip()
+            if rid:
+                row_by[(feed, rid)] = r
+
+    def _articles(feed, ids):
+        arts = []
+        for rid in ids[:12]:
+            r = row_by.get((feed, str(rid)))
+            if not r:
+                continue
+            arts.append({"id": str(rid),
+                         "title": _clip(r.get("title") or r.get("filer") or "", 200),
+                         "url": r.get("url") or None, "source": r.get("source") or None,
+                         "date": r.get("date") or r.get("filed_date") or None})
+        return arts
+
+    out = {}
+    for feed in ("ss1", "ss2", "ss3"):
+        v = spotlight.get(feed)
+        if not isinstance(v, dict):
+            continue
+        items = []
+        for it in (v.get("items") or [])[:dc.SPOTLIGHT_MAX_PER_FEED]:
+            arts = _articles(feed, it.get("article_ids") or [])
+            if not arts:
+                continue
+            items.append({"rank": _i(it.get("rank")),
+                          "heading": _clip(it.get("heading") or arts[0]["title"], 200),
+                          "reason": _clip(it.get("reason"), 200),
+                          "criteria_hits": [str(h)[:24] for h in (it.get("criteria_hits") or [])][:5],
+                          "articles": arts})
+        orgs = [{"name": _clip(o.get("name"), 80), "segment": str(o.get("segment") or "")}
+                for o in (v.get("orgs") or []) if isinstance(o, dict)][:20]
+        out[feed] = {"generated_at": v.get("generated_at"),
+                     "window_days": _i(v.get("window_days")) or dc.SPOTLIGHT_DAYS,
+                     "status": v.get("status") or "ok", "items": items, "orgs": orgs}
+    return out
 
 
 def _states_payload(tabs):
@@ -336,6 +407,20 @@ def validate(data):
             for eid in pl.get("evidence_ids") or []:
                 if eid not in (data.get("evidence_register") or {}):
                     problems.append(f"triangulation cites unexported evidence {eid}")
+    spot = data.get("spotlight")
+    if not isinstance(spot, dict):
+        problems.append("spotlight not a dict")
+    else:
+        for feed, v in spot.items():
+            if not isinstance(v, dict) or not isinstance(v.get("items"), list):
+                problems.append(f"spotlight[{feed}] malformed")
+            elif len(v["items"]) > dc.SPOTLIGHT_MAX_PER_FEED:
+                problems.append(f"spotlight[{feed}] over cap ({len(v['items'])})")
+    po = data.get("proposed_operators")
+    if not isinstance(po, list):
+        problems.append("proposed_operators not a list")
+    elif len(po) > 200:
+        problems.append(f"proposed_operators over cap ({len(po)})")
     qa = data.get("qa")
     if not isinstance(qa, list) or len(qa) > CAP_QA:
         problems.append("qa missing/over cap")
@@ -452,10 +537,33 @@ def _selfcheck():
                    "asked_at": "2026-07-16T10:00:00Z", "status": "answered",
                    "a": "AirTrunk [n1].", "answered_at": "2026-07-17T05:00:00Z",
                    "evidence_ids": ["n1"]}]
+    fixture_spot = {   # ss1 event clusters the two AirTrunk articles (n1 + n2) into one
+        "ss1": {"generated_at": "2026-07-17 05:00 UTC", "window_days": 2, "status": "ok",
+                "items": [{"rank": 1, "heading": "AirTrunk Mumbai campus", "reason": "foreign mover into India",
+                           "criteria_hits": ["cross-border", "deal"], "article_ids": ["n1", "n2"]}],
+                "orgs": [{"name": "NewCo Power", "segment": "energy/power"}]},
+        "ss2": {"generated_at": "2026-07-17 05:00 UTC", "window_days": 2, "status": "ok",
+                "items": [{"rank": 1, "heading": "State incentive notified", "reason": "state incentive",
+                           "criteria_hits": ["P1-state"], "article_ids": ["p1"]}], "orgs": []},
+        "ss3": {"generated_at": "2026-07-17 05:00 UTC", "window_days": 2, "status": "empty",
+                "items": [], "orgs": []}}
+    fixture_ops = {"proposed": [
+        {"name": "NovaEdge DC", "segment": "operator", "status": "proposed",
+         "verified_by": "edgar", "evidence_url": "https://sec.gov/x", "first_seen": "2026-07-20"},
+        {"name": "CoolFluid Inc", "segment": "cooling/coolant", "status": "proposed",
+         "verified_by": "", "evidence_url": "", "first_seen": "2026-07-20"}]}
     data = build(tabs, computed, register, pipe, gcc, md,
-                 triangulation=fixture_tri, qa=fixture_qa, health=health)
+                 triangulation=fixture_tri, qa=fixture_qa, health=health,
+                 spotlight=fixture_spot, proposed_operators=fixture_ops)
     probs = validate(data)
     assert not probs, probs
+    ev = data["spotlight"]["ss1"]["items"][0]
+    assert len(ev["articles"]) == 2 and {a["id"] for a in ev["articles"]} == {"n1", "n2"}, "event links not resolved"
+    assert ev["articles"][0]["title"].startswith("AirTrunk") and ev["articles"][0]["url"], "article not enriched"
+    assert data["spotlight"]["ss3"]["status"] == "empty", "empty spotlight feed lost"
+    assert data["spotlight"]["ss2"]["orgs"] == [], "policy feed should carry no orgs"
+    po = {p["name"]: p for p in data["proposed_operators"]}
+    assert po["NovaEdge DC"]["promotable"] and not po["CoolFluid Inc"]["promotable"], "promotable flag wrong"
     assert data["triangulation"]["top_plays"][0]["evidence_ids"] == ["n1"]
     assert "n1" in data["evidence_register"]          # pinned citation resolvable
     assert data["qa"][0]["evidence_ids"] == ["n1"]
