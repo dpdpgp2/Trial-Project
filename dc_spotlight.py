@@ -33,7 +33,7 @@ CRITERIA_PATH = os.path.join(os.path.dirname(__file__), "docs", "TAG_BD_CRITERIA
 # DC-relevance gate for the noisy Policy feed (see _candidates).
 _DC_GATE = re.compile(r"data.?cent(er|re)|colocation|\bcolo\b|hyperscal|server farm|"
                       r"\bdata centre\b|data-cent", re.I)
-_SCHEMA = "v9-events"    # bump when item shape OR ranker prompt/call changes (busts the per-feed cache)
+_SCHEMA = "v10-events"   # bump when item shape OR ranker prompt/call changes (busts the per-feed cache)
 _ORG_FEEDS = ("ss1", "ss3")   # only News + Disclosure rankers extract value-chain orgs
 _HIGH, _MED = dc.FEE_VIABILITY_DEAL_USD["high"], dc.FEE_VIABILITY_DEAL_USD["medium"]
 
@@ -321,6 +321,39 @@ def _apply_merges(items, groups):
     return out
 
 
+_HSTOP = {"the", "a", "an", "to", "in", "of", "for", "and", "on", "at", "with", "its", "is",
+          "as", "by", "it", "data", "centre", "center", "datacentre", "datacenter", "india",
+          "indian", "new", "plans", "plan", "ai", "s"}
+
+
+def _htok(s):
+    return {t for t in re.findall(r"[a-z0-9]+", (s or "").lower()) if t not in _HSTOP and len(t) > 1}
+
+
+def _dedup_headings(items):
+    """Final safety net: fold events with near-identical HEADINGS (same story the judge missed
+    or the sticky cache re-introduced with different article ids) by heading-token overlap."""
+    kept = []
+    for it in items:
+        h = _htok(it["heading"])
+        hit = None
+        for k in kept:
+            kt = _htok(k["heading"])
+            inter = len(h & kt)
+            if inter and inter / min(len(h), len(kt)) >= 0.6:
+                hit = k
+                break
+        if hit:
+            hit["article_ids"] += [i for i in it["article_ids"] if i not in hit["article_ids"]]
+            if it["tier"] == "opportunity":
+                hit["tier"] = "opportunity"
+        else:
+            kept.append(dict(it))
+    for i, it in enumerate(kept):
+        it["rank"] = i + 1
+    return kept
+
+
 def _stitch(fresh_items, prev_items, cand_ids):
     """Sticky cache: keep this run's fresh events on top, then carry forward last-good events
     whose articles are STILL in-window (present in cand_ids) and not already shown — so the count
@@ -421,6 +454,7 @@ def spotlight(ss, tabs, register=None):
                         items = _apply_merges(items, merges.get(feed, []))     # fold same-story dups
                         items = _stitch(items, (last.get(feed) or {}).get("items"),
                                         {c["id"] for c in cands[feed]})         # sticky carry-forward
+                        items = _dedup_headings(items)                          # net: catch cross-run dups
                         result[feed] = {"generated_at": _now(), "window_days": _window_days(feed),
                                         "status": "ok", "items": items, "orgs": orgs}
                         hashes[feed] = need[feed]      # cache only a real result
@@ -548,6 +582,17 @@ def demo():
     sids = {i for it in st for i in it["article_ids"]}
     assert st[0]["article_ids"] == ["f1"], "fresh not kept on top of stitch"
     assert "c1" in sids and "gone" not in sids, "stitch carry/expiry wrong"
+
+    # heading dedup net: two 'UP targets 9%' events with DIFFERENT ids fold into one
+    dh = M._dedup_headings(
+        [{"rank": 1, "heading": "Uttar Pradesh targets 9% of capacity", "tier": "opportunity",
+          "reason": "", "criteria_hits": [], "article_ids": ["u1", "u2"]},
+         {"rank": 2, "heading": "TCS land in Andhra Pradesh", "tier": "context",
+          "reason": "", "criteria_hits": [], "article_ids": ["t1"]},
+         {"rank": 3, "heading": "Uttar Pradesh targets 9 percent of capacity", "tier": "context",
+          "reason": "", "criteria_hits": [], "article_ids": ["u3"]}])
+    assert len(dh) == 2, "cross-run heading duplicate not folded"
+    assert set(dh[0]["article_ids"]) == {"u1", "u2", "u3"}, "folded ids not unioned"
 
     orgs = {o["name"] for o in r["ss1"]["orgs"]}
     assert "AirTrunk" not in orgs and "NewCo Power" in orgs, "org dedup/extract wrong"
