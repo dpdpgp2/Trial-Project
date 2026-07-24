@@ -412,12 +412,14 @@ function streamHero(s,n){
 // Empty / missing feed -> nothing (graceful).
 const FEED_STREAM={ss1:'news',ss2:'policy',ss3:'disclosure'};
 const FEED_LABEL={ss1:'News',ss2:'Policy',ss3:'Disclosures'};
+function winLabel(w){return (w&&w<=2)?'48h':`${w||30} days`;}
 function spotlightPanel(feed,compact){
   const sp=(DATA.spotlight||{})[feed];
+  const wl=winLabel(sp&&sp.window_days);
   const label=compact?` <span style="font-weight:400;color:var(--ink-3);font-size:12px">· ${FEED_LABEL[feed]}</span>`:'';
   if(!sp||!sp.items||!sp.items.length){
     if(compact)return '';                       // overview: just omit an empty feed
-    return sp&&sp.status==='empty'?`<div class="panel" style="margin-bottom:16px"><h3><i class="ti ti-flame"></i>Most Important — last 48h</h3><div style="font-size:12px;color:var(--ink-3)">Nothing material in the last ${(sp.window_days||2)} days.</div></div>`:'';
+    return sp&&sp.status==='empty'?`<div class="panel" style="margin-bottom:16px"><h3><i class="ti ti-flame"></i>Most Important — last ${wl}</h3><div style="font-size:12px;color:var(--ink-3)">Nothing material in the last ${wl}.</div></div>`:'';
   }
   const open=`onclick="openStream('${FEED_STREAM[feed]}')" style="cursor:pointer"`;
   const rows=sp.items.map(it=>{
@@ -433,7 +435,7 @@ function spotlightPanel(feed,compact){
         ${(!compact&&arts.length>1)?`<div style="font-size:12px;margin-top:5px;line-height:1.9">${links}</div>`:''}
       </div>${compact?'<i class="ti ti-chevron-right bchev" style="align-self:center"></i>':''}</div>`;
   }).join('');
-  return `<div class="panel" style="margin-bottom:16px"><h3><i class="ti ti-flame"></i>Most Important — last 48h${label} <span style="font-weight:400;color:var(--ink-3);font-size:12px">· top ${sp.items.length} event${sp.items.length===1?'':'s'}</span></h3>${rows}</div>`;
+  return `<div class="panel" style="margin-bottom:16px"><h3><i class="ti ti-flame"></i>Most Important — last ${wl}${label} <span style="font-weight:400;color:var(--ink-3);font-size:12px">· top ${sp.items.length} event${sp.items.length===1?'':'s'}</span></h3>${rows}</div>`;
 }
 function viewStreamNews(s){
   const rows=(DATA.events||[]).map((e,i)=>Object.assign({_i:i},e));

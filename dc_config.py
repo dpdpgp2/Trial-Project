@@ -663,11 +663,14 @@ CITY_STATE_MAP = {
     "shimla": "Himachal Pradesh", "kangra": "Himachal Pradesh",
 }
 
-# --- 48h Spotlight + Operators (per-feed AI highlight + value-chain discovery) -----
-SPOTLIGHT_DAYS          = 2
-SPOTLIGHT_MAX_PER_FEED  = 10
-SPOTLIGHT_MAX_ROWS      = 400          # safety valve vs a feed malfunction
+# --- Spotlight + Operators (per-feed AI highlight + value-chain discovery) -----
+# Per-feed horizon + how many (latest) rows go into the ranker call. News moves fast
+# (48h); policy/disclosures move slowly, so a 1-month horizon with a bounded row budget.
 SPOTLIGHT_FEEDS         = ("ss1", "ss2", "ss3")   # OSINT excluded
+SPOTLIGHT_FEED_WINDOW   = {"ss1": 2,   "ss2": 30,  "ss3": 30}   # days back
+SPOTLIGHT_FEED_ROWS     = {"ss1": 400, "ss2": 150, "ss3": 20}   # latest N rows sent to the ranker
+SPOTLIGHT_DAYS          = 2            # legacy default (News); per-feed table above wins
+SPOTLIGHT_MAX_PER_FEED  = 10
 SPOTLIGHT_MAX_WIDEN     = 2             # judge-driven retries per failing feed
 OPERATOR_SEGMENTS       = ["operator", "energy/power", "cooling/coolant",
                            "hardware/compute", "transmission/network"]

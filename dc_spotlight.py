@@ -74,11 +74,16 @@ _FEED_SPEC = {
 }
 
 
+def _window_days(feed):
+    return dc.SPOTLIGHT_FEED_WINDOW.get(feed, dc.SPOTLIGHT_DAYS)
+
+
 def _candidates(feed, rows, today):
     """In-window rows for one feed, each pre-tagged with deal bucket + matched state.
-    -> [{id, date, url, text, deal, state}] newest first, capped at SPOTLIGHT_MAX_ROWS."""
+    Per-feed horizon (News 48h, Policy/Disclosure 30d) and per-feed row budget (the latest
+    N rows sent to the ranker). -> [{id, date, url, text, title, deal, state}] newest first."""
     idf, datef, textf = _FEED_SPEC[feed]
-    cutoff = today - timedelta(days=dc.SPOTLIGHT_DAYS)
+    cutoff = today - timedelta(days=_window_days(feed))
     out = []
     for r in rows:
         rid = str(r.get(idf) or "").strip()
@@ -100,7 +105,7 @@ def _candidates(feed, rows, today):
             "state": ", ".join(dc_states.map_state(text)),
         })
     out.sort(key=lambda c: c["date"], reverse=True)
-    return out[: dc.SPOTLIGHT_MAX_ROWS]
+    return out[: dc.SPOTLIGHT_FEED_ROWS.get(feed, 400)]
 
 
 def _known_names():
@@ -110,8 +115,8 @@ def _known_names():
 
 RANK_SYSTEM = (
     "detailed thinking off\n\n"
-    "You are a business-development analyst for The Asia Group (TAG). Rank the last-48h rows of "
-    "ONE data-stream by BD relevance for TAG, grounded ONLY on the CRITERIA below and the rows "
+    "You are a business-development analyst for The Asia Group (TAG). Rank the recent rows (last "
+    "{window} days) of ONE data-stream by BD relevance for TAG, grounded ONLY on the CRITERIA below and the rows "
     "given. Never invent companies, deals, states, or ids — copy every id character-for-character "
     "from a row; invented ids are deleted by a validator.\n\n"
     "=== TAG BD CRITERIA (verbatim grounding) ===\n{criteria}\n\n{states}\n\n"
@@ -143,7 +148,7 @@ RANK_SYSTEM = (
     '"article_ids":["<id copied exactly>", ...]}}]{orgs_schema}}}'
 )
 _LOOSEN = ("\nRELEVANCE BAR LOOSENED: the strict pass found too little — include weaker-but-real "
-           "rows this time, but STAY inside the 48h window and still drop pure noise.")
+           "rows this time, but STAY inside the given window and still drop pure noise.")
 _ORGS_INSTR = ("\nALSO extract DC value-chain company NAMES mentioned in these rows, each tagged by "
                "segment (operator | energy/power | cooling/coolant | hardware/compute | "
                "transmission/network). Names only — do not invent, do not include ids.")
@@ -164,8 +169,8 @@ def _rank_feed(key, feed, cands, loosen=False):
     want_orgs = feed in _ORG_FEEDS
     system = RANK_SYSTEM.format(
         criteria=_criteria(), states=_state_matrix_line(), maxn=dc.SPOTLIGHT_MAX_PER_FEED,
-        loosen=_LOOSEN if loosen else "", orgs=_ORGS_INSTR if want_orgs else "",
-        orgs_schema=_ORGS_SCHEMA if want_orgs else "")
+        window=_window_days(feed), loosen=_LOOSEN if loosen else "",
+        orgs=_ORGS_INSTR if want_orgs else "", orgs_schema=_ORGS_SCHEMA if want_orgs else "")
     user = "ROWS (id | date | state | deal | text):\n" + "\n".join(
         f"{c['id']} | {c['date']} | {c['state'] or '-'} | {c['deal'] or '-'} | {c['text']}"
         for c in cands)
@@ -264,7 +269,7 @@ def spotlight(ss, tabs, register=None):
         result, need = {}, {}          # need: feeds requiring a fresh call
         for feed, cs in cands.items():
             if not cs:
-                result[feed] = {"generated_at": _now(), "window_days": dc.SPOTLIGHT_DAYS,
+                result[feed] = {"generated_at": _now(), "window_days": _window_days(feed),
                                 "status": "empty", "items": [], "orgs": []}
                 continue
             # _SCHEMA in the hash busts the cache when the output format changes (else a
@@ -282,7 +287,7 @@ def spotlight(ss, tabs, register=None):
                 print(f"  Spotlight -> {note}; deterministic + last-good fallback")
                 for feed in need:
                     result[feed] = last.get(feed) or {
-                        "generated_at": _now(), "window_days": dc.SPOTLIGHT_DAYS,
+                        "generated_at": _now(), "window_days": _window_days(feed),
                         "status": "fallback", "items": _fallback_items(cands[feed]),
                         "orgs": (last.get(feed) or {}).get("orgs", [])}
             else:
@@ -293,7 +298,7 @@ def spotlight(ss, tabs, register=None):
                     except Exception as e:
                         print(f"  [spotlight] {feed} ranker non-fatal: {e}")
                         result[feed] = last.get(feed) or {
-                            "generated_at": _now(), "window_days": dc.SPOTLIGHT_DAYS,
+                            "generated_at": _now(), "window_days": _window_days(feed),
                             "status": "fallback", "items": _fallback_items(cands[feed]), "orgs": []}
                 # judge + bounded widen (loosen the bar INSIDE 48h; never extend window)
                 pending = set(fresh)
@@ -311,7 +316,7 @@ def spotlight(ss, tabs, register=None):
                             print(f"  [spotlight] {feed} widen non-fatal: {e}")
                 for feed, (items, orgs) in fresh.items():
                     status = "ok" if items else "empty"
-                    result[feed] = {"generated_at": _now(), "window_days": dc.SPOTLIGHT_DAYS,
+                    result[feed] = {"generated_at": _now(), "window_days": _window_days(feed),
                                     "status": status, "items": items, "orgs": orgs}
                 for feed in need:
                     hashes[feed] = need[feed]
@@ -319,7 +324,7 @@ def spotlight(ss, tabs, register=None):
         cache.update({"spotlight": result, "spot_hash": hashes, "spot_ts": _now()})
         save_cache(cache)
         n = {f: len(v["items"]) for f, v in result.items()}
-        print(f"  Spotlight -> {n} (window {dc.SPOTLIGHT_DAYS}d)")
+        print(f"  Spotlight -> {n} (windows {dc.SPOTLIGHT_FEED_WINDOW})")
         return result
     except Exception as e:
         print(f"  [spotlight] non-fatal: {e}")
