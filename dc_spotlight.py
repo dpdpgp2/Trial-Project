@@ -33,7 +33,7 @@ CRITERIA_PATH = os.path.join(os.path.dirname(__file__), "docs", "TAG_BD_CRITERIA
 # DC-relevance gate for the noisy Policy feed (see _candidates).
 _DC_GATE = re.compile(r"data.?cent(er|re)|colocation|\bcolo\b|hyperscal|server farm|"
                       r"\bdata centre\b|data-cent", re.I)
-_SCHEMA = "v8-events"    # bump when item shape OR ranker prompt/call changes (busts the per-feed cache)
+_SCHEMA = "v9-events"    # bump when item shape OR ranker prompt/call changes (busts the per-feed cache)
 _ORG_FEEDS = ("ss1", "ss3")   # only News + Disclosure rankers extract value-chain orgs
 _HIGH, _MED = dc.FEE_VIABILITY_DEAL_USD["high"], dc.FEE_VIABILITY_DEAL_USD["medium"]
 
@@ -178,11 +178,15 @@ _ORGS_SCHEMA = ',"orgs":[{"name":"<company>","segment":"<segment>"}]'
 
 JUDGE_SYSTEM = (
     "detailed thinking off\n\n"
-    "You review a per-feed 'Most Important — last 48h' pick list before it reaches a BD "
-    "decision-maker. For EACH feed judge usefulness + stream health only: are the picks concrete, "
-    "BD-relevant TAG opportunities from a healthy stream ('useful'), or technically-real-but-useless / "
-    "a broken-or-stale stream that should be re-ranked with a looser bar ('widen')? Do NOT invent.\n"
-    'Output ONLY JSON: {"feeds":{"<feed>":"useful"|"widen", ...}}'
+    "You review each feed's ranked 'Most Important' events (each shown as 'N. heading') before "
+    "they reach a BD decision-maker. For EACH feed do TWO things:\n"
+    "1. VERDICT: 'useful' if the events are concrete, BD-relevant and from a healthy stream, or "
+    "'widen' if they're useless / the stream looks broken-or-stale and should be re-ranked looser.\n"
+    "2. MERGE: list any groups of event NUMBERS that are actually the SAME announcement/story "
+    "reported under different headings — they must be collapsed into one (e.g. [[1,3]] merges "
+    "events 1 and 3). Only merge genuine duplicates of ONE story; NEVER merge different companies, "
+    "projects, or stories. Most feeds need no merges — return [].\n"
+    'Output ONLY JSON: {"feeds":{"<feed>":{"verdict":"useful"|"widen","merge":[[1,3],...]}, ...}}'
 )
 
 
@@ -258,20 +262,82 @@ def _validate_orgs(obj):
 
 
 def _judge(key, fresh):
-    """fresh: {feed: (items, orgs)} -> {feed: 'useful'|'widen'}. Any failure -> all 'useful'."""
+    """One call: usefulness verdict + same-story MERGE groups per feed (dedup folded in, no
+    extra call). fresh: {feed: (items, orgs)} -> {feed: {"verdict","merge"}}. Fails -> useful."""
     if not fresh:
         return {}
     lines = []
     for feed, (items, _) in fresh.items():
         lines.append(f"[{feed}] {len(items)} events:")
-        lines += [f"  - {it['heading']}: {it['reason']}" for it in items] or ["  (none)"]
+        lines += [f"  {it['rank']}. {it['heading']}: {it['reason']}" for it in items] or ["  (none)"]
     try:
-        obj = _json_obj(_chat(key, JUDGE_SYSTEM, "\n".join(lines), max_tokens=400, temperature=0.0))
-        verd = obj.get("feeds") or {}
-        return {f: ("widen" if str(verd.get(f)).lower() == "widen" else "useful") for f in fresh}
+        obj = _json_obj(_chat(key, JUDGE_SYSTEM, "\n".join(lines), max_tokens=600, temperature=0.0))
+        feeds = obj.get("feeds") or {}
+        out = {}
+        for f in fresh:
+            fv = feeds.get(f)
+            if isinstance(fv, str):                      # tolerate the old "useful"/"widen" shape
+                out[f] = {"verdict": "widen" if fv.lower() == "widen" else "useful", "merge": []}
+            elif isinstance(fv, dict):
+                v = str(fv.get("verdict") or "useful").lower()
+                merge = [[int(x) for x in g if isinstance(x, (int, float))]
+                         for g in (fv.get("merge") or []) if isinstance(g, list)]
+                out[f] = {"verdict": "widen" if v == "widen" else "useful",
+                          "merge": [g for g in merge if len(g) >= 2]}
+            else:
+                out[f] = {"verdict": "useful", "merge": []}
+        return out
     except Exception as e:
         print(f"  [spotlight] judge non-fatal: {e}")
-        return {f: "useful" for f in fresh}
+        return {f: {"verdict": "useful", "merge": []} for f in fresh}
+
+
+def _apply_merges(items, groups):
+    """Collapse judge-flagged same-story events: fold each group into its smallest rank,
+    union article_ids, keep 'opportunity' if any member is. Re-rank. Non-destructive on bad refs."""
+    valid = {it["rank"] for it in items}
+    parent = {}
+    for g in groups:
+        rs = sorted({r for r in g if r in valid})
+        for r in rs[1:]:
+            parent[r] = rs[0]
+    if not parent:
+        return items
+    by_rank = {it["rank"]: it for it in items}
+    out = []
+    for it in items:
+        if it["rank"] in parent:                          # folded away into its target
+            continue
+        ids, tier = list(it["article_ids"]), it["tier"]
+        for src, tgt in parent.items():
+            if tgt == it["rank"]:
+                s = by_rank[src]
+                ids += [i for i in s["article_ids"] if i not in ids]
+                if s["tier"] == "opportunity":
+                    tier = "opportunity"
+        out.append({**it, "article_ids": ids, "tier": tier})
+    for i, it in enumerate(out):
+        it["rank"] = i + 1
+    return out
+
+
+def _stitch(fresh_items, prev_items, cand_ids):
+    """Sticky cache: keep this run's fresh events on top, then carry forward last-good events
+    whose articles are STILL in-window (present in cand_ids) and not already shown — so the count
+    doesn't flap down on a weak pass. Events whose articles have all aged out are dropped (expiry)."""
+    used = {i for it in fresh_items for i in it["article_ids"]}
+    out = list(fresh_items)
+    for it in prev_items or []:
+        if len(out) >= dc.SPOTLIGHT_MAX_PER_FEED:
+            break
+        keep = [i for i in it.get("article_ids", []) if i in cand_ids and i not in used]
+        if not keep:                                      # expired (out of window) or already covered
+            continue
+        used.update(keep)
+        out.append({**it, "article_ids": keep})
+    for i, it in enumerate(out):
+        it["rank"] = i + 1
+    return out[: dc.SPOTLIGHT_MAX_PER_FEED]
 
 
 def _fallback_items(cands):
@@ -329,22 +395,32 @@ def spotlight(ss, tabs, register=None):
                         result[feed] = last.get(feed) or {
                             "generated_at": _now(), "window_days": _window_days(feed),
                             "status": "fallback", "items": _fallback_items(cands[feed]), "orgs": []}
-                # judge + bounded widen (loosen the bar INSIDE 48h; never extend window)
+                # judge (verdict + same-story merges) + bounded widen (loosen inside window)
+                merges = {}                            # feed -> latest same-story merge groups
                 pending = set(fresh)
                 for _ in range(dc.SPOTLIGHT_MAX_WIDEN + 1):
                     if not pending:
                         break
                     verd = _judge(key, {f: fresh[f] for f in pending})
-                    widen = {f for f in pending if verd.get(f) == "widen"}
+                    widen = set()
+                    for feed in pending:
+                        v = verd.get(feed) or {}
+                        merges[feed] = v.get("merge", [])
+                        if v.get("verdict") == "widen":
+                            widen.add(feed)
                     pending = set()
                     for feed in widen:
                         try:
                             fresh[feed] = _rank_feed(key, feed, cands[feed], loosen=True)
-                            pending.add(feed)      # re-judge the widened result
+                            merges[feed] = []          # stale after re-rank; re-judged next pass
+                            pending.add(feed)
                         except Exception as e:
                             print(f"  [spotlight] {feed} widen non-fatal: {e}")
                 for feed, (items, orgs) in fresh.items():
                     if items:
+                        items = _apply_merges(items, merges.get(feed, []))     # fold same-story dups
+                        items = _stitch(items, (last.get(feed) or {}).get("items"),
+                                        {c["id"] for c in cands[feed]})         # sticky carry-forward
                         result[feed] = {"generated_at": _now(), "window_days": _window_days(feed),
                                         "status": "ok", "items": items, "orgs": orgs}
                         hashes[feed] = need[feed]      # cache only a real result
@@ -405,7 +481,7 @@ def demo():
     judged = {"ss2": 0}
 
     def fake_chat(key, system, user, max_tokens, temperature=0.2, reason=False):
-        if "review a per-feed" in system:                      # judge call
+        if "review each feed" in system:                       # judge call (verdict + merge)
             # fail ss2 the first time it is judged, pass thereafter; ss1 always useful
             judged["ss2"] += 1
             v = "widen" if judged["ss2"] == 1 else "useful"
@@ -413,7 +489,7 @@ def demo():
             for line in user.splitlines():
                 if line.startswith("[") and "] " in line:
                     f = line[1:line.index("]")]
-                    feeds[f] = v if f == "ss2" else "useful"
+                    feeds[f] = {"verdict": v if f == "ss2" else "useful", "merge": []}
             import json as _j
             return _j.dumps({"feeds": feeds})
         calls["rank"] += 1                                     # ranker call
@@ -455,6 +531,24 @@ def demo():
     assert hcl[0]["tier"] == "opportunity", "tier not passed through"
     assert all(it["tier"] in ("opportunity", "context") for it in ss1), "tier missing/invalid"
     assert [it for it in ss1 if it["tier"] == "context"], "context tier not defaulted"
+
+    # judge-driven merge: fold events 1+2 into one, union ids, keep 'opportunity'
+    mg = M._apply_merges(
+        [{"rank": 1, "heading": "A", "tier": "context", "reason": "", "criteria_hits": [], "article_ids": ["x1"]},
+         {"rank": 2, "heading": "B", "tier": "opportunity", "reason": "", "criteria_hits": [], "article_ids": ["x2"]},
+         {"rank": 3, "heading": "C", "tier": "context", "reason": "", "criteria_hits": [], "article_ids": ["x3"]}],
+        [[1, 2]])
+    assert len(mg) == 2 and set(mg[0]["article_ids"]) == {"x1", "x2"} and mg[0]["tier"] == "opportunity", "merge wrong"
+
+    # sticky stitch: keep fresh on top, carry a still-in-window prev event, expire an aged-out one
+    prev = [{"rank": 1, "heading": "old-valid", "tier": "context", "reason": "", "criteria_hits": [], "article_ids": ["c1"]},
+            {"rank": 2, "heading": "old-gone", "tier": "context", "reason": "", "criteria_hits": [], "article_ids": ["gone"]}]
+    st = M._stitch([{"rank": 1, "heading": "fresh", "tier": "opportunity", "reason": "", "criteria_hits": [], "article_ids": ["f1"]}],
+                   prev, {"f1", "c1"})
+    sids = {i for it in st for i in it["article_ids"]}
+    assert st[0]["article_ids"] == ["f1"], "fresh not kept on top of stitch"
+    assert "c1" in sids and "gone" not in sids, "stitch carry/expiry wrong"
+
     orgs = {o["name"] for o in r["ss1"]["orgs"]}
     assert "AirTrunk" not in orgs and "NewCo Power" in orgs, "org dedup/extract wrong"
     assert not r["ss2"]["orgs"], "policy feed must not extract orgs"
